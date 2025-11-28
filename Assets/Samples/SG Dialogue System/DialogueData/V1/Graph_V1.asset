@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c0d229053405472caf5f5e715b9e2ff, type: 3}
   m_Name: Graph_V1
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
-  graphId: Graph_1_1_1
+  graphId: V1
   startNodeId: CHAR_1
   IsSkippable: 1
   AllNodes:
@@ -22,10 +22,8 @@ MonoBehaviour:
   - rid: 1643815601279336711
   - rid: 1643815601279336716
   - rid: 1643815601279336742
-  - rid: 1643815601279336743
-  - rid: 1643815601279336744
-  - rid: 1643815601279336745
   - rid: 1643815601279336747
+  - rid: 1643815607100244165
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -52,15 +50,11 @@ MonoBehaviour:
   - nodeId: CHAR_2
     position: {x: 1162, y: 343}
   - nodeId: CHAR_3
-    position: {x: 1838.5, y: 343}
-  - nodeId: TEXT_4
-    position: {x: 1605.5, y: 343}
-  - nodeId: TEXT_5
-    position: {x: 2283.5, y: 343}
-  - nodeId: AUDIO_1
-    position: {x: 1495, y: 715.5}
+    position: {x: 1997.5, y: 370.5}
   - nodeId: EVENT_1
     position: {x: 2647, y: 343}
+  - nodeId: TEXT_4
+    position: {x: 1553.5, y: 343}
   references:
     version: 2
     RefIds:
@@ -186,7 +180,7 @@ MonoBehaviour:
         live2DModelPrefab: {fileID: 0}
         portraitRenderMode: 2
         speakerName: "\u9ED1\u5BF6"
-        nextNodeId: AUDIO_1
+        nextNodeId: TEXT_4
     - rid: 1643815601279336742
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -210,69 +204,7 @@ MonoBehaviour:
         live2DModelPrefab: {fileID: 0}
         portraitRenderMode: 2
         speakerName: "\u5976\u7403"
-        nextNodeId: TEXT_5
-    - rid: 1643815601279336743
-      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
-      data:
-        nodeId: TEXT_4
-        IsEnabled: 1
-        AudioEvent: {fileID: 0}
-        speakerName: "\u5976\u7403"
-        text: "\u63DB\u6211\u767B\u5834"
-        nextNodeId: CHAR_3
-        IsInterruptible: 0
-        InterruptEvent: {fileID: 0}
-        InterruptNextNodeId: 
-        textKey: Graph_V1_TEXT_3
-        textCues: []
-        motions: []
-        targetAnimationPosition: 1
-        variableChanges: []
-        onEnter:
-          m_PersistentCalls:
-            m_Calls: []
-        onExit:
-          m_PersistentCalls:
-            m_Calls: []
-        overrideAutoAdvance: 0
-        autoAdvanceDelay: 1.2
-    - rid: 1643815601279336744
-      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
-      data:
-        nodeId: TEXT_5
-        IsEnabled: 1
-        AudioEvent: {fileID: 0}
-        speakerName: "\u5976\u7403"
-        text: "\u6211\u53EF\u4EE5\u5728\u7A7A\u4E2D\u98DB"
-        nextNodeId: EVENT_1
-        IsInterruptible: 0
-        InterruptEvent: {fileID: 0}
-        InterruptNextNodeId: 
-        textKey: Graph_V1_TEXT_3
-        textCues: []
-        motions: []
-        targetAnimationPosition: 1
-        variableChanges: []
-        onEnter:
-          m_PersistentCalls:
-            m_Calls: []
-        onExit:
-          m_PersistentCalls:
-            m_Calls: []
-        overrideAutoAdvance: 0
-        autoAdvanceDelay: 1.2
-    - rid: 1643815601279336745
-      type: {class: PlayAudioNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
-      data:
-        nodeId: AUDIO_1
-        IsEnabled: 1
-        AudioEvent: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
-        request:
-          ActionType: 2
-          Clip: {fileID: 0}
-          Loop: 0
-          FadeDuration: 0
-        nextNodeId: TEXT_4
+        nextNodeId: 
     - rid: 1643815601279336747
       type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -282,3 +214,28 @@ MonoBehaviour:
         request:
           EventName: "\u5C0D\u8A71\u6D41\u7A0B\u7D50\u675F"
         nextNodeId: 
+    - rid: 1643815607100244165
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_4
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u5976\u7403"
+        text: "\u63DB\u6211\u767B\u5834\u4E86"
+        nextNodeId: CHAR_2
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_3
+        textCues: []
+        motions: []
+        targetAnimationPosition: 1
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2

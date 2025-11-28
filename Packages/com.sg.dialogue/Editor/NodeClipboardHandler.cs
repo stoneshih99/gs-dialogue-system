@@ -17,7 +17,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
     public class NodeClipboardHandler
     {
         private readonly DialogueGraphView _graphView;
-        private string _clipboard;              // 用於儲存複製的節點資料
+        private string _clipboard;              // 用於儲存複製的節點資料（JSON）
         private Vector2 _lastMousePosition;     // 用於追蹤滑鼠位置（Graph 內容座標）
 
         public NodeClipboardHandler(DialogueGraphView graphView)
@@ -43,7 +43,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// </summary>
         private void OnKeyDown(KeyDownEvent evt)
         {
-            if (!evt.actionKey) // Command/Ctrl key
+            // 只處理 Command（mac）或 Ctrl（win）
+            if (!evt.actionKey)
+                return;
+
+            // 若焦點在 TextField / 文字輸入元件上，就不要攔截 Ctrl/Cmd+C / V
+            if (evt.target is TextField || evt.target is TextElement)
                 return;
 
             if (evt.keyCode == KeyCode.C)
@@ -59,7 +64,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 將選中的節點複製到剪貼簿。
+        /// 將選中的節點複製到剪貼簿（只存在此 Handler 內部，不用系統剪貼簿）。
         /// </summary>
         public void CopySelectionToClipboard()
         {
@@ -68,32 +73,39 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 .Select(n => n.NodeData)
                 .ToList();
 
-            if (selectedNodesData.Any())
+            if (!selectedNodesData.Any())
+                return;
+
+            try
             {
-                try
+                var settings = new JsonSerializerSettings
                 {
-                    var settings = new JsonSerializerSettings
-                    {
-                        TypeNameHandling = TypeNameHandling.All,
-                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore // 避免循環引用問題
-                    };
-                    _clipboard = JsonConvert.SerializeObject(selectedNodesData, Formatting.Indented, settings);
-                    Debug.Log($"Copied {selectedNodesData.Count} nodes to clipboard.");
-                }
-                catch (Exception e)
+                    TypeNameHandling = TypeNameHandling.All,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore // 避免循環引用問題
+                };
+
+                _clipboard = JsonConvert.SerializeObject(selectedNodesData, Formatting.Indented, settings);
+                Debug.Log($"[NodeClipboardHandler] Copied {selectedNodesData.Count} nodes to clipboard.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[Copy Error] Failed to serialize nodes. Error: {e.Message}\n{e.StackTrace}");
+
+                // 嘗試找出是哪個節點類型的問題
+                foreach (var nodeData in selectedNodesData)
                 {
-                    Debug.LogError($"[Copy Error] Failed to serialize nodes. Error: {e.Message}\n{e.StackTrace}");
-                    // 嘗試找出是哪個節點類型的問題
-                    foreach (var nodeData in selectedNodesData)
+                    try
                     {
-                        try
-                        {
-                            JsonConvert.SerializeObject(nodeData, Formatting.Indented, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
-                        }
-                        catch (Exception innerEx)
-                        {
-                            Debug.LogError($"[Copy Error] Problem might be with node of type: {nodeData.GetType().FullName}. Inner Exception: {innerEx.Message}");
-                        }
+                        JsonConvert.SerializeObject(
+                            nodeData,
+                            Formatting.Indented,
+                            new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }
+                        );
+                    }
+                    catch (Exception innerEx)
+                    {
+                        Debug.LogError(
+                            $"[Copy Error] Problem might be with node of type: {nodeData.GetType().FullName}. Inner Exception: {innerEx.Message}");
                     }
                 }
             }
@@ -105,8 +117,17 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// <param name="pastePosition">貼上節點的起始位置（Graph 內容座標）。</param>
         public void PasteFromClipboard(Vector2 pastePosition)
         {
-            if (string.IsNullOrEmpty(_clipboard)) return;
-            if (_graphView.Graph == null) return;
+            if (string.IsNullOrEmpty(_clipboard))
+                return;
+            if (_graphView.Graph == null)
+                return;
+
+            // NavigationStack 為空就不貼，避免 InvalidOperationException
+            if (_graphView.NavigationStack == null || _graphView.NavigationStack.Count == 0)
+            {
+                Debug.LogWarning("[Paste Warning] NavigationStack is empty. Abort paste.");
+                return;
+            }
 
             List<DialogueNodeBase> pastedNodesData;
             try
@@ -120,25 +141,39 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             catch (Exception e)
             {
                 Debug.LogError($"[Paste Error] Failed to deserialize nodes from clipboard. Error: {e.Message}\n{e.StackTrace}");
-                Debug.LogWarning($"Clipboard content was:\n{_clipboard}");
+                Debug.LogWarning($"[Paste Error] Clipboard content was:\n{_clipboard}");
                 return;
             }
 
-            if (pastedNodesData == null || !pastedNodesData.Any()) return;
+            if (pastedNodesData == null || !pastedNodesData.Any())
+                return;
 
             _graphView.RecordUndo("Paste Nodes");
-
             _graphView.Graph.BuildLookup();
 
             var oldIdToNewId = new Dictionary<string, string>();
-            
+
+            // 蒐集現有圖上的所有 nodeId，用來確保新 Id 在「整張圖 + 本次貼上的節點」都唯一
+            var usedIds = new HashSet<string>();
+            if (_graphView.Graph.AllNodes != null)
+            {
+                foreach (var node in _graphView.Graph.AllNodes)
+                {
+                    if (!string.IsNullOrEmpty(node.nodeId))
+                        usedIds.Add(node.nodeId);
+                }
+            }
+
             // 第一次遍歷：為反序列化出來的節點產生新的唯一 ID
             foreach (var nodeData in pastedNodesData)
             {
                 string oldId = nodeData.nodeId;
-                string prefix = oldId.Contains('_') ? oldId.Split('_')[0] : "NODE";
-                nodeData.nodeId = GenerateUniqueNodeId(prefix);
-                oldIdToNewId[oldId] = nodeData.nodeId;
+                string prefix = oldId != null && oldId.Contains('_') ? oldId.Split('_')[0] : "NODE";
+
+                // 使用「貼上專用」的產生器，確保在 usedIds 裡也不重複
+                string newId = GenerateUniqueNodeIdForPaste(prefix, usedIds);
+                nodeData.nodeId = newId;
+                oldIdToNewId[oldId] = newId;
             }
 
             // 第二次遍歷：更新節點內部的連接，將舊的目標節點 ID 替換為新的 ID
@@ -150,17 +185,21 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 獲取當前容器（對話圖或子圖）
             var container = _graphView.NavigationStack.Peek();
             var targetList = _graphView.GetNodesFromContainer(container);
-            if (targetList == null) return;
+            if (targetList == null)
+            {
+                Debug.LogWarning("[Paste Warning] targetList is null. Abort paste.");
+                return;
+            }
 
             int originalCount = targetList.Count;
 
-            // 將節點添加到數據模型
+            // 將節點添加到數據模型，並設置基礎位置
             Vector2 currentPastePos = pastePosition;
             foreach (var newNodeData in pastedNodesData)
             {
                 _graphView.Graph.SetNodePosition(newNodeData.nodeId, currentPastePos);
                 targetList.Add(newNodeData);
-                currentPastePos += new Vector2(30f, 30f);
+                currentPastePos += new Vector2(30f, 30f); // 貼上時稍微錯開，避免完全重疊
             }
 
             // 更新序列化對象並創建視覺元素
@@ -174,8 +213,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 {
                     var nodeData = pastedNodesData[i];
                     var nodeProperty = nodesProperty.GetArrayElementAtIndex(originalCount + i);
+
+                    // 建立並註冊視覺節點
                     _graphView.CreateAndRegisterNode(nodeData, nodeProperty);
                 }
+
+                // 若 CreateAndRegisterNode 內有透過 SerializedProperty 改值，這裡可以確保寫回資產
+                serializedGraph.ApplyModifiedProperties();
             }
         }
 
@@ -185,6 +229,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             {
                 return serializedGraph.FindProperty("AllNodes");
             }
+
             if (container is DialogueNodeBase containerNode)
             {
                 string path = FindPropertyPath(_graphView.Graph.AllNodes, "AllNodes", containerNode);
@@ -194,12 +239,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                     return containerProperty?.FindPropertyRelative("childNodes");
                 }
             }
+
             return null;
         }
 
         private string FindPropertyPath(List<DialogueNodeBase> nodes, string currentPath, DialogueNodeBase targetNode)
         {
-            if (nodes == null) return null;
+            if (nodes == null)
+                return null;
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -212,12 +259,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 if (node is SequenceNode seqNode)
                 {
                     string foundPath = FindPropertyPath(seqNode.childNodes, $"{currentPath}.Array.data[{i}].childNodes", targetNode);
-                    if (foundPath != null) return foundPath;
+                    if (foundPath != null)
+                        return foundPath;
                 }
                 else if (node is ParallelNode parNode)
                 {
                     string foundPath = FindPropertyPath(parNode.childNodes, $"{currentPath}.Array.data[{i}].childNodes", targetNode);
-                    if (foundPath != null) return foundPath;
+                    if (foundPath != null)
+                        return foundPath;
                 }
             }
             return null;
@@ -240,7 +289,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                     !field.Name.Equals("nodeId", StringComparison.Ordinal))
                 {
                     string oldTargetId = field.GetValue(newNode) as string;
-                    if (string.IsNullOrEmpty(oldTargetId)) continue;
+                    if (string.IsNullOrEmpty(oldTargetId))
+                        continue;
 
                     if (oldIdToNewId.TryGetValue(oldTargetId, out string newTargetId))
                     {
@@ -257,12 +307,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                          field.Name.EndsWith("Ids", StringComparison.Ordinal))
                 {
                     var oldList = field.GetValue(newNode) as List<string>;
-                    if (oldList == null) continue;
+                    if (oldList == null)
+                        continue;
 
                     var newList = new List<string>(oldList.Count);
                     foreach (var oldId in oldList)
                     {
-                        if (string.IsNullOrEmpty(oldId)) continue;
+                        if (string.IsNullOrEmpty(oldId))
+                            continue;
 
                         if (oldIdToNewId.TryGetValue(oldId, out string newId))
                         {
@@ -278,13 +330,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                     field.SetValue(newNode, newList);
                 }
             }
-            
+
             // 特殊處理 ChoiceNode 的選項連接
-            if (newNode is ChoiceNode newChoiceNode)
+            if (newNode is ChoiceNode newChoiceNode && newChoiceNode.choices != null)
             {
                 foreach (var choice in newChoiceNode.choices)
                 {
-                    if (string.IsNullOrEmpty(choice.nextNodeId)) continue;
+                    if (string.IsNullOrEmpty(choice.nextNodeId))
+                        continue;
 
                     if (oldIdToNewId.TryGetValue(choice.nextNodeId, out string newTargetId))
                     {
@@ -293,14 +346,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                     else
                     {
                         // 不在貼上選取中的 Id → 保留原值
-                        // choice.nextNodeId = choice.nextNodeId;
                     }
                 }
             }
         }
 
         /// <summary>
-        /// 生成一個唯一的節點 ID。
+        /// 一般用的 nodeId 產生器（只檢查 Graph 裡的節點）。
         /// </summary>
         public string GenerateUniqueNodeId(string prefix)
         {
@@ -310,6 +362,26 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             {
                 id = $"{prefix}_{i++}";
             } while (_graphView.Graph != null && _graphView.Graph.HasNode(id));
+            return id;
+        }
+
+        /// <summary>
+        /// 專供 Paste 使用的 nodeId 產生器：
+        /// 同時檢查 Graph 以及 usedIds，確保「整張圖 + 此次貼上的所有節點」都不重複。
+        /// </summary>
+        private string GenerateUniqueNodeIdForPaste(string prefix, HashSet<string> usedIds)
+        {
+            int i = 1;
+            string id;
+            do
+            {
+                id = $"{prefix}_{i++}";
+            } while (
+                (_graphView.Graph != null && _graphView.Graph.HasNode(id)) ||
+                usedIds.Contains(id)
+            );
+
+            usedIds.Add(id);
             return id;
         }
 

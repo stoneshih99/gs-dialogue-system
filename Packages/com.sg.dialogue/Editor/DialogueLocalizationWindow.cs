@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {
@@ -13,10 +14,29 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
     /// </summary>
     public class DialogueLocalizationWindow : EditorWindow
     {
-        // 用於在 EditorPrefs 中保存上次選取資產的 GUID 鍵
-        private const string LastGraphGuidKey = "DialogueLocalizationWindow.LastGraphGuid";
-        private const string LastTableGuidKey = "DialogueLocalizationWindow.LastTableGuid";
-        private const string LastStateGuidKey = "DialogueLocalizationWindow.LastStateGuid";
+        // 用於在 EditorPrefs 中保存資產 GUID 組的鍵。
+        // 這個鍵儲存了一個 JSON 字符串，其中包含了多組 Graph, Table, 和 State 的 GUID 對應關係。
+        private const string AssetGuidGroupsKey = "DialogueLocalizationWindow.AssetGuidGroups";
+
+        /// <summary>
+        /// 用於序列化的資產 GUID 組。
+        /// </summary>
+        [Serializable]
+        private class AssetGuidGroup
+        {
+            public string GraphGuid;
+            public string TableGuid;
+            public string StateGuid;
+        }
+
+        /// <summary>
+        /// 用於序列化 AssetGuidGroup 列表的輔助類別。
+        /// </summary>
+        [Serializable]
+        private class AssetGuidGroupList
+        {
+            public List<AssetGuidGroup> Groups = new List<AssetGuidGroup>();
+        }
 
         // 各個功能分頁的實例
         private GraphEditorTab _graphTab;
@@ -95,9 +115,36 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (_simulatorTab != null) _simulatorTab.SetGraph(graph);
             UpdateWindowTitle(); // 更新視窗標題
 
-            // 將對話圖的 GUID 保存到 EditorPrefs
-            string guid = graph != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(graph)) : null;
-            EditorPrefs.SetString(LastGraphGuidKey, guid);
+            string graphGuid = graph != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(graph)) : null;
+
+            // 如果傳入的 graph 是 null，清除當前 session 的 table 和 state
+            if (string.IsNullOrEmpty(graphGuid))
+            {
+                SetTable(null);
+                SetState(null);
+                return;
+            }
+
+            var list = LoadGuidGroups();
+            var existingGroup = list.Groups.FirstOrDefault(g => g.GraphGuid == graphGuid);
+
+            if (existingGroup != null)
+            {
+                // 如果已存在，將其移到列表末尾，表示最近使用
+                list.Groups.Remove(existingGroup);
+                list.Groups.Add(existingGroup);
+            }
+            else
+            {
+                // 如果不存在，創建新的一組
+                var newGroup = new AssetGuidGroup { GraphGuid = graphGuid };
+                list.Groups.Add(newGroup);
+            }
+            
+            SaveGuidGroups(list);
+            
+            // 當 graph 改變時，自動載入與其關聯的 table 和 state
+            LoadAssociatedAssets();
         }
 
         /// <summary>
@@ -112,9 +159,25 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (_locTab != null) _locTab.SetTable(table);
             if (_tableTab != null) _tableTab.SetTable(table);
 
-            // 將本地化表格的 GUID 保存到 EditorPrefs
-            string guid = table != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(table)) : null;
-            EditorPrefs.SetString(LastTableGuidKey, guid);
+            // 如果沒有 graph，就無法建立關聯
+            if (_initialGraph == null) return;
+            string graphGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_initialGraph));
+            if (string.IsNullOrEmpty(graphGuid)) return;
+
+            string tableGuid = table != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(table)) : null;
+
+            var list = LoadGuidGroups();
+            var groupToUpdate = list.Groups.FirstOrDefault(g => g.GraphGuid == graphGuid);
+
+            if (groupToUpdate != null)
+            {
+                // 只有在 GUID 不同的時候才儲存，避免不必要的寫入
+                if (groupToUpdate.TableGuid != tableGuid)
+                {
+                    groupToUpdate.TableGuid = tableGuid;
+                    SaveGuidGroups(list);
+                }
+            }
         }
 
         /// <summary>
@@ -128,9 +191,25 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (_graphTab != null) _graphTab.SetState(state);
             if (_simulatorTab != null) _simulatorTab.SetState(state);
 
-            // 將狀態資產的 GUID 保存到 EditorPrefs
-            string guid = state != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(state)) : null;
-            EditorPrefs.SetString(LastStateGuidKey, guid);
+            // 如果沒有 graph，就無法建立關聯
+            if (_initialGraph == null) return;
+            string graphGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_initialGraph));
+            if (string.IsNullOrEmpty(graphGuid)) return;
+
+            string stateGuid = state != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(state)) : null;
+
+            var list = LoadGuidGroups();
+            var groupToUpdate = list.Groups.FirstOrDefault(g => g.GraphGuid == graphGuid);
+
+            if (groupToUpdate != null)
+            {
+                // 只有在 GUID 不同的時候才儲存，避免不必要的寫入
+                if (groupToUpdate.StateGuid != stateGuid)
+                {
+                    groupToUpdate.StateGuid = stateGuid;
+                    SaveGuidGroups(list);
+                }
+            }
         }
 
         /// <summary>
@@ -179,18 +258,89 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 從 EditorPrefs 載入上次選取的資產。
+        /// 從 EditorPrefs 載入上次選取的資產組。
         /// </summary>
         private void LoadLastSelection()
         {
-            string graphGuid = EditorPrefs.GetString(LastGraphGuidKey, null);
+            var list = LoadGuidGroups();
+            if (list.Groups.Count == 0) return;
+
+            // 載入最近使用的一組
+            var lastGroup = list.Groups.Last();
+
+            string graphGuid = lastGroup.GraphGuid;
             _initialGraph = !string.IsNullOrEmpty(graphGuid) ? AssetDatabase.LoadAssetAtPath<DialogueGraph>(AssetDatabase.GUIDToAssetPath(graphGuid)) : null;
 
-            string tableGuid = EditorPrefs.GetString(LastTableGuidKey, null);
+            string tableGuid = lastGroup.TableGuid;
             _initialTable = !string.IsNullOrEmpty(tableGuid) ? AssetDatabase.LoadAssetAtPath<LocalizationTable>(AssetDatabase.GUIDToAssetPath(tableGuid)) : null;
 
-            string stateGuid = EditorPrefs.GetString(LastStateGuidKey, null);
+            string stateGuid = lastGroup.StateGuid;
             _initialState = !string.IsNullOrEmpty(stateGuid) ? AssetDatabase.LoadAssetAtPath<DialogueStateAsset>(AssetDatabase.GUIDToAssetPath(stateGuid)) : null;
+        }
+
+        /// <summary>
+        /// 從 EditorPrefs 載入並反序列化資產 GUID 組列表。
+        /// </summary>
+        private AssetGuidGroupList LoadGuidGroups()
+        {
+            string json = EditorPrefs.GetString(AssetGuidGroupsKey, "{}");
+            AssetGuidGroupList list = JsonUtility.FromJson<AssetGuidGroupList>(json);
+            // JsonUtility 在反序列化空 JSON 時可能會返回 null，或 list.Groups 為 null，需要做防呆處理
+            if (list == null)
+            {
+                list = new AssetGuidGroupList();
+            }
+            if (list.Groups == null)
+            {
+                list.Groups = new List<AssetGuidGroup>();
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 序列化並保存資產 GUID 組列表到 EditorPrefs。
+        /// </summary>
+        private void SaveGuidGroups(AssetGuidGroupList list)
+        {
+            // 限制列表的最大長度，避免無限增長
+            const int maxGroups = 20;
+            if (list.Groups.Count > maxGroups)
+            {
+                list.Groups.RemoveRange(0, list.Groups.Count - maxGroups);
+            }
+            
+            string json = JsonUtility.ToJson(list);
+            EditorPrefs.SetString(AssetGuidGroupsKey, json);
+        }
+
+        /// <summary>
+        /// 根據當前的 Graph，載入與其關聯的 Table 和 State。
+        /// </summary>
+        private void LoadAssociatedAssets()
+        {
+            if (_initialGraph == null) return;
+            string graphGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_initialGraph));
+            if (string.IsNullOrEmpty(graphGuid)) return;
+
+            var list = LoadGuidGroups();
+            var group = list.Groups.FirstOrDefault(g => g.GraphGuid == graphGuid);
+
+            if (group != null)
+            {
+                string tableGuid = group.TableGuid;
+                var table = !string.IsNullOrEmpty(tableGuid) ? AssetDatabase.LoadAssetAtPath<LocalizationTable>(AssetDatabase.GUIDToAssetPath(tableGuid)) : null;
+                SetTable(table);
+
+                string stateGuid = group.StateGuid;
+                var state = !string.IsNullOrEmpty(stateGuid) ? AssetDatabase.LoadAssetAtPath<DialogueStateAsset>(AssetDatabase.GUIDToAssetPath(stateGuid)) : null;
+                SetState(state);
+            }
+            else
+            {
+                // 如果找不到關聯的群組 (例如，在創建新 Graph 後)，則清空 Table 和 State
+                SetTable(null);
+                SetState(null);
+            }
         }
 
         /// <summary>
