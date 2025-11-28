@@ -23,7 +23,8 @@ MonoBehaviour:
   - rid: 1643815601279336716
   - rid: 1643815601279336742
   - rid: 1643815601279336747
-  - rid: 1643815607100244165
+  - rid: 1643815607100244166
+  - rid: 1643815607100244167
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -50,11 +51,13 @@ MonoBehaviour:
   - nodeId: CHAR_2
     position: {x: 1162, y: 343}
   - nodeId: CHAR_3
-    position: {x: 1997.5, y: 370.5}
+    position: {x: 1911.5, y: 343}
   - nodeId: EVENT_1
-    position: {x: 2647, y: 343}
+    position: {x: 2509, y: 343}
   - nodeId: TEXT_4
-    position: {x: 1553.5, y: 343}
+    position: {x: 1579.5, y: 343}
+  - nodeId: TEXT_5
+    position: {x: 2203, y: 343}
   references:
     version: 2
     RefIds:
@@ -204,7 +207,7 @@ MonoBehaviour:
         live2DModelPrefab: {fileID: 0}
         portraitRenderMode: 2
         speakerName: "\u5976\u7403"
-        nextNodeId: 
+        nextNodeId: TEXT_5
     - rid: 1643815601279336747
       type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -214,19 +217,44 @@ MonoBehaviour:
         request:
           EventName: "\u5C0D\u8A71\u6D41\u7A0B\u7D50\u675F"
         nextNodeId: 
-    - rid: 1643815607100244165
+    - rid: 1643815607100244166
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_4
         IsEnabled: 1
         AudioEvent: {fileID: 0}
         speakerName: "\u5976\u7403"
-        text: "\u63DB\u6211\u767B\u5834\u4E86"
-        nextNodeId: CHAR_2
+        text: "\u63DB\u6211\u767B\u5834\u56C9"
+        nextNodeId: CHAR_3
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: Graph_V1_TEXT_3
+        textKey: Graph_V1_TEXT_4
+        textCues: []
+        motions: []
+        targetAnimationPosition: 1
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+    - rid: 1643815607100244167
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_5
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u5976\u7403"
+        text: "\u6211\u662F\u64C1\u6709\u98DB\u884C\u80FD\u529B\u7684"
+        nextNodeId: EVENT_1
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_5
         textCues: []
         motions: []
         targetAnimationPosition: 1

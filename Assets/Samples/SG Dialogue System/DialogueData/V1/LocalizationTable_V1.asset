@@ -34,3 +34,17 @@ MonoBehaviour:
     speakerZhTW: 
     speakerJaJP: 
     speakerEnUS: 
+  - key: Graph_V1_TEXT_4
+    zhTW: "\u63DB\u6211\u767B\u5834\u56C9"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V1_TEXT_5
+    zhTW: "\u6211\u662F\u64C1\u6709\u98DB\u884C\u80FD\u529B\u7684"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 

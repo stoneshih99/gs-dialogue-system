@@ -13,9 +13,13 @@ MonoBehaviour:
   m_Name: Graph_V2
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
   graphId: V2
-  startNodeId: 
+  startNodeId: CHAR_1
   IsSkippable: 1
-  AllNodes: []
+  AllNodes:
+  - rid: 1643815607100244168
+  - rid: 1643815607100244169
+  - rid: 1643815607100244170
+  - rid: 1643815607100244171
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -30,7 +34,96 @@ MonoBehaviour:
       m_Calls: []
   autoAdvanceEnabled: 0
   defaultAutoAdvanceDelay: 1.2
-  nodePositions: []
+  nodePositions:
+  - nodeId: CHAR_1
+    position: {x: 179, y: 280}
+  - nodeId: TEXT_1
+    position: {x: 479, y: 280}
+  - nodeId: WAIT_1
+    position: {x: 902, y: 280}
+  - nodeId: TEXT_2
+    position: {x: 1161, y: 280}
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 1643815607100244168
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CHAR_1
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        ActionType: 0
+        TargetPosition: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.3
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 8038074026689077407, guid: 50cef8ce46cce413087ceff67e989c69, type: 3}
+        portraitRenderMode: 3
+        speakerName: NPC
+        nextNodeId: TEXT_1
+    - rid: 1643815607100244169
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_1
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: NPC
+        text: "Hi\uFF0C\u5927\u5BB6\u597D\uFF0C\u9019\u662F\u4E00\u500B  Live2D Demo"
+        nextNodeId: WAIT_1
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V2_TEXT_1
+        textCues: []
+        motions: []
+        targetAnimationPosition: 1
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+    - rid: 1643815607100244170
+      type: {class: WaitNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: WAIT_1
+        IsEnabled: 1
+        WaitTime: 1
+        nextNodeId: TEXT_2
+    - rid: 1643815607100244171
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_2
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: NPC
+        text: "\u64AD\u653E\u7CFB\u7D71\u5C1A\u672A\u5B8C\u6210"
+        nextNodeId: 
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V2_TEXT_2
+        textCues: []
+        motions: []
+        targetAnimationPosition: 1
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2

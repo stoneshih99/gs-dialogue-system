@@ -350,6 +350,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         private void SwitchTab(int index)
         {
             if (_graphTab == null || _locTab == null || _tableTab == null || _simulatorTab == null) return;
+            
+            // [核心修改] 當切換到 Table 分頁時，觸發其刷新
+            if (index == 2)
+            {
+                _tableTab.Refresh();
+            }
+            
             // 根據索引設定分頁的顯示樣式
             _graphTab.style.display = index == 0 ? DisplayStyle.Flex : DisplayStyle.None;
             _locTab.style.display = index == 1 ? DisplayStyle.Flex : DisplayStyle.None;

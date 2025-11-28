@@ -145,6 +145,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             _tableField.RegisterValueChangedCallback(OnTableFieldValueChanged);
             RebuildList(); // 重新構建列表視圖
         }
+        
+        /// <summary>
+        /// [新增] 公共方法，用於從外部觸發刷新列表視圖。
+        /// </summary>
+        public void Refresh()
+        {
+            RebuildList(true); // 重新構建列表，並嘗試保持選中項
+        }
 
         /// <summary>
         /// 本地化表格 ObjectField 值改變時的回調。

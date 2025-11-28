@@ -944,6 +944,10 @@ PrefabInstance:
       propertyPath: '_childDrawableRenderers.Array.data[1]'
       value: 
       objectReference: {fileID: 7933478294359224063}
+    - target: {fileID: 4908899584090055642, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+      propertyPath: CubismFadeMotionList
+      value: 
+      objectReference: {fileID: 11400000, guid: 69688fce5fb50624faf4db45bddd265c, type: 2}
     - target: {fileID: 5262925813218452678, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
       propertyPath: '_childDrawableRenderers.Array.data[0]'
       value: 
@@ -1179,8 +1183,39 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1086712869052770, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3386911549716973189}
+    - targetCorrespondingSourceObject: {fileID: 1086712869052770, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 191357676129616249}
+    - targetCorrespondingSourceObject: {fileID: 1086712869052770, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -6814619892011484596}
   m_SourcePrefab: {fileID: 100100000, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+--- !u!114 &3139237400766636583 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4908899584090055642, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+  m_PrefabInstance: {fileID: 8038685509545935357}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8038074026689077407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd9e6647bfff7542acb0200ab74bdd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Live2D.Cubism::Live2D.Cubism.Framework.MotionFade.CubismFadeController
+--- !u!114 &5703248053217394061 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2353451873239121008, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+  m_PrefabInstance: {fileID: 8038685509545935357}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8038074026689077407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b893d4d32dd60bc4c9a2e447d31c6e88, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Live2D.Cubism::Live2D.Cubism.Framework.Expression.CubismExpressionController
 --- !u!114 &7932816575529015687 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 114880565817907322, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
@@ -2182,3 +2217,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 308e904e3f33207489a2c15b9b0b297b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &8038074026689077407 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1086712869052770, guid: 6f0e06de47dbcee4c92ffcb3cbd11a22, type: 3}
+  m_PrefabInstance: {fileID: 8038685509545935357}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3386911549716973189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8038074026689077407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5ebe254d34723249a16ad2f6ba8058b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Live2D.Cubism::Live2D.Cubism.Framework.Motion.CubismMotionController
+  LayerCount: 1
+--- !u!114 &191357676129616249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8038074026689077407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cba16fd42c8be42d18a445e0f14208be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Live2DActorKit.Runtime::Live2DActorKit.Actors.Live2DActor
+  motionController: {fileID: 3386911549716973189}
+  fadeController: {fileID: 3139237400766636583}
+  expressionController: {fileID: 5703248053217394061}
+  lookController: {fileID: 0}
+  motionClips: []
+  mouthOpenParam: {fileID: 0}
+  opacityParam: {fileID: 0}
+  uiCamera: {fileID: 0}
+  rectTransform: {fileID: 0}
+  parentCanvas: {fileID: 0}
+  breathController: {fileID: 0}
+  breathStateController: {fileID: 0}
+  lipSync: {fileID: 0}
+--- !u!114 &-6814619892011484596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8038074026689077407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd9e6647bfff7542acb0200ab74bdd1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Live2D.Cubism::Live2D.Cubism.Framework.MotionFade.CubismFadeController
+  CubismFadeMotionList: {fileID: 11400000, guid: 69688fce5fb50624faf4db45bddd265c, type: 2}

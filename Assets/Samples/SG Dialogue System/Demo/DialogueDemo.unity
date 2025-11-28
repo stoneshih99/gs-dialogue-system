@@ -411,6 +411,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!1 &670104840
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 670104842}
+  - component: {fileID: 670104841}
+  m_Layer: 0
+  m_Name: LocalizationSettings
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &670104841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670104840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eebc5040198ff4aab89b579e9017a3c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.LocalizationSettings
+  table: {fileID: 11400000, guid: 271773212d4cc476b9cdf7f85510d108, type: 2}
+  language: 0
+--- !u!4 &670104842
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670104840}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1142.7908, y: -224.52495, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &689713466
 GameObject:
   m_ObjectHideFlags: 0
@@ -712,6 +758,14 @@ PrefabInstance:
     m_TransformParent: {fileID: 1125954177}
     m_Modifications:
     - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: graph
+      value: 
+      objectReference: {fileID: 11400000, guid: ed72f90c93d4148dc875003a1ec2d5be, type: 2}
+    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: globalState
+      value: 
+      objectReference: {fileID: 11400000, guid: ce7a4b0ec1ce54657a0c39d8e38e9009, type: 2}
+    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 348571787}
@@ -829,3 +883,4 @@ SceneRoots:
   - {fileID: 348571786}
   - {fileID: 1833721332}
   - {fileID: 1125954177}
+  - {fileID: 670104842}
