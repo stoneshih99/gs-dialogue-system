@@ -25,6 +25,8 @@ namespace Live2DActorKit.Core
 
         // Appearance
         void SetOpacity(float value01);
+        float GetOpacity(); // 取得目前透明度
+        void SetColor(Color color); // 設定顏色
         void Show(bool show);
 
         // Breathing

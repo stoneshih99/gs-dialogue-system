@@ -351,6 +351,40 @@ namespace Live2DActorKit.Actors
         }
 
         /// <summary>
+        /// 取得目前透明度。
+        /// </summary>
+        /// <returns>透明度，範圍 0~1。</returns>
+        public float GetOpacity()
+        {
+            if (opacityParam != null)
+            {
+                return Mathf.InverseLerp(opacityParam.MinimumValue, opacityParam.MaximumValue, opacityParam.Value);
+            }
+
+            var renderer = GetComponentInChildren<Renderer>();
+            if (renderer != null && renderer.material.HasProperty(Color1))
+            {
+                return renderer.material.color.a;
+            }
+
+            return 1f;
+        }
+
+        /// <summary>
+        /// 設定角色顏色。
+        /// </summary>
+        /// <param name="color">要設定的顏色。</param>
+        public void SetColor(Color color)
+        {
+            var renderers = GetComponentsInChildren<Renderer>();
+            foreach (var r in renderers)
+            {
+                if (!r.material.HasProperty(Color1)) continue;
+                r.material.color = color;
+            }
+        }
+
+        /// <summary>
         /// 顯示或隱藏角色。 
         /// </summary>
         /// <param name="show"></param>
