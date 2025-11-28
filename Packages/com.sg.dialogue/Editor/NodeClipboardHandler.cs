@@ -164,7 +164,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 }
             }
 
-            // 第一次遍歷：為反序列化出來的節點產生新的唯一 ID
+            // 第一次遍歷：為反序列化出來的節點產生新的唯一 ID，並清除本地化 Key
             foreach (var nodeData in pastedNodesData)
             {
                 string oldId = nodeData.nodeId;
@@ -174,6 +174,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 string newId = GenerateUniqueNodeIdForPaste(prefix, usedIds);
                 nodeData.nodeId = newId;
                 oldIdToNewId[oldId] = newId;
+
+                // [核心修改] 如果是 TextNode，就清除它的 textKey，以便 Sync 功能重新生成
+                if (nodeData is TextNode textNode)
+                {
+                    textNode.textKey = null;
+                }
             }
 
             // 第二次遍歷：更新節點內部的連接，將舊的目標節點 ID 替換為新的 ID
