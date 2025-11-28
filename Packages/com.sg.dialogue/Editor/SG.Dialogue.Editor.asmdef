@@ -1,0 +1,22 @@
+{
+    "name": "SG.Dialogue.Editor",
+    "rootNamespace": "SG.Dialogue.Editor",
+    "references": [
+        "SG.Dialogue",
+        "LitMotion.Animation.Editor",
+        "LitMotion.Editor",
+        "LitMotion.Extensions",
+        "LitMotion"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

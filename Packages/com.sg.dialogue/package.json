@@ -1,0 +1,25 @@
+{
+    "name": "com.sg.dialogue",
+    "version": "1.0.0",
+    "displayName": "SG Dialogue System",
+    "description": "A flexible and extensible graph-based dialogue system for Unity, featuring custom nodes, event handling, and a visual editor.",
+    "unity": "6000.2",
+    "author": {
+        "name": "Stone Shih"
+    },
+     "dependencies": {
+        "com.annulusgames.lit-motion": "https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion",
+        "com.annulusgames.lit-motion.animation": "https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion.Animation",
+        "com.browar.editor-toolbox": "https://github.com/arimger/Unity-Editor-Toolbox.git#upm",
+        "com.esotericsoftware.spine.spine-csharp": "https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-csharp/src#4.2",
+        "com.esotericsoftware.spine.spine-unity": "https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Assets/Spine#4.2",
+        "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity"
+    },
+     "samples": [
+        {
+            "displayName": "1. Basic Dialogue Example",
+            "description": "Shows a simple dialogue tree and how to trigger it.",
+            "path": "Samples~/Dialogue"
+        }
+    ]
+}
