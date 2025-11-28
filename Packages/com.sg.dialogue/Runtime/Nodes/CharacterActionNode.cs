@@ -51,6 +51,9 @@ namespace SG.Dialogue.Nodes
         [Tooltip("當動作類型為『進場』(Enter) 且立繪呈現模式為 Spine 時，Spine 模型的額外設定。")]
         public SpinePortraitConfig spinePortraitConfig;
 
+        [Tooltip("當動作類型為『進場』(Enter) 且立繪呈現模式為 Live2D 時，Live2D 模型的額-外設定。")]
+        public Live2DPortraitConfig live2DPortraitConfig;
+
         [Tooltip("當動作類型為『進場』(Enter) 且立繪呈現模式為 Live2D 時，要實例化的 Live2D 模型 Prefab。")]
         [JsonIgnore] // 忽略此欄位，避免直接序列化 GameObject
         public GameObject live2DModelPrefab;

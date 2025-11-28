@@ -36,7 +36,7 @@ MonoBehaviour:
   defaultAutoAdvanceDelay: 1.2
   nodePositions:
   - nodeId: CHAR_1
-    position: {x: 179, y: 280}
+    position: {x: 38, y: 280}
   - nodeId: TEXT_1
     position: {x: 479, y: 280}
   - nodeId: WAIT_1
@@ -65,6 +65,13 @@ MonoBehaviour:
           loop: 1
           queuedAnimation: 
           queuedAnimationDelay: 0
+          scaleX: 1
+        live2DPortraitConfig:
+          enterAnimation: Idle
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
           scaleX: 1
         live2DModelPrefab: {fileID: 8038074026689077407, guid: 50cef8ce46cce413087ceff67e989c69, type: 3}
         portraitRenderMode: 3

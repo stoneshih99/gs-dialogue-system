@@ -28,14 +28,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 var propertyField = new PropertyField(nodeProperty);
                 propertyField.Bind(nodeProperty.serializedObject);
                 mainContainer.Add(propertyField);
+                
+                // 註冊一個通用的回調，以確保任何在 PropertyDrawer 中發生的變更都能被保存
+                propertyField.RegisterValueChangeCallback(evt => 
+                {
+                    onChanged?.Invoke();
+                });
             }
-            
-            // 註冊回調以確保變更被保存
-            this.RegisterCallback<ChangeEvent<string>>(evt => onChanged?.Invoke());
-            this.RegisterCallback<ChangeEvent<float>>(evt => onChanged?.Invoke());
-            this.RegisterCallback<ChangeEvent<bool>>(evt => onChanged?.Invoke());
-            this.RegisterCallback<ChangeEvent<UnityEngine.Object>>(evt => onChanged?.Invoke());
-            this.RegisterCallback<ChangeEvent<Enum>>(evt => onChanged?.Invoke());
         }
 
         public override void OnOutputPortConnected(Port outputPort, string targetNodeId)

@@ -144,7 +144,7 @@ namespace SG.Dialogue.Presentation
             switch (node.ActionType)
             {
                 case CharacterActionType.Enter:
-                    ProcessEnterAction(node.TargetPosition, node.portraitRenderMode, GetSourcePrefab(node), node.spinePortraitConfig, node.speakerName, duration);
+                    ProcessEnterAction(node.TargetPosition, node.portraitRenderMode, GetSourcePrefab(node), node.spinePortraitConfig, node.live2DPortraitConfig, node.speakerName, duration);
                     break;
                 case CharacterActionType.Exit:
                     if (node.ClearAllOnExit) ClearAllCharacters(duration); // 清除所有角色
@@ -217,21 +217,22 @@ namespace SG.Dialogue.Presentation
         /// <param name="renderMode">立繪渲染模式。</param>
         /// <param name="sourcePrefab">來源 Prefab。</param>
         /// <param name="spineConfig">Spine 設定。</param>
+        /// <param name="live2DConfig">Live2D 設定。</param>
         /// <param name="speakerName">說話者名稱。</param>
         /// <param name="duration">淡入持續時間。</param>
-        private void ProcessEnterAction(CharacterPosition position, PortraitRenderMode renderMode, Object sourcePrefab, SpinePortraitConfig spineConfig, string speakerName, float duration)
+        private void ProcessEnterAction(CharacterPosition position, PortraitRenderMode renderMode, Object sourcePrefab, SpinePortraitConfig spineConfig, Live2DPortraitConfig live2DConfig, string speakerName, float duration)
         {
             if (sourcePrefab == null) return;
 
             // 如果目標位置已有角色且來源 Prefab 相同，則更新現有角色
             if (_activeCharacters.TryGetValue(position, out var existingState) && existingState.SourcePrefab == sourcePrefab)
             {
-                UpdateExistingCharacter(existingState.Instance, renderMode, spineConfig);
+                UpdateExistingCharacter(existingState.Instance, renderMode, spineConfig, live2DConfig);
                 existingState.SpeakerName = speakerName; // 更新說話者名稱
             }
             else // 否則實例化新角色
             {
-                InstantiateNewCharacter(position, renderMode, sourcePrefab, spineConfig, speakerName, duration);
+                InstantiateNewCharacter(position, renderMode, sourcePrefab, spineConfig, live2DConfig, speakerName, duration);
             }
         }
 
@@ -242,9 +243,10 @@ namespace SG.Dialogue.Presentation
         /// <param name="renderMode">立繪渲染模式。</param>
         /// <param name="sourcePrefab">來源 Prefab。</param>
         /// <param name="spineConfig">Spine 設定。</param>
+        /// <param name="live2DConfig">Live2D 設定。</param>
         /// <param name="speakerName">說話者名稱。</param>
         /// <param name="duration">淡入持續時間。</param>
-        private void InstantiateNewCharacter(CharacterPosition position, PortraitRenderMode renderMode, Object sourcePrefab, SpinePortraitConfig spineConfig, string speakerName, float duration)
+        private void InstantiateNewCharacter(CharacterPosition position, PortraitRenderMode renderMode, Object sourcePrefab, SpinePortraitConfig spineConfig, Live2DPortraitConfig live2DConfig, string speakerName, float duration)
         {
             if (!_stageLookup.TryGetValue(position, out var stage) || stage == null)
             {
@@ -274,9 +276,16 @@ namespace SG.Dialogue.Presentation
                     break;
                 case PortraitRenderMode.Live2D:
                     characterInstance = Instantiate((GameObject)sourcePrefab);
-                    // Live2D 呈現器需要額外處理
-                    presenter = characterInstance.GetComponent<IDialoguePortraitPresenter>(); // 假設 Live2D Prefab 上有 IDialoguePortraitPresenter
-                    if (presenter == null) Debug.LogWarning($"Live2D Prefab '{sourcePrefab.name}' is missing an IDialoguePortraitPresenter component.");
+                    var live2DPresenter = characterInstance.GetComponent<Live2DDialoguePortraitPresenter>();
+                    if (live2DPresenter != null)
+                    {
+                        live2DPresenter.ShowLive2D(live2DConfig, 0f); // 立即設定 Live2D
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Live2D Prefab '{sourcePrefab.name}' is missing a Live2DDialoguePortraitPresenter component.");
+                    }
+                    presenter = live2DPresenter;
                     break;
             }
 
@@ -300,36 +309,24 @@ namespace SG.Dialogue.Presentation
         /// <param name="instance">角色實例。</param>
         /// <param name="renderMode">立繪渲染模式。</param>
         /// <param name="spineConfig">Spine 設定。</param>
-        private void UpdateExistingCharacter(GameObject instance, PortraitRenderMode renderMode, SpinePortraitConfig spineConfig)
+        /// <param name="live2DConfig">Live2D 設定。</param>
+        private void UpdateExistingCharacter(GameObject instance, PortraitRenderMode renderMode, SpinePortraitConfig spineConfig, Live2DPortraitConfig live2DConfig)
         {
             if (renderMode == PortraitRenderMode.Spine && spineConfig != null)
             {
-                var skeletonAnimation = instance.GetComponent<SkeletonAnimation>();
-                if (skeletonAnimation != null)
+                var spinePresenter = instance.GetComponent<SpineDialoguePortraitPresenter>();
+                if (spinePresenter != null)
                 {
-                    // 更新 Spine 模型的縮放和 Skin
-                    if (skeletonAnimation.Skeleton.ScaleX != spineConfig.scaleX) skeletonAnimation.Skeleton.ScaleX = spineConfig.scaleX;
-                    if (!string.IsNullOrEmpty(spineConfig.skin) && skeletonAnimation.Skeleton.Skin?.Name != spineConfig.skin) skeletonAnimation.Skeleton.SetSkin(spineConfig.skin);
-                    
-                    // 播放進入動畫
-                    var currentAnimation = skeletonAnimation.AnimationState.GetCurrent(0)?.Animation?.Name;
-                    if (!string.IsNullOrEmpty(spineConfig.enterAnimation) && currentAnimation != spineConfig.enterAnimation)
-                    {
-                        skeletonAnimation.AnimationState.SetAnimation(0, spineConfig.enterAnimation, spineConfig.loop);
-                    }
-
-                    // 添加佇列動畫
-                    if (!string.IsNullOrEmpty(spineConfig.queuedAnimation))
-                    {
-                        // 修正錯誤：使用 spineConfig.loop 和 spineConfig.queuedAnimationDelay
-                        skeletonAnimation.AnimationState.AddAnimation(0, spineConfig.queuedAnimation, spineConfig.loop, spineConfig.queuedAnimationDelay);
-                    }
+                    spinePresenter.ShowSpine(spineConfig, 0f);
                 }
             }
-            else if (renderMode == PortraitRenderMode.Live2D)
+            else if (renderMode == PortraitRenderMode.Live2D && live2DConfig != null)
             {
-                var animator = instance.GetComponent<Animator>();
-                if (animator != null) { /* e.g., animator.SetTrigger("Enter"); */ } // Live2D 的動畫處理
+                var live2DPresenter = instance.GetComponent<Live2DDialoguePortraitPresenter>();
+                if (live2DPresenter != null)
+                {
+                    live2DPresenter.ShowLive2D(live2DConfig, 0f);
+                }
             }
         }
 

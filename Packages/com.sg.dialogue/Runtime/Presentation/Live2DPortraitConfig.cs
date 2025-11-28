@@ -5,8 +5,8 @@ namespace SG.Dialogue.Presentation
     /// <summary>
     /// Live2D 立繪的設定。
     /// </summary>
-    [CreateAssetMenu(fileName = "Live2DPortraitConfig", menuName = "SG/Dialogue/Live2D Portrait Config")]
-    public class Live2DPortraitConfig : ScriptableObject
+    [System.Serializable]
+    public class Live2DPortraitConfig
     {
         [Tooltip("進入動畫的動作 ID。")]
         public string enterAnimation;
