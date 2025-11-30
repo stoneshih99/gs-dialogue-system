@@ -7,6 +7,7 @@ using Live2D.Cubism.Framework.Expression;
 using Live2D.Cubism.Framework.LookAt;
 using Live2D.Cubism.Core;
 using Live2D.Cubism.Framework.MotionFade;
+using System.Collections.Generic;
 
 namespace Live2DActorKit.Actors
 {
@@ -53,13 +54,67 @@ namespace Live2DActorKit.Actors
         [Tooltip("語音唇同步控制器")]
         [SerializeField] private Live2DLipSyncController lipSync;
 
+        // --- 重構後新增的快取欄位 ---
+        /// <summary>
+        /// 用於快速查詢動作的字典，以提升效能。
+        /// </summary>
+        private readonly Dictionary<string, AnimationClip> _motionClipDict = new();
+        /// <summary>
+        /// 用於快速查詢表情索引的字典，以提升效能。
+        /// </summary>
+        private readonly Dictionary<string, int> _expressionIndexDict = new();
+        /// <summary>
+        /// 快取所有 Renderer，避免在 SetOpacity/SetColor 中重複搜尋。
+        /// </summary>
+        private Renderer[] _renderers;
+        /// <summary>
+        /// 快取 Cubism Core Model，用於取得 Renderer。
+        /// </summary>
+        private CubismModel _model;
+
         /// <summary>
         /// 目前正在播放的 Motion Id。
         /// </summary>
         private string _currentMotionId;
-
-        // LookAt 目標快取（必須是實作 ICubismLookTarget 的 Component）
+        /// <summary>
+        /// LookAt 目標快取（必須是實作 ICubismLookTarget 的 Component）。
+        /// </summary>
         private Component _lookTargetComponent;
+
+        private void Awake()
+        {
+            // 在 Awake 中快取所有需要的元件和資料
+            _model = GetComponent<CubismModel>();
+            if (_model != null)
+            {
+                _renderers = _model.GetComponents<Renderer>(); // 從 CubismModel 獲取 Renderer 更可靠
+            }
+
+            // 將 motionClips 陣列轉換為字典以加速查詢
+            if (motionClips != null)
+            {
+                foreach (var clip in motionClips)
+                {
+                    if (clip != null && !_motionClipDict.ContainsKey(clip.name))
+                    {
+                        _motionClipDict[clip.name] = clip;
+                    }
+                }
+            }
+
+            // 將表情列表轉換為字典
+            if (expressionController != null && expressionController.ExpressionsList != null)
+            {
+                var exprs = expressionController.ExpressionsList.CubismExpressionObjects;
+                for (int i = 0; i < exprs.Length; i++)
+                {
+                    if (exprs[i] != null && !_expressionIndexDict.ContainsKey(exprs[i].name))
+                    {
+                        _expressionIndexDict[exprs[i].name] = i;
+                    }
+                }
+            }
+        }
 
         private void Reset()
         {
@@ -79,48 +134,27 @@ namespace Live2DActorKit.Actors
 
         /// <summary>
         /// 依照 motionId 播放對應的 AnimationClip。
-        /// 預設邏輯：在 motionClips 中尋找 name == motionId 的 Clip，然後呼叫 CubismMotionController.PlayAnimation。
         /// </summary>
         public void PlayMotion(string motionId, bool loop = false, float fadeIn = 0.2f, float fadeOut = 0.2f)
         {
             if (motionController == null || string.IsNullOrEmpty(motionId))
                 return;
 
-            var clip = FindMotionClip(motionId);
-            if (clip == null)
+            // 使用字典進行 O(1) 快速查詢，而不是遍歷陣列
+            if (_motionClipDict.TryGetValue(motionId, out var clip))
+            {
+                // Cubism 官方建議：由 CubismMotionController.PlayAnimation() 播放，CubismFadeController 會自動處理淡入淡出
+                motionController.PlayAnimation(clip, isLoop: loop);
+                _currentMotionId = motionId;
+            }
+            else
             {
                 Debug.LogWarning($"[Live2DActor] Motion clip '{motionId}' not found on {name}. 請確認已將對應的 AnimationClip 登記到 Live2DActor.motionClips。");
-                return;
             }
-
-            // Cubism 官方建議：由 CubismMotionController.PlayAnimation() 播放，CubismFadeController 會自動處理淡入淡出
-            motionController.PlayAnimation(clip, isLoop: loop);
-            _currentMotionId = motionId;
         }
 
         /// <summary>
-        /// 尋找對應 motionId 的 AnimationClip。
-        /// </summary>
-        /// <param name="motionId"></param>
-        /// <returns></returns>
-        private AnimationClip FindMotionClip(string motionId)
-        {
-            if (motionClips == null)
-                return null;
-
-            for (int i = 0; i < motionClips.Length; i++)
-            {
-                var c = motionClips[i];
-                if (c == null) continue;
-                if (c.name == motionId)
-                    return c;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// 停止目前的動作播放。 
+        /// 停止目前的動作播放。
         /// </summary>
         /// <param name="layer"></param>
         public void StopMotion(string layer = "Base")
@@ -134,8 +168,6 @@ namespace Live2DActorKit.Actors
         /// <summary>
         /// 目前是否正在播放指定的 motionId。
         /// </summary>
-        /// <param name="motionId"></param>
-        /// <returns></returns>
         public bool IsPlaying(string motionId) => _currentMotionId == motionId;
 
         #endregion
@@ -143,51 +175,31 @@ namespace Live2DActorKit.Actors
         #region Expression
 
         /// <summary>
-        /// 設定表情（Expression）。 
+        /// 設定表情（Expression）。
         /// </summary>
-        /// <param name="expressionId"></param>
         public void SetExpression(string expressionId)
         {
             if (expressionController == null || string.IsNullOrEmpty(expressionId))
                 return;
 
-            var list = expressionController.ExpressionsList;
-            if (list == null || list.CubismExpressionObjects == null)
-                return;
-
-            var exprs = list.CubismExpressionObjects;
-            int index = -1;
-
-            for (int i = 0; i < exprs.Length; i++)
+            // 使用字典快速查詢表情索引
+            if (_expressionIndexDict.TryGetValue(expressionId, out int index))
             {
-                var data = exprs[i];
-                if (data == null) continue;
-
-                // 使用 exp3.asset 的名稱作為 expressionId 對應
-                if (data.name == expressionId)
-                {
-                    index = i;
-                    break;
-                }
+                expressionController.CurrentExpressionIndex = index;
             }
-
-            if (index < 0)
+            else
             {
                 Debug.LogWarning($"[Live2DActor] Expression '{expressionId}' not found in ExpressionList on {name}.");
-                return;
             }
-
-            expressionController.CurrentExpressionIndex = index;
         }
 
         /// <summary>
-        /// 清除目前表情，回到預設狀態。 
+        /// 清除目前表情，回到預設狀態。
         /// </summary>
         public void ClearExpression()
         {
             if (expressionController == null)
                 return;
-
             // 設成 -1 通常代表「無表情」、回預設狀態
             expressionController.CurrentExpressionIndex = -1;
         }
@@ -201,9 +213,7 @@ namespace Live2DActorKit.Actors
         /// </summary>
         private void CacheLookTarget()
         {
-            if (lookController == null)
-                return;
-
+            if (lookController == null) return;
             if (_lookTargetComponent == null && lookController.Target != null)
             {
                 _lookTargetComponent = lookController.Target as Component;
@@ -220,14 +230,10 @@ namespace Live2DActorKit.Actors
         /// </summary>
         public void LookAt(Vector2 screenPosition)
         {
-            if (lookController == null)
-                return;
-
+            if (lookController == null) return;
             CacheLookTarget();
-            if (_lookTargetComponent == null)
-                return;
+            if (_lookTargetComponent == null) return;
 
-            // 判斷是否在 Canvas 下
             if (rectTransform != null && parentCanvas != null)
             {
                 LookAtOnCanvas(screenPosition);
@@ -241,29 +247,11 @@ namespace Live2DActorKit.Actors
         /// <summary>
         /// 在 Canvas 下的 LookAt。
         /// </summary>
-        /// <param name="screenPosition"></param>
         private void LookAtOnCanvas(Vector2 screenPosition)
         {
-            if (rectTransform == null || parentCanvas == null)
-                return;
-
-            Camera cam = null;
-
-            if (parentCanvas.renderMode == RenderMode.ScreenSpaceCamera ||
-                parentCanvas.renderMode == RenderMode.WorldSpace)
-            {
-                cam = parentCanvas.worldCamera != null ? parentCanvas.worldCamera : uiCamera;
-            }
-            else if (parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay)
-            {
-                cam = null; // Overlay 模式下可用 null
-            }
-
-            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
-                    rectTransform,
-                    screenPosition,
-                    cam,
-                    out var world))
+            if (rectTransform == null || parentCanvas == null) return;
+            Camera cam = (parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : (parentCanvas.worldCamera ?? uiCamera);
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(rectTransform, screenPosition, cam, out var world))
             {
                 _lookTargetComponent.transform.position = world;
             }
@@ -272,19 +260,11 @@ namespace Live2DActorKit.Actors
         /// <summary>
         /// 在 3D 世界中的 LookAt。
         /// </summary>
-        /// <param name="screenPosition"></param>
         private void LookAtInWorld(Vector2 screenPosition)
         {
-            if (uiCamera == null)
-                return;
-
+            if (uiCamera == null) return;
             float z = Mathf.Abs(uiCamera.transform.position.z - transform.position.z);
-
-            var world = uiCamera.ScreenToWorldPoint(new Vector3(
-                screenPosition.x,
-                screenPosition.y,
-                z));
-
+            var world = uiCamera.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, z));
             _lookTargetComponent.transform.position = world;
         }
 
@@ -293,13 +273,9 @@ namespace Live2DActorKit.Actors
         /// </summary>
         public void ResetLookAt()
         {
-            if (lookController == null)
-                return;
-
+            if (lookController == null) return;
             CacheLookTarget();
-            if (_lookTargetComponent == null)
-                return;
-
+            if (_lookTargetComponent == null) return;
             // 回到角色正前方一小段距離
             var forwardTarget = transform.position + transform.forward * 1f;
             _lookTargetComponent.transform.position = forwardTarget;
@@ -312,12 +288,9 @@ namespace Live2DActorKit.Actors
         /// <summary>
         /// 設定嘴巴開合程度，value01 範圍 0~1。
         /// </summary>
-        /// <param name="value01"></param>
         public void SetMouthOpen(float value01)
         {
-            if (mouthOpenParam == null)
-                return;
-
+            if (mouthOpenParam == null) return;
             float v = Mathf.Clamp01(value01);
             mouthOpenParam.Value = Mathf.Lerp(mouthOpenParam.MinimumValue, mouthOpenParam.MaximumValue, v);
         }
@@ -329,24 +302,25 @@ namespace Live2DActorKit.Actors
         /// <summary>
         /// 設定角色透明度，value01 範圍 0~1。
         /// </summary>
-        /// <param name="value01"></param>
         public void SetOpacity(float value01)
         {
             float v = Mathf.Clamp01(value01);
-
             if (opacityParam != null)
             {
                 opacityParam.Value = Mathf.Lerp(opacityParam.MinimumValue, opacityParam.MaximumValue, v);
                 return;
             }
 
-            var renderers = GetComponentsInChildren<Renderer>();
-            foreach (var r in renderers)
+            // 直接使用快取的 _renderers 陣列，效能更高
+            if (_renderers == null) return;
+            foreach (var r in _renderers)
             {
-                if (!r.material.HasProperty(Color1)) continue;
-                var c = r.material.color;
-                c.a = v;
-                r.material.color = c;
+                if (r.material.HasProperty(Color1))
+                {
+                    var c = r.material.color;
+                    c.a = v;
+                    r.material.color = c;
+                }
             }
         }
 
@@ -361,10 +335,10 @@ namespace Live2DActorKit.Actors
                 return Mathf.InverseLerp(opacityParam.MinimumValue, opacityParam.MaximumValue, opacityParam.Value);
             }
 
-            var renderer = GetComponentInChildren<Renderer>();
-            if (renderer != null && renderer.material.HasProperty(Color1))
+            // 使用快取的 Renderer
+            if (_renderers != null && _renderers.Length > 0 && _renderers[0].material.HasProperty(Color1))
             {
-                return renderer.material.color.a;
+                return _renderers[0].material.color.a;
             }
 
             return 1f;
@@ -376,18 +350,20 @@ namespace Live2DActorKit.Actors
         /// <param name="color">要設定的顏色。</param>
         public void SetColor(Color color)
         {
-            var renderers = GetComponentsInChildren<Renderer>();
-            foreach (var r in renderers)
+            // 直接使用快取的 _renderers 陣列
+            if (_renderers == null) return;
+            foreach (var r in _renderers)
             {
-                if (!r.material.HasProperty(Color1)) continue;
-                r.material.color = color;
+                if (r.material.HasProperty(Color1))
+                {
+                    r.material.color = color;
+                }
             }
         }
 
         /// <summary>
-        /// 顯示或隱藏角色。 
+        /// 顯示或隱藏角色。
         /// </summary>
-        /// <param name="show"></param>
         public void Show(bool show)
         {
             gameObject.SetActive(show);
@@ -398,20 +374,17 @@ namespace Live2DActorKit.Actors
         #region Breathing
 
         /// <summary>
-        /// 開始呼吸。 
+        /// 開始呼吸。
         /// </summary>
-        /// <param name="speed"></param>
-        /// <param name="strength"></param>
         public void StartBreathing(float speed = 1.0f, float strength = 1.0f)
         {
             if (breathController == null) return;
-
             float baseBpm = 12f * Mathf.Max(0.1f, speed);
             breathController.StartBreathing(baseBpm, strength);
         }
 
         /// <summary>
-        /// 停止呼吸。   
+        /// 停止呼吸。
         /// </summary>
         public void StopBreathing()
         {
@@ -424,10 +397,8 @@ namespace Live2DActorKit.Actors
         #region Voice
 
         /// <summary>
-        /// 播放語音並進行唇同步。 
+        /// 播放語音並進行唇同步。
         /// </summary>
-        /// <param name="clip"></param>
-        /// <param name="volume"></param>
         public void PlayVoice(AudioClip clip, float volume = 1f)
         {
             if (lipSync == null) return;
