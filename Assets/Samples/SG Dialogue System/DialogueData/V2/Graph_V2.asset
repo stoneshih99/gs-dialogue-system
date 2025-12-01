@@ -48,7 +48,7 @@ MonoBehaviour:
   - nodeId: CharAct_2
     position: {x: 1389, y: 273}
   - nodeId: TEXT_2
-    position: {x: 1679, y: 291.5}
+    position: {x: 1679, y: 293}
   - nodeId: Anim_2
     position: {x: 2009, y: 273}
   - nodeId: CharAct_3

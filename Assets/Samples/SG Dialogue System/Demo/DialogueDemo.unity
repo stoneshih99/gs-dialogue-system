@@ -758,14 +758,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 1125954177}
     m_Modifications:
     - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: graph
-      value: 
-      objectReference: {fileID: 11400000, guid: ed72f90c93d4148dc875003a1ec2d5be, type: 2}
-    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: globalState
-      value: 
-      objectReference: {fileID: 11400000, guid: ce7a4b0ec1ce54657a0c39d8e38e9009, type: 2}
-    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 348571787}
@@ -869,8 +861,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: DialoguePanel
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 222878738714162937, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
