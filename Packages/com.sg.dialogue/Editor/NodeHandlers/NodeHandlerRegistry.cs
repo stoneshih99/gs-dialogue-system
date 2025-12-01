@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SG.Dialogue.Nodes;
+using SG.Dialogue.Editor.Editor.NodeHandlers;
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {

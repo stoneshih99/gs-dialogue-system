@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Nodes;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;

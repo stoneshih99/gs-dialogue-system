@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SG.Dialogue.Editor.Editor.GraphElements;
+using SG.Dialogue.Editor.Editor.NodeHandlers;
 using SG.Dialogue.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;

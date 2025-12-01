@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Newtonsoft.Json;
+using SG.Dialogue.Editor.Editor.GraphElements;
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {

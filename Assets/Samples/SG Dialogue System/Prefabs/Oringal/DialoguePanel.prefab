@@ -1851,7 +1851,6 @@ GameObject:
   - component: {fileID: 2990892720674022122}
   - component: {fileID: 432268647813499672}
   - component: {fileID: 2817269173376254361}
-  - component: {fileID: 222878738714162937}
   m_Layer: 0
   m_Name: DialoguePanel
   m_TagString: Untagged
@@ -1977,20 +1976,6 @@ MonoBehaviour:
   targetGrayscaleAlpha: 0.8
   flashMask: {fileID: 5963786462256199739}
   backgroundBlurImage: {fileID: 7993267241850615304}
---- !u!114 &222878738714162937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7639811759149525801}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53e36f2150ff740d7a5dfb1523812023, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: SG.Dialogue::SaveLoadHotkeys
-  controller: {fileID: 432268647813499672}
-  slotKey: slot1
 --- !u!1 &7697269485669614275
 GameObject:
   m_ObjectHideFlags: 0

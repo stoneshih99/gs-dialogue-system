@@ -1,10 +1,9 @@
 #if UNITY_EDITOR
 using SG.Dialogue.Nodes;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SG.Dialogue.Editor.Dialogue.Editor
+namespace SG.Dialogue.Editor.Editor.Tabs
 {
     /// <summary>
     /// SimulatorTab 是一個 VisualElement，用於在編輯器中提供對話模擬器界面。

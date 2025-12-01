@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;

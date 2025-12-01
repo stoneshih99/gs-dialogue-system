@@ -75,8 +75,6 @@ MonoBehaviour:
         InterruptNextNodeId: 
         textKey: Graph_V1_TEXT_1
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:
@@ -91,25 +89,31 @@ MonoBehaviour:
       data:
         nodeId: CHAR_1
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: TEXT_1
         ActionType: 0
         TargetPosition: 1
-        ClearAllOnExit: 0
-        OverrideDuration: 0
-        Duration: 0.3
+        portraitRenderMode: 0
+        speakerName: 
         characterSprite: {fileID: 0}
         spinePortraitConfig:
-          modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
-          skin: default
+          modelPrefab: {fileID: 0}
+          skin: 
           enterAnimation: idle
           loop: 1
           queuedAnimation: 
           queuedAnimationDelay: 0
           scaleX: 1
         live2DModelPrefab: {fileID: 0}
-        portraitRenderMode: 2
-        speakerName: "\u9ED1\u5BF6"
-        nextNodeId: TEXT_1
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.3
     - rid: 1643815601279336709
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -124,8 +128,6 @@ MonoBehaviour:
         InterruptNextNodeId: 
         textKey: Graph_V1_TEXT_2
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:
@@ -149,8 +151,6 @@ MonoBehaviour:
         InterruptNextNodeId: 
         textKey: Graph_V1_TEXT_3
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:
@@ -165,49 +165,61 @@ MonoBehaviour:
       data:
         nodeId: CHAR_2
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: TEXT_4
         ActionType: 0
         TargetPosition: 1
-        ClearAllOnExit: 0
-        OverrideDuration: 0
-        Duration: 0.3
+        portraitRenderMode: 0
+        speakerName: 
         characterSprite: {fileID: 0}
         spinePortraitConfig:
-          modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
-          skin: default
-          enterAnimation: attack
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
           loop: 1
           queuedAnimation: 
           queuedAnimationDelay: 0
           scaleX: 1
         live2DModelPrefab: {fileID: 0}
-        portraitRenderMode: 2
-        speakerName: "\u9ED1\u5BF6"
-        nextNodeId: TEXT_4
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.3
     - rid: 1643815601279336742
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: CHAR_3
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: TEXT_5
         ActionType: 0
         TargetPosition: 0
-        ClearAllOnExit: 0
-        OverrideDuration: 0
-        Duration: 0.3
+        portraitRenderMode: 0
+        speakerName: 
         characterSprite: {fileID: 0}
         spinePortraitConfig:
-          modelPrefab: {fileID: 7674738182291908339, guid: 0331b193dad9b4b6aba9e295c734e15c, type: 3}
-          skin: default
-          enterAnimation: flying
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
           loop: 1
           queuedAnimation: 
           queuedAnimationDelay: 0
           scaleX: 1
         live2DModelPrefab: {fileID: 0}
-        portraitRenderMode: 2
-        speakerName: "\u5976\u7403"
-        nextNodeId: TEXT_5
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.3
     - rid: 1643815601279336747
       type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -231,8 +243,6 @@ MonoBehaviour:
         InterruptNextNodeId: 
         textKey: Graph_V1_TEXT_4
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:
@@ -256,8 +266,6 @@ MonoBehaviour:
         InterruptNextNodeId: 
         textKey: Graph_V1_TEXT_5
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:

@@ -5,7 +5,7 @@ using SG.Dialogue.Conditions;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Variables;
 
-namespace SG.Dialogue.Editor.Dialogue.Editor
+namespace SG.Dialogue.Editor.Editor
 {
     /// <summary>
     /// 對話模擬器引擎，用於在編輯器中模擬對話流程。
@@ -129,11 +129,9 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                         // 繼續循環以處理下一個節點
                         break;
 
-                    // 對於所有非互動式節點，我們只應用變數變更（如果有的話）並自動前進
+                    // 對於所有非互動式節點（如動畫、背景設置等），我們直接前進到下一個節點。
+                    // 模擬器不處理它們的視覺效果。
                     default:
-                        if (node is TextNode t) ApplyVariableChanges(t.variableChanges);
-                        else if (node is TransitionNode tr) ApplyVariableChanges(tr.variableChanges);
-                        
                         _currentNodeId = node.GetNextNodeId();
                         // 繼續循環以處理下一個節點
                         break;
@@ -146,7 +144,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// </summary>
         /// <param name="condition">要檢查的條件。</param>
         /// <returns>如果條件滿足則為 true，否則為 false。</returns>
-        private bool CheckCondition(Conditions.Condition condition)
+        private bool CheckCondition(Condition condition)
         {
             // 這是模仿 DialogueController 狀態訪問的簡化檢查
             // 完整的實現可能需要一個模擬控制器或共享介面

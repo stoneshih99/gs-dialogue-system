@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SG.Dialogue.Editor.Editor.Tabs;
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {

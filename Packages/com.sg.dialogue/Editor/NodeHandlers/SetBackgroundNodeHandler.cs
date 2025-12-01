@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 using System;
+using SG.Dialogue.Editor.Editor.GraphElements;
+using SG.Dialogue.Editor.Editor.NodeHandlers;
 using SG.Dialogue.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
@@ -8,36 +10,32 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 {
     public class SetBackgroundNodeHandler : INodeHandler
     {
-        public string MenuName => "Content/Set Background Node";
+        public string MenuName => "Action/Visual/Set Background";
+        public string GetPrefix() => "SetBG";
+
         public DialogueNodeBase CreateNodeData() => new SetBackgroundNode();
-        public string GetPrefix() => "BG";
 
-        public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onChanged)
+        public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onNodeChanged)
         {
-            return new SetBackgroundNodeElement(node as SetBackgroundNode, onChanged);
+            return new SetBackgroundNodeElement(node as SetBackgroundNode, onNodeChanged);
         }
 
-        public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> getInputPort, Action<Port, Port> connect)
+        public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> tryGetInputPort, Action<Port, Port> connectPorts)
         {
-            var sbNode = nodeData as SetBackgroundNode;
-            var sbElem = sourceView as SetBackgroundNodeElement;
-            connect(sbElem.OutputPort, getInputPort(sbNode.nextNodeId));
-        }
+            var bgNode = nodeData as SetBackgroundNode;
+            var bgNodeView = sourceView as SetBackgroundNodeElement;
+            if (bgNode == null || bgNodeView == null) return;
 
-        /// <summary>
-        /// 根據埠名稱獲取節點的輸出埠。
-        /// </summary>
-        /// <param name="element">節點的視覺元素。</param>
-        /// <param name="portName">埠的名稱。</param>
-        /// <returns>對應的輸出埠，如果找不到則為 null。</returns>
+            var targetPort = tryGetInputPort(bgNode.nextNodeId);
+            if (targetPort != null)
+            {
+                connectPorts(bgNodeView.OutputPort, targetPort);
+            }
+        }
+        
         public Port GetOutputPort(DialogueNodeElement element, string portName)
         {
-            if (element is SetBackgroundNodeElement sbElem)
-            {
-                // SetBackgroundNodeElement 只有一個輸出埠，通常命名為 "Next"
-                return sbElem.OutputPort;
-            }
-            return null;
+            return (element as SetBackgroundNodeElement)?.OutputPort;
         }
     }
 }

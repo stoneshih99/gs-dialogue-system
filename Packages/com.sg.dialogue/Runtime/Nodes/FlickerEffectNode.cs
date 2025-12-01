@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using SG.Dialogue.Enums;
-using SG.Dialogue.Presentation;
 using UnityEngine;
 
 namespace SG.Dialogue.Nodes
@@ -20,45 +19,35 @@ namespace SG.Dialogue.Nodes
 
         [Header("目標設定")]
         [Tooltip("閃爍效果的目標類型。")]
-        public TargetType Target = TargetType.Background;
+        public TargetType target = TargetType.Background;
 
         [Tooltip("當目標是『背景』時，要閃爍的背景圖層索引。")]
-        public int BackgroundLayerIndex = 0;
+        public int backgroundLayerIndex;
 
         [Tooltip("當目標是『角色』時，要閃爍的角色位置。")]
-        public CharacterPosition CharacterPosition = CharacterPosition.Center;
+        public CharacterPosition characterPosition = CharacterPosition.Center;
 
         [Header("閃爍參數")]
         [Tooltip("整個閃爍效果的總持續時間（秒）。")]
-        public float Duration = 1f;
+        public float duration = 1f;
 
         [Tooltip("閃爍的頻率（每秒閃爍次數）。")]
-        public float Frequency = 10f;
+        public float frequency = 10f;
 
         [Tooltip("閃爍時的最低透明度（Alpha 值，範圍 0 到 1）。1 表示不變，0 表示完全透明。")]
         [Range(0f, 1f)]
-        public float MinAlpha = 0.2f;
+        public float minAlpha = 0.2f;
 
         [Header("流程控制")]
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        /// <summary>
-        /// 處理閃爍特效節點的核心邏輯。
-        /// 它會呼叫視覺管理器來執行閃爍效果，並等待其完成。
-        /// </summary>
-        /// <param name="controller">對話總控制器。</param>
-        /// <returns>一個協程迭代器，用於等待特效完成。</returns>
         public override IEnumerator Process(DialogueController controller)
         {
-            // 呼叫視覺管理器來處理這個特效，並等待其完成
-            yield return controller.VisualManager.ExecuteFlickerEffect(this);
+            // 主要邏輯由 DialogueController 處理
+            yield break;
         }
 
-        /// <summary>
-        /// 覆寫基底類別的方法，返回此節點的下一個節點 ID。
-        /// </summary>
-        /// <returns>下一個節點的 ID。</returns>
         public override string GetNextNodeId()
         {
             return nextNodeId;

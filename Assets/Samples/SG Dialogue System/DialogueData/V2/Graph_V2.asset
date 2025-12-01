@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: Graph_V2
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
   graphId: V2
-  startNodeId: CHAR_1
+  startNodeId: CharAct_1
   IsSkippable: 1
   AllNodes:
-  - rid: 1643815607100244168
-  - rid: 1643815607100244169
-  - rid: 1643815607100244170
-  - rid: 1643815607100244171
+  - rid: 736264902029869256
+  - rid: 736264902029869257
+  - rid: 736264902029869258
+  - rid: 736264902029869259
+  - rid: 736264902029869260
+  - rid: 736264902029869261
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -35,64 +37,81 @@ MonoBehaviour:
   autoAdvanceEnabled: 0
   defaultAutoAdvanceDelay: 1.2
   nodePositions:
-  - nodeId: CHAR_1
-    position: {x: 38, y: 280}
+  - nodeId: CharAct_1
+    position: {x: 201, y: 283.5}
+  - nodeId: Anim_1
+    position: {x: 671, y: 292.5}
   - nodeId: TEXT_1
-    position: {x: 479, y: 280}
-  - nodeId: WAIT_1
-    position: {x: 902, y: 280}
+    position: {x: 1038, y: 292.5}
+  - nodeId: CharAct_2
+    position: {x: 1390, y: 292.5}
   - nodeId: TEXT_2
-    position: {x: 1161, y: 280}
+    position: {x: 1684, y: 292.5}
+  - nodeId: Anim_2
+    position: {x: 1988, y: 292.5}
   references:
     version: 2
     RefIds:
-    - rid: 1643815607100244168
+    - rid: 736264902029869256
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
-        nodeId: CHAR_1
+        nodeId: CharAct_1
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: Anim_1
         ActionType: 0
-        TargetPosition: 1
-        ClearAllOnExit: 0
-        OverrideDuration: 0
-        Duration: 0.3
+        TargetPosition: 0
+        portraitRenderMode: 2
+        speakerName: "\u5976\u7403"
         characterSprite: {fileID: 0}
         spinePortraitConfig:
-          modelPrefab: {fileID: 0}
+          modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
           skin: 
           enterAnimation: idle
           loop: 1
           queuedAnimation: 
           queuedAnimationDelay: 0
           scaleX: 1
+        live2DModelPrefab: {fileID: 0}
         live2DPortraitConfig:
-          enterAnimation: Idle
+          enterAnimation: 
           loop: 0
           queuedAnimation: 
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
-        live2DModelPrefab: {fileID: 8038074026689077407, guid: 50cef8ce46cce413087ceff67e989c69, type: 3}
-        portraitRenderMode: 3
-        speakerName: NPC
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.2
+    - rid: 736264902029869257
+      type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: Anim_1
+        IsEnabled: 1
         nextNodeId: TEXT_1
-    - rid: 1643815607100244169
+        targetAnimationPosition: 0
+        motions:
+        - TargetProperty: 0
+          EndValue: {x: 0, y: 1, z: 0}
+          Duration: 0.2
+          Ease: 5
+          LoopType: 2
+          Loops: -1
+          Delay: 0
+          IsRelative: 1
+    - rid: 736264902029869258
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_1
         IsEnabled: 1
         AudioEvent: {fileID: 0}
-        speakerName: NPC
-        text: "Hi\uFF0C\u5927\u5BB6\u597D\uFF0C\u9019\u662F\u4E00\u500B  Live2D Demo"
-        nextNodeId: WAIT_1
+        speakerName: "\u5976\u7403"
+        text: "\u6211\u7B49\u7B49\u8981\u5403\u52A0\u71B1\u98DF\u7269"
+        nextNodeId: CharAct_2
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: Graph_V2_TEXT_1
+        textKey: 
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:
@@ -102,29 +121,50 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
-    - rid: 1643815607100244170
-      type: {class: WaitNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+    - rid: 736264902029869259
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
-        nodeId: WAIT_1
+        nodeId: CharAct_2
         IsEnabled: 1
-        WaitTime: 1
         nextNodeId: TEXT_2
-    - rid: 1643815607100244171
+        ActionType: 0
+        TargetPosition: 1
+        portraitRenderMode: 2
+        speakerName: "\u9ED1\u5BF6"
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.2
+    - rid: 736264902029869260
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_2
         IsEnabled: 1
         AudioEvent: {fileID: 0}
-        speakerName: NPC
-        text: "\u64AD\u653E\u7CFB\u7D71\u5C1A\u672A\u5B8C\u6210"
-        nextNodeId: 
+        speakerName: "\u9ED1\u5BF6"
+        text: "\u6211\u5410\u51FA\u4F86\u7D66\u4F60\u5403"
+        nextNodeId: Anim_2
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: Graph_V2_TEXT_2
+        textKey: 
         textCues: []
-        motions: []
-        targetAnimationPosition: 1
         variableChanges: []
         onEnter:
           m_PersistentCalls:
@@ -134,3 +174,19 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
+    - rid: 736264902029869261
+      type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: Anim_2
+        IsEnabled: 1
+        nextNodeId: 
+        targetAnimationPosition: 1
+        motions:
+        - TargetProperty: 2
+          EndValue: {x: 0.8, y: 0.8, z: 0}
+          Duration: 0.2
+          Ease: 5
+          LoopType: 2
+          Loops: -1
+          Delay: 0
+          IsRelative: 1

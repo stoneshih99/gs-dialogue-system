@@ -1,43 +1,42 @@
 #if UNITY_EDITOR
 using System;
+using SG.Dialogue.Editor.Editor.GraphElements;
+using SG.Dialogue.Editor.Editor.NodeHandlers;
 using SG.Dialogue.Nodes;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
+
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {
     public class CharacterActionNodeHandler : INodeHandler
     {
-        public string MenuName => "Character/Character Action Node";
+        public string MenuName => "Action/Visual/Character Action";
+        public string GetPrefix() => "CharAct";
+
         public DialogueNodeBase CreateNodeData() => new CharacterActionNode();
-        public string GetPrefix() => "CHAR";
 
-        public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onChanged)
+        public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onNodeChanged)
         {
-            return new CharacterActionNodeElement(node as CharacterActionNode, nodeProperty, onChanged);
+            return new CharacterActionNodeElement(node as CharacterActionNode, onNodeChanged);
         }
 
-        public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> getInputPort, Action<Port, Port> connect)
+        public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> tryGetInputPort, Action<Port, Port> connectPorts)
         {
-            var caNode = nodeData as CharacterActionNode;
-            var caElem = sourceView as CharacterActionNodeElement;
-            connect(caElem.OutputPort, getInputPort(caNode.nextNodeId));
-        }
+            var charNode = nodeData as CharacterActionNode;
+            var charNodeView = sourceView as CharacterActionNodeElement;
+            if (charNode == null || charNodeView == null) return;
 
-        /// <summary>
-        /// 根據埠名稱獲取節點的輸出埠。
-        /// </summary>
-        /// <param name="element">節點的視覺元素。</param>
-        /// <param name="portName">埠的名稱。</param>
-        /// <returns>對應的輸出埠，如果找不到則為 null。</returns>
+            var targetPort = tryGetInputPort(charNode.nextNodeId);
+            if (targetPort != null)
+            {
+                connectPorts(charNodeView.OutputPort, targetPort);
+            }
+        }
+        
         public Port GetOutputPort(DialogueNodeElement element, string portName)
         {
-            if (element is CharacterActionNodeElement caElem)
-            {
-                // CharacterActionNodeElement 只有一個輸出埠，通常命名為 "Next"
-                return caElem.OutputPort;
-            }
-            return null;
+            return (element as CharacterActionNodeElement)?.OutputPort;
         }
     }
 }

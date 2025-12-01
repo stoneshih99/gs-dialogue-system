@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SG.Dialogue.Conditions;
+using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Nodes;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;

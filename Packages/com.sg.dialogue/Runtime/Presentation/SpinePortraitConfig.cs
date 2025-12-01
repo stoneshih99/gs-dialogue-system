@@ -1,4 +1,3 @@
-using Spine.Unity;
 using UnityEngine;
 
 namespace SG.Dialogue.Presentation
@@ -13,9 +12,6 @@ namespace SG.Dialogue.Presentation
                  "用於實例化 Spine 立繪。")]
         public GameObject modelPrefab;
         
-        // [Tooltip("Spine 骨架資料，用於舊的 Presenter 渲染模式")]
-        // public SkeletonDataAsset skeletonData; // 註釋掉的舊屬性
-
         [Tooltip("指定要使用的 Skin 名稱。如果留空，則使用 Spine 模型的預設 Skin。")]
         public string skin;
         
