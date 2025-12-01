@@ -39,5 +39,15 @@ namespace SG.Dialogue.Nodes
             // 主要邏輯由 DialogueController 處理
             yield break;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+        }
+
+        public override void ClearUnityReferencesForClipboard()
+        {
+            ClearAllUnityObjectFields();
+        }
     }
 }

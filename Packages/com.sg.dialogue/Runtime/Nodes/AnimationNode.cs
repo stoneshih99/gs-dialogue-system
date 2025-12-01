@@ -41,5 +41,10 @@ namespace SG.Dialogue.Nodes
             // 此處返回 null 或空的迭代器。
             yield break;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+        }
     }
 }

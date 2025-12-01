@@ -77,5 +77,19 @@ namespace SG.Dialogue.Nodes
         {
             return nextNodeId;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+            InterruptNextNodeId = null;
+        }
+
+        public override void ClearUnityReferencesForClipboard()
+        {
+            AudioEvent = null;
+            InterruptEvent = null;
+            // UnityEvent 內部可能包含對 Unity 物件的引用，但通常不需要在剪貼簿操作時清除其內部細節
+            // 如果需要，可以考慮遍歷 GetPersistentEventCount() 並清除
+        }
     }
 }

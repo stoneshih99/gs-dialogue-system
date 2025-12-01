@@ -39,5 +39,15 @@ namespace SG.Dialogue.Nodes
         {
             return nextNodeId;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+        }
+
+        public override void ClearUnityReferencesForClipboard()
+        {
+            ClearAllUnityObjectFields();
+        }
     }
 }

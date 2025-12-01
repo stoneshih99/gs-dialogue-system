@@ -64,5 +64,17 @@ namespace SG.Dialogue.Nodes
         {
             return nextNodeId;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+        }
+
+        public override void ClearUnityReferencesForClipboard()
+        {
+            // 清除 AudioEvent 和 AudioClip 的引用
+            AudioEvent = null;
+            request.Clip = null;
+        }
     }
 }

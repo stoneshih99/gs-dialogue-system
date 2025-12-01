@@ -60,5 +60,11 @@ namespace SG.Dialogue.Nodes
         {
             return null;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            TrueNextNodeId = null;
+            FalseNextNodeId = null;
+        }
     }
 }

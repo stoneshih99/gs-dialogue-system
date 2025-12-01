@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Newtonsoft.Json;
 using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Nodes;
@@ -12,13 +13,51 @@ using UnityEngine.UIElements;
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {
     /// <summary>
-    /// DialogueGraphView 的複製 / 貼上處理器。
-    /// - 支援 Ctrl/Cmd + C / V 針對 DialogueNodeElement 做複製與貼上。
-    /// - 複製時會深拷貝 NodeData，並呼叫各 node 的 ClearConnectionsForClipboard / ClearUnityReferencesForClipboard。
-    /// - 貼上時會為每個節點產新的 nodeId，加入 Graph，並建立對應的視覺節點。
+    /// 專門忽略 UnityEngine.Object 的 JsonConverter：
+    /// 任何 Unity 物件在序列化時一律輸出為 null。
+    /// 這樣 Json.NET 就不會去動 Sprite.bounds / AudioClip.length 等等。
     /// </summary>
+    internal sealed class UnityObjectNullConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return typeof(UnityEngine.Object).IsAssignableFrom(objectType);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            writer.WriteNull();
+        }
+
+        public override object ReadJson(
+            JsonReader reader,
+            Type objectType,
+            object existingValue,
+            JsonSerializer serializer)
+        {
+            // 從剪貼簿讀回來時，一律用 null
+            return null;
+        }
+    }
+
     public class NodeClipboardHandler
     {
+        private static readonly JsonSerializerSettings ClipboardJsonSettings = CreateClipboardJsonSettings();
+
+        private static JsonSerializerSettings CreateClipboardJsonSettings()
+        {
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            // 核心：忽略所有 UnityEngine.Object
+            settings.Converters.Add(new UnityObjectNullConverter());
+
+            return settings;
+        }
+
         private readonly DialogueGraphView _graphView;
         private string _clipboard;
         private Vector2 _lastMousePosition;
@@ -37,10 +76,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         private void OnKeyDown(KeyDownEvent evt)
         {
-            // 只在 Ctrl/Cmd 情境下處理
             if (!evt.actionKey) return;
-
-            // 焦點在文字輸入時不攔截
             if (evt.target is TextField || evt.target is TextElement) return;
 
             if (evt.keyCode == KeyCode.C)
@@ -55,9 +91,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             }
         }
 
-        /// <summary>
-        /// 複製當前選取的 DialogueNodeElement 到內部剪貼簿。
-        /// </summary>
         public void CopySelectionToClipboard()
         {
             var selectedNodesData = _graphView.selection
@@ -69,41 +102,85 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             try
             {
-                var settings = new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-
-                // 先用 JSON 深拷貝
-                string tempJson = JsonConvert.SerializeObject(selectedNodesData, settings);
-                var copiedNodes = JsonConvert.DeserializeObject<List<DialogueNodeBase>>(tempJson, settings);
+                // 使用共用設定：忽略 UnityEngine.Object
+                string tempJson = JsonConvert.SerializeObject(selectedNodesData, ClipboardJsonSettings);
+                var copiedNodes = JsonConvert.DeserializeObject<List<DialogueNodeBase>>(tempJson, ClipboardJsonSettings);
 
                 if (copiedNodes == null || copiedNodes.Count == 0)
                     return;
 
-                // 讓每個 node 自己負責清連線/Unity 物件/狀態
                 foreach (var node in copiedNodes)
                 {
-                    if (node == null) continue;
-
-                    node.ClearConnectionsForClipboard();
-                    node.ClearUnityReferencesForClipboard();
-                    node.OnAfterClonedFromClipboard();
+                    ClearConnectionIds(node);
+                    ClearUnityObjectReferences(node); // 雖然 Json 已經忽略，這裡當作雙重保險
                 }
 
-                _clipboard = JsonConvert.SerializeObject(copiedNodes, Formatting.Indented, settings);
+                _clipboard = JsonConvert.SerializeObject(copiedNodes, Formatting.Indented, ClipboardJsonSettings);
                 Debug.Log($"[NodeClipboardHandler] Copied {copiedNodes.Count} nodes to clipboard.");
             }
             catch (Exception e)
             {
-                Debug.LogError(
-                    $"[Copy Error] Failed to process nodes for clipboard. Error: {e.Message}\n{e.StackTrace}");
+                Debug.LogError($"[Copy Error] Failed to process nodes for clipboard. Error: {e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        private void ClearConnectionIds(DialogueNodeBase node)
+        {
+            if (node == null) return;
+
+            var fields = node.GetType().GetFields(
+                BindingFlags.Instance |
+                BindingFlags.Public |
+                BindingFlags.NonPublic |
+                BindingFlags.FlattenHierarchy);
+
+            foreach (var field in fields)
+            {
+                if (field.FieldType == typeof(string) &&
+                    field.Name.EndsWith("Id", StringComparison.Ordinal) &&
+                    !field.Name.Equals("nodeId", StringComparison.Ordinal))
+                {
+                    field.SetValue(node, null);
+                }
+                else if (field.FieldType == typeof(List<string>) &&
+                         field.Name.EndsWith("Ids", StringComparison.Ordinal))
+                {
+                    field.SetValue(node, new List<string>());
+                }
+            }
+
+            if (node is ChoiceNode choiceNode && choiceNode.choices != null)
+            {
+                foreach (var choice in choiceNode.choices)
+                {
+                    choice.nextNodeId = null;
+                }
             }
         }
 
         /// <summary>
-        /// 從剪貼簿貼上節點，並在給定位置附近排列。
+        /// 這裡是額外保險：如果你某些欄位是 UnityEngine.Object，但
+        /// 剛好 Json 設定哪天被改掉，這裡還是會清一次。
         /// </summary>
+        private void ClearUnityObjectReferences(DialogueNodeBase node)
+        {
+            if (node == null) return;
+
+            var fields = node.GetType().GetFields(
+                BindingFlags.Instance |
+                BindingFlags.Public |
+                BindingFlags.NonPublic |
+                BindingFlags.FlattenHierarchy);
+
+            foreach (var field in fields)
+            {
+                if (typeof(UnityEngine.Object).IsAssignableFrom(field.FieldType))
+                {
+                    field.SetValue(node, null);
+                }
+            }
+        }
+
         public void PasteFromClipboard(Vector2 pastePosition)
         {
             if (string.IsNullOrEmpty(_clipboard) ||
@@ -117,11 +194,9 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             List<DialogueNodeBase> pastedNodesData;
             try
             {
-                var settings = new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                };
-                pastedNodesData = JsonConvert.DeserializeObject<List<DialogueNodeBase>>(_clipboard, settings);
+                pastedNodesData = JsonConvert.DeserializeObject<List<DialogueNodeBase>>(
+                    _clipboard,
+                    ClipboardJsonSettings);
             }
             catch (Exception e)
             {
@@ -129,31 +204,30 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 return;
             }
 
-            if (pastedNodesData == null || pastedNodesData.Count == 0)
-                return;
+            if (pastedNodesData == null || !pastedNodesData.Any()) return;
 
             _graphView.RecordUndo("Paste Nodes");
             _graphView.Graph.BuildLookup();
 
             var usedIds = new HashSet<string>(_graphView.Graph.AllNodes.Select(n => n.nodeId));
 
-            // 為貼上的節點產新的唯一 nodeId
             foreach (var nodeData in pastedNodesData)
             {
                 if (nodeData == null) continue;
 
                 string oldId = nodeData.nodeId;
-                string prefix = !string.IsNullOrEmpty(oldId) && oldId.Contains('_')
+                string prefix = oldId != null && oldId.Contains('_')
                     ? oldId.Split('_')[0]
                     : "NODE";
 
                 nodeData.nodeId = GenerateUniqueNodeIdForPaste(prefix, usedIds);
 
-                // 若節點貼上後還需要 reset 特定狀態，也可在這裡呼叫額外 hook（目前已在 OnAfterClonedFromClipboard 做大部分）。
-                // 例如：nodeData.OnAfterPastedIntoGraph(); 若你未來想再加一層。
+                if (nodeData is TextNode textNode)
+                {
+                    textNode.textKey = null;
+                }
             }
 
-            // 找到目前的節點容器（根 Graph 或 Sequence/Parallel 等）
             var container = _graphView.NavigationStack.Peek();
             var targetList = _graphView.GetNodesFromContainer(container);
             if (targetList == null) return;
@@ -161,19 +235,17 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             int originalCount = targetList.Count;
             Vector2 currentPastePos = pastePosition;
 
-            // 先把資料層級加進 Graph
             foreach (var newNodeData in pastedNodesData)
             {
                 if (newNodeData == null) continue;
 
                 _graphView.Graph.SetNodePosition(newNodeData.nodeId, currentPastePos);
                 targetList.Add(newNodeData);
-                currentPastePos += new Vector2(30f, 30f); // 每個 node 稍微錯開一點
+                currentPastePos += new Vector2(30f, 30f);
             }
 
             EditorUtility.SetDirty(_graphView.Graph);
 
-            // 再用 SerializedObject 寫回，並建立視覺節點
             var serializedGraph = new SerializedObject(_graphView.Graph);
             serializedGraph.Update();
 
@@ -181,6 +253,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             if (nodesProperty != null)
             {
+                // 先擴大 arraySize，避免 GetArrayElementAtIndex 越界
                 int newCount = originalCount + pastedNodesData.Count;
                 if (nodesProperty.arraySize < newCount)
                 {
@@ -198,23 +271,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
                 serializedGraph.ApplyModifiedProperties();
             }
-            else
-            {
-                Debug.LogWarning("[NodeClipboardHandler] PasteFromClipboard: nodesProperty not found for container.");
-            }
         }
 
-        /// <summary>
-        /// 找到目前 container 對應的 SerializedProperty：
-        /// - 若 container 是 DialogueGraph → 回傳 AllNodes。
-        /// - 若 container 是某個 DialogueNodeBase → 找到它在 AllNodes 裡的位置，再取 childNodes。
-        /// </summary>
         private SerializedProperty FindNodesProperty(SerializedObject serializedGraph, object container)
         {
             if (container is DialogueGraph)
-            {
                 return serializedGraph.FindProperty("AllNodes");
-            }
 
             if (container is DialogueNodeBase containerNode)
             {
@@ -229,9 +291,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             return null;
         }
 
-        /// <summary>
-        /// 在 AllNodes 的樹狀結構裡遞迴找出 targetNode 的 SerializedProperty 路徑。
-        /// </summary>
         private string FindPropertyPath(
             List<DialogueNodeBase> nodes,
             string currentPath,
@@ -245,9 +304,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 if (node == null) continue;
 
                 if (node.nodeId == targetNode.nodeId)
-                {
                     return $"{currentPath}.Array.data[{i}]";
-                }
 
                 if (node is SequenceNode seqNode)
                 {
@@ -272,34 +329,21 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             return null;
         }
 
-        /// <summary>
-        /// 一般用的 nodeId 產生器（沒考慮本次 paste 批次內的重複，只看 Graph）。
-        /// </summary>
         public string GenerateUniqueNodeId(string prefix)
         {
             int i = 1;
             string id;
-
-            do
-            {
-                id = $"{prefix}_{i++}";
-            } while (_graphView.Graph != null && _graphView.Graph.HasNode(id));
-
+            do { id = $"{prefix}_{i++}"; }
+            while (_graphView.Graph != null && _graphView.Graph.HasNode(id));
             return id;
         }
 
-        /// <summary>
-        /// 貼上專用的 nodeId 產生器：同時避免 Graph 裡和本次貼上批次裡的重複。
-        /// </summary>
         private string GenerateUniqueNodeIdForPaste(string prefix, HashSet<string> usedIds)
         {
             int i = 1;
             string id;
-            do
-            {
-                id = $"{prefix}_{i++}";
-            } while ((_graphView.Graph != null && _graphView.Graph.HasNode(id)) || usedIds.Contains(id));
-
+            do { id = $"{prefix}_{i++}"; }
+            while ((_graphView.Graph != null && _graphView.Graph.HasNode(id)) || usedIds.Contains(id));
             usedIds.Add(id);
             return id;
         }

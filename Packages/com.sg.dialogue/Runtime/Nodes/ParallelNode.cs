@@ -73,5 +73,16 @@ namespace SG.Dialogue.Nodes
         {
             return nextNodeId;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+            branchStartNodeIds = new List<string>();
+            // 遞迴清除子節點的連線
+            foreach (var childNode in childNodes)
+            {
+                childNode.ClearConnectionsForClipboard();
+            }
+        }
     }
 }

@@ -52,7 +52,8 @@ namespace SG.Dialogue.Nodes
         
         public override void ClearConnectionsForClipboard()
         {
-            base.ClearConnectionsForClipboard();
+            // 清除 ChoiceNode 本身的 nextNodeId (如果有的話，雖然 ChoiceNode 通常沒有)
+            // base.ClearConnectionsForClipboard(); // DialogueNodeBase 的 GetNextNodeId 已經返回 null，所以這裡不需要呼叫 base
 
             if (choices == null) return;
             foreach (var c in choices)
@@ -63,9 +64,8 @@ namespace SG.Dialogue.Nodes
 
         public override void ClearUnityReferencesForClipboard()
         {
-            // 如果這個 node 有 Sprite / AudioClip 要清，就：
-            // ClearAllUnityObjectFields();
+            // UnityEvent 內部可能包含對 Unity 物件的引用，但通常不需要在剪貼簿操作時清除其內部細節
+            // 如果需要，可以考慮遍歷 GetPersistentEventCount() 並清除
         }
-
     }
 }

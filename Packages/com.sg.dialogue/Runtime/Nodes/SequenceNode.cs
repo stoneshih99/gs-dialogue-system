@@ -37,7 +37,7 @@ namespace SG.Dialogue.Nodes
             Debug.Log($"[對話] 進入序列: {sequenceName}");
 
             // 1. 將返回位址（即此序列結束後應前往的節點）推入執行堆疊。
-            //    當序列內的流程結束時，控制器會從堆疊中彈出這個 ID 來繼續執行。
+            //    當序列內的流程結束時，控制器會從堆疊中彈出這個 ID 來繼續繼續執行。
             controller.PushToExecutionStack(nextNodeId);
 
             // 2. 返回一個指令，告訴控制器立即前進到此序列內部的起始節點。
@@ -52,6 +52,17 @@ namespace SG.Dialogue.Nodes
         public override string GetNextNodeId()
         {
             return nextNodeId;
+        }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+            startNodeId = null;
+            // 遞迴清除子節點的連線
+            foreach (var childNode in childNodes)
+            {
+                childNode.ClearConnectionsForClipboard();
+            }
         }
     }
 }

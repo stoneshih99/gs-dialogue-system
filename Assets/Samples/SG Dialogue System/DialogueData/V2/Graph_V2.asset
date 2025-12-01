@@ -44,17 +44,17 @@ MonoBehaviour:
   - nodeId: Anim_1
     position: {x: 682, y: 292.5}
   - nodeId: TEXT_1
-    position: {x: 1040, y: 265.5}
+    position: {x: 1040, y: 273}
   - nodeId: CharAct_2
-    position: {x: 1389, y: 276.5}
+    position: {x: 1389, y: 273}
   - nodeId: TEXT_2
-    position: {x: 1687, y: 292.5}
+    position: {x: 1679, y: 291.5}
   - nodeId: Anim_2
-    position: {x: 2009, y: 265.5}
+    position: {x: 2009, y: 273}
   - nodeId: CharAct_3
-    position: {x: 2412, y: 301.5}
+    position: {x: 2412, y: 310.5}
   - nodeId: TEXT_3
-    position: {x: 2673, y: 301.5}
+    position: {x: 2703, y: 310.5}
   references:
     version: 2
     RefIds:
@@ -234,7 +234,7 @@ MonoBehaviour:
         AudioEvent: {fileID: 0}
         speakerName: "\u5976\u7403"
         text: "\u6211\u7B49\u7B49\u8981\u5403\u52A0\u71B1\u98DF\u7269"
-        nextNodeId: CharAct_2
+        nextNodeId: 
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 

@@ -71,5 +71,16 @@ namespace SG.Dialogue.Nodes
         {
             return nextNodeId;
         }
+
+        public override void ClearConnectionsForClipboard()
+        {
+            nextNodeId = null;
+        }
+
+        public override void ClearUnityReferencesForClipboard()
+        {
+            // 清除所有 Unity 物件引用，包括 FocusTarget
+            ClearAllUnityObjectFields();
+        }
     }
 }
