@@ -51,5 +51,59 @@ namespace SG.Dialogue
             var field = GetType().GetField("nextNodeId");
             return field?.GetValue(this) as string;
         }
+        
+        #region Clipboard Hooks
+
+        /// <summary>
+        /// 當節點已經被 JSON 反序列化出來，準備作為「複製結果」使用時呼叫。
+        /// 你可以在 override 裡清除 runtime 狀態、重設一些欄位（但不含 nodeId）。
+        /// </summary>
+        public virtual void OnAfterClonedFromClipboard()
+        {
+            // 預設什麼都不做
+        }
+
+        /// <summary>
+        /// 複製到剪貼簿時，用來清除「連線相關」資訊（避免貼上後連回原本 graph）。
+        /// 例如 nextNodeId / childIds 等。
+        /// </summary>
+        public virtual void ClearConnectionsForClipboard()
+        {
+            // 預設什麼都不做，有需要的子類別再 override
+        }
+
+        /// <summary>
+        /// 複製到剪貼簿時，用來清除不應該被 JSON 直存的 Unity 物件引用
+        /// （例如暫時的 GameObject、runtime only 參考）。
+        /// </summary>
+        public virtual void ClearUnityReferencesForClipboard()
+        {
+            // 預設不做事，有需要的子類別 override，
+            // 或呼叫下面這個 helper: ClearAllUnityObjectFields();
+        }
+
+        /// <summary>
+        /// 共用 helper：把這個 node 上所有 UnityEngine.Object 欄位清成 null。
+        /// 若你的節點需要這種行為，可以在 override 裡呼叫它。
+        /// </summary>
+        protected void ClearAllUnityObjectFields()
+        {
+            var type = GetType();
+            var fields = type.GetFields(
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.FlattenHierarchy);
+
+            foreach (var field in fields)
+            {
+                if (typeof(UnityEngine.Object).IsAssignableFrom(field.FieldType))
+                {
+                    field.SetValue(this, null);
+                }
+            }
+        }
+
+        #endregion
     }
 }

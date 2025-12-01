@@ -49,5 +49,23 @@ namespace SG.Dialogue.Nodes
         {
             return null;
         }
+        
+        public override void ClearConnectionsForClipboard()
+        {
+            base.ClearConnectionsForClipboard();
+
+            if (choices == null) return;
+            foreach (var c in choices)
+            {
+                c.nextNodeId = null;
+            }
+        }
+
+        public override void ClearUnityReferencesForClipboard()
+        {
+            // 如果這個 node 有 Sprite / AudioClip 要清，就：
+            // ClearAllUnityObjectFields();
+        }
+
     }
 }
