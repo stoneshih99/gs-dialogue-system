@@ -10,7 +10,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 {
     public class SetBackgroundNodeHandler : INodeHandler
     {
-        public string MenuName => "Action/Visual/Set Background";
+        public string MenuName => "Action/Visual/Background";
         public string GetPrefix() => "SetBG";
 
         public DialogueNodeBase CreateNodeData() => new SetBackgroundNode();

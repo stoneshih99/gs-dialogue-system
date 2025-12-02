@@ -45,10 +45,10 @@ namespace SG.Dialogue.Nodes
         [Tooltip("是否在退場時清除所有角色，而不僅僅是目標位置的角色。僅在退場時有效。")]
         public bool ClearAllOnExit;
 
-        [Tooltip("是否覆寫預設的淡入淡出持續時間。")]
-        public bool OverrideDuration;
+        // [Tooltip("是否覆寫預設的淡入淡出持續時間。")]
+        // public bool OverrideDuration;
         [Tooltip("自訂的淡入淡出持續時間（秒）。")]
-        public float Duration = 0.2f;
+        public float Duration = 0.3f;
 
         public override string GetNextNodeId()
         {

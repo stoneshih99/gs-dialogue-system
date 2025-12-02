@@ -62,11 +62,11 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             clearAllField.RegisterValueChangedCallback(e => { _data.ClearAllOnExit = e.newValue; onChanged?.Invoke(); });
             mainContainer.Add(clearAllField);
             
-            var overrideToggle = new Toggle("Override Duration") { value = _data.OverrideDuration };
+            // var overrideToggle = new Toggle("Override Duration") { value = _data.OverrideDuration };
             var durationField = new FloatField("Duration") { value = _data.Duration };
-            overrideToggle.RegisterValueChangedCallback(e => { _data.OverrideDuration = e.newValue; durationField.style.display = e.newValue ? DisplayStyle.Flex : DisplayStyle.None; onChanged?.Invoke(); });
+            // overrideToggle.RegisterValueChangedCallback(e => { _data.OverrideDuration = e.newValue; durationField.style.display = e.newValue ? DisplayStyle.Flex : DisplayStyle.None; onChanged?.Invoke(); });
             durationField.RegisterValueChangedCallback(e => { _data.Duration = Mathf.Max(0, e.newValue); onChanged?.Invoke(); });
-            mainContainer.Add(overrideToggle);
+            // mainContainer.Add(overrideToggle);
             mainContainer.Add(durationField);
 
             void UpdateVisibility()
@@ -80,7 +80,8 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                 spineConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Spine ? DisplayStyle.Flex : DisplayStyle.None;
                 live2DConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Live2D ? DisplayStyle.Flex : DisplayStyle.None;
                 
-                durationField.style.display = _data.OverrideDuration ? DisplayStyle.Flex : DisplayStyle.None;
+                durationField.style.display = _data.Duration > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+                // durationField.style.display = _data.OverrideDuration ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             actionTypeField.RegisterValueChangedCallback(e => { _data.ActionType = (CharacterActionType)e.newValue; UpdateVisibility(); onChanged?.Invoke(); });

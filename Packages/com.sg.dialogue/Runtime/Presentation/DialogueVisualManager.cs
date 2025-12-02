@@ -86,7 +86,8 @@ namespace SG.Dialogue.Presentation
 
         public IEnumerator UpdateFromCharacterActionNode(CharacterActionNode node)
         {
-            float duration = node.OverrideDuration ? node.Duration : portraitFadeDuration;
+            // float duration = node.OverrideDuration ? node.Duration : portraitFadeDuration;
+            var duration = node.Duration;
             
             switch (node.ActionType)
             {
@@ -163,20 +164,20 @@ namespace SG.Dialogue.Presentation
                 case PortraitRenderMode.Sprite:
                     characterInstance = new GameObject("SpritePortrait");
                     var imagePresenter = characterInstance.AddComponent<ImageDialoguePortraitPresenter>();
-                    imagePresenter.ShowSprite(node.characterSprite, 0f);
+                    imagePresenter.ShowSprite(node.characterSprite, duration);
                     presenter = imagePresenter;
                     break;
                 case PortraitRenderMode.Spine:
                     characterInstance = Instantiate(node.spinePortraitConfig.modelPrefab);
                     var spinePresenter = characterInstance.GetComponent<SpineDialoguePortraitPresenter>();
                     if (spinePresenter == null) spinePresenter = characterInstance.AddComponent<SpineDialoguePortraitPresenter>();
-                    spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
+                    spinePresenter.ShowSpine(node.spinePortraitConfig, duration);
                     presenter = spinePresenter;
                     break;
                 case PortraitRenderMode.Live2D:
                     characterInstance = Instantiate(node.live2DModelPrefab);
                     var live2DPresenter = characterInstance.GetComponent<Live2DDialoguePortraitPresenter>();
-                    if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
+                    if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, duration);
                     presenter = live2DPresenter;
                     break;
             }
