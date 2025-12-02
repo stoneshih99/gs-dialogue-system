@@ -49,10 +49,15 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             SetIsStartNode(GraphView.Graph.startNodeId == NodeId);
         }
 
+        /// <summary>
+        /// 建立節點的上下文菜單。 
+        /// </summary>
+        /// <param name="evt"></param>
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             base.BuildContextualMenu(evt);
-            evt.menu.AppendAction("Delete", action => OnDelete?.Invoke());
+            // 修正：不再直接呼叫 OnDelete，而是讓 GraphView 處理刪除操作
+            evt.menu.AppendAction("Delete", action => GraphView.DeleteSelection());
             evt.menu.AppendSeparator();
             evt.menu.AppendAction("Set as Start Node", (action) => { GraphView.SetStartNode(NodeId); }, DropdownMenuAction.Status.Normal);
         }
