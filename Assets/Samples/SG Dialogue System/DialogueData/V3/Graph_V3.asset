@@ -36,7 +36,7 @@ MonoBehaviour:
   defaultAutoAdvanceDelay: 1.2
   nodePositions:
   - nodeId: CharAct_1
-    position: {x: -167.5, y: 424}
+    position: {x: -172.5, y: 424}
   - nodeId: TEXT_1
     position: {x: 62.5, y: 454}
   - nodeId: CAM_1

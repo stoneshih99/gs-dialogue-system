@@ -57,8 +57,8 @@ namespace SG.Dialogue.Nodes
 
         public override IEnumerator Process(DialogueController controller)
         {
-            // 主要邏輯由 DialogueController 處理
-            yield break;
+            // 呼叫 DialogueVisualManager 的方法，並等待其完成
+            yield return controller.VisualManager.UpdateFromCharacterActionNode(this);
         }
 
         public override void ClearConnectionsForClipboard()

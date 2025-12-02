@@ -68,9 +68,20 @@ namespace SG.Dialogue.Nodes
             displayNode.speakerName = formattedSpeaker;
             
             controller.VisualManager.UpdateFromTextNode(displayNode); 
-            controller.UiManager.ShowText(displayNode, formattedText);
             
-            yield return new WaitForUserInput();
+            // 等待打字機效果完成
+            yield return controller.UiManager.ShowText(displayNode, formattedText);
+            
+            // 根據自動前進設定決定等待方式
+            if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
+            {
+                float delay = overrideAutoAdvance ? autoAdvanceDelay : controller.AutoAdvanceDelay;
+                yield return new WaitForSeconds(delay);
+            }
+            else
+            {
+                yield return new WaitForUserInput();
+            }
         }
 
         public override string GetNextNodeId()

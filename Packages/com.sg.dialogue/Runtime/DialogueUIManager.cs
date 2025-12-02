@@ -159,11 +159,12 @@ namespace SG.Dialogue.UI
         }
 
         /// <summary>
-        /// 顯示指定的文本節點內容。
+        /// 顯示指定的文本節點內容，並返回打字機協程。
         /// </summary>
         /// <param name="node">文本節點。</param>
         /// <param name="text">要顯示的文本。</param>
-        public void ShowText(TextNode node, string text)
+        /// <returns>打字機協程。</returns>
+        public Coroutine ShowText(TextNode node, string text)
         {
             if (speakerLabel != null)
             {
@@ -189,6 +190,7 @@ namespace SG.Dialogue.UI
                 if (enableTypewriter && gameObject.activeInHierarchy)
                 {
                     _typingRoutine = StartCoroutine(TypewriterRoutine(bodyLabel.text));
+                    return _typingRoutine;
                 }
                 else
                 {
@@ -208,6 +210,7 @@ namespace SG.Dialogue.UI
                 nextButton.gameObject.SetActive(!string.IsNullOrEmpty(node.nextNodeId));
             }
             ClearChoices();
+            return null;
         }
 
         /// <summary>
@@ -255,7 +258,7 @@ namespace SG.Dialogue.UI
         /// <summary>
         /// 立即完成打字機效果。
         /// </summary>
-        private void CompleteTyping()
+        public void CompleteTyping()
         {
             if (!_isTyping && _typingRoutine == null) return;
             _isTyping = false;

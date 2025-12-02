@@ -56,6 +56,11 @@ namespace SG.Dialogue
         /// </summary>
         public MonoBehaviour CoroutineRunner => this;
 
+        /// <summary>
+        /// 獲取當前對話圖的自動前進延遲時間。
+        /// </summary>
+        public float AutoAdvanceDelay => graph != null ? graph.defaultAutoAdvanceDelay : 0f;
+
         private void Awake()
         {
             if (uiManager == null) uiManager = GetComponent<DialogueUIManager>();
@@ -278,7 +283,13 @@ namespace SG.Dialogue
                 while (instructionEnumerator.MoveNext())
                 {
                     var instruction = instructionEnumerator.Current;
-                    if (instruction != null)
+                    // 在分支中，如果遇到 AdvanceToNode 或 EndDialogue，則只結束當前分支，不傳播給主流程
+                    if (instruction is AdvanceToNode || instruction is EndDialogue)
+                    {
+                        Debug.LogWarning($"[對話除錯] 分支節點 {node.GetType().Name} (ID: {node.nodeId}) 嘗試發出全局流程控制指令 ({instruction.GetType().Name})，但在並行分支中被消化。");
+                        yield break; // 結束當前分支的執行
+                    }
+                    else if (instruction != null)
                     {
                         yield return instruction;
                     }
@@ -319,7 +330,13 @@ namespace SG.Dialogue
 
         private void OnAdvanceRequested()
         {
-            if (!IsRunning || uiManager.IsTyping) return;
+            if (!IsRunning) return;
+
+            if (uiManager.IsTyping)
+            {
+                uiManager.CompleteTyping();
+                return;
+            }
 
             if (_lastNode is TextNode textNode)
             {
