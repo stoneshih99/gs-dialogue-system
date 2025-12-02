@@ -16,7 +16,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onChanged)
         {
-            return new TextNodeElement(node as TextNode, onChanged);
+            // 將 graphView 和 nodeProperty 傳遞給 TextNodeElement 的建構子
+            return new TextNodeElement(node as TextNode, graphView, nodeProperty, onChanged);
         }
 
         public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> getInputPort, Action<Port, Port> connect)
