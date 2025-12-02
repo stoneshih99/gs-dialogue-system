@@ -98,7 +98,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 var container = stackArray[i];
                 string name = "Unknown";
                 if (container is DialogueGraph g) name = g.name; // 如果是對話圖，顯示其名稱
-                else if (container is SequenceNode s) name = s.sequenceName; // 如果是序列節點，顯示其序列名稱
+                else if (container is SequenceNode s) name = s.sequenceName; // 調整回使用 sequenceName
+                else if (container is ParallelNode p) name = p.parallelName; // 調整回使用 parallelName
                 
                 if (i > 0) _breadcrumbContainer.Add(new Label(" > ")); // 添加分隔符
 

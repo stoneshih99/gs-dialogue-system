@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Linq; // 引入 System.Linq 以使用 Any()
 using SG.Dialogue.Editor.Dialogue.Editor;
 using SG.Dialogue.Nodes;
 using UnityEditor;
@@ -15,6 +16,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         public Port InputPort { get; protected set; }
         public Action OnDelete;
         protected DialogueGraphView GraphView { get; private set; }
+        protected SerializedProperty NodeSerializedProperty { get; private set; } // 新增：儲存節點的 SerializedProperty
 
         protected DialogueNodeElement(string nodeId)
         {
@@ -24,17 +26,25 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             inputContainer.Add(InputPort);
         }
 
-        public void Initialize(DialogueGraphView graphView)
+        // 修改 Initialize 方法，使其接收 SerializedProperty
+        public void Initialize(DialogueGraphView graphView, SerializedProperty nodeSerializedProperty)
         {
             GraphView = graphView;
-            var enabledToggle = new Toggle { value = NodeData.IsEnabled };
-            enabledToggle.RegisterValueChangedCallback(evt =>
+            NodeSerializedProperty = nodeSerializedProperty; // 儲存傳入的 SerializedProperty
+
+            // 檢查是否已經添加過 IsEnabled 的 Toggle，避免重複添加
+            if (titleButtonContainer.Children().OfType<Toggle>().All(t => t.name != "IsEnabledToggle"))
             {
-                NodeData.IsEnabled = evt.newValue;
-                UpdateEnabledStatus();
-                GraphView.RecordUndo("Toggle Node Enabled");
-            });
-            titleButtonContainer.Insert(0, enabledToggle);
+                var enabledToggle = new Toggle { value = NodeData.IsEnabled, name = "IsEnabledToggle" }; // 給 Toggle 一個名稱以便識別
+                enabledToggle.RegisterValueChangedCallback(evt =>
+                {
+                    NodeData.IsEnabled = evt.newValue;
+                    UpdateEnabledStatus();
+                    GraphView.RecordUndo("Toggle Node Enabled");
+                });
+                titleButtonContainer.Insert(0, enabledToggle);
+            }
+            
             UpdateEnabledStatus();
             SetIsStartNode(GraphView.Graph.startNodeId == NodeId);
         }

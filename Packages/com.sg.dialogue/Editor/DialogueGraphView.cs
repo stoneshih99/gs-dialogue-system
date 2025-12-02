@@ -34,8 +34,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         private bool _isPopulating;
 
         // 子圖起始節點的引用 (現在設為 public)
-        public SequenceStartNodeElement SequenceStartNode { get; private set; } // 修改為 public 屬性
-        public ParallelBranchStartNodeElement ParallelStartNode { get; private set; } // 修改為 public 屬性
+        public SequenceStartNodeElement SequenceStartNode { get; private set; }
+        public ParallelBranchStartNodeElement ParallelStartNode { get; private set; }
 
         private NodeClipboardHandler _clipboardHandler;
         private GraphConnectionHandler _connectionHandler; // 新增連接處理器
@@ -122,8 +122,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             {
                 DeleteElements(graphElements.ToList());
                 _nodeViews.Clear();
-                SequenceStartNode = null; // 修改為 public 屬性
-                ParallelStartNode = null; // 修改為 public 屬性
+                SequenceStartNode = null;
+                ParallelStartNode = null;
 
                 if (!_graph || _navigationStack.Count == 0) return;
                 
@@ -162,22 +162,22 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 }
 
                 // 連接子圖起始節點的埠
-                if (SequenceStartNode != null && currentContainer is SequenceNode seqNodeData) // 修改為 public 屬性
+                if (SequenceStartNode != null && currentContainer is SequenceNode seqNodeData)
                 {
                     var inputPort = TryGetInputPort(seqNodeData.startNodeId);
                     if (inputPort != null)
                     {
-                        ConnectPorts(SequenceStartNode.OutputPort, inputPort); // 修改為 public 屬性
+                        ConnectPorts(SequenceStartNode.OutputPort, inputPort);
                     }
                 }
-                else if (ParallelStartNode != null && currentContainer is ParallelNode parNodeData) // 修改為 public 屬性
+                else if (ParallelStartNode != null && currentContainer is ParallelNode parNodeData)
                 {
                     for (int i = 0; i < parNodeData.branchStartNodeIds.Count; i++)
                     {
                         var inputPort = TryGetInputPort(parNodeData.branchStartNodeIds[i]);
-                        if (inputPort != null && i < ParallelStartNode.BranchPorts.Count) // 修改為 public 屬性
+                        if (inputPort != null && i < ParallelStartNode.BranchPorts.Count)
                         {
-                            ConnectPorts(ParallelStartNode.BranchPorts[i], inputPort); // 修改為 public 屬性
+                            ConnectPorts(ParallelStartNode.BranchPorts[i], inputPort);
                         }
                     }
                 }
@@ -196,28 +196,28 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         private void CreateSequenceStartNode(SequenceNode seqNode)
         {
-            SequenceStartNode = new SequenceStartNodeElement(); // 修改為 public 屬性
-            AddElement(SequenceStartNode); // 修改為 public 屬性
+            SequenceStartNode = new SequenceStartNodeElement();
+            AddElement(SequenceStartNode);
         }
 
         private void CreateParallelStartNode(ParallelNode parNode)
         {
-            ParallelStartNode = new ParallelBranchStartNodeElement(); // 修改為 public 屬性
-            ParallelStartNode.BuildPorts(parNode.branchStartNodeIds); // 修改為 public 屬性
-            ParallelStartNode.OnBranchesChanged = () => // 修改為 public 屬性
+            ParallelStartNode = new ParallelBranchStartNodeElement();
+            ParallelStartNode.BuildPorts(parNode.branchStartNodeIds);
+            ParallelStartNode.OnBranchesChanged = () =>
             {
                 RecordUndo("Modify Parallel Branches");
                 // 同步埠數量到數據模型
-                while (parNode.branchStartNodeIds.Count < ParallelStartNode.BranchPorts.Count) // 修改為 public 屬性
+                while (parNode.branchStartNodeIds.Count < ParallelStartNode.BranchPorts.Count)
                 {
                     parNode.branchStartNodeIds.Add(null);
                 }
-                while (parNode.branchStartNodeIds.Count > ParallelStartNode.BranchPorts.Count) // 修改為 public 屬性
+                while (parNode.branchStartNodeIds.Count > ParallelStartNode.BranchPorts.Count)
                 {
                     parNode.branchStartNodeIds.RemoveAt(parNode.branchStartNodeIds.Count - 1);
                 }
             };
-            AddElement(ParallelStartNode); // 修改為 public 屬性
+            AddElement(ParallelStartNode);
         }
 
         private void ConnectPortsForNode(DialogueNodeElement sourceView, DialogueNodeBase nodeData)
@@ -302,11 +302,11 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             }
             else if (container is SequenceNode)
             {
-                FrameSelectionOrAll(SequenceStartNode); // 修改為 public 屬性
+                FrameSelectionOrAll(SequenceStartNode);
             }
             else if (container is ParallelNode)
             {
-                FrameSelectionOrAll(ParallelStartNode); // 修改為 public 屬性
+                FrameSelectionOrAll(ParallelStartNode);
             }
             else
             {
@@ -396,32 +396,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             return change;
         }
 
-        // 移除 HandleSubGraphStartEdge 方法，其邏輯已移至 GraphConnectionHandler
-        // private bool HandleSubGraphStartEdge(Edge edge, bool isDeletion = false)
-        // {
-        //     var container = _navigationStack.Peek();
-        //     if (container is SequenceNode seqNode && edge.output?.node == _sequenceStartNode)
-        //     {
-        //         var targetNodeId = isDeletion ? null : (edge.input?.node as DialogueNodeElement)?.NodeId;
-        //         seqNode.startNodeId = targetNodeId;
-        //         return true;
-        //     }
-        //     if (container is ParallelNode parNode && edge.output?.node == _parallelStartNode)
-        //     {
-        //         int portIndex = _parallelStartNode.BranchPorts.IndexOf(edge.output);
-        //         if (portIndex != -1)
-        //         {
-        //             var targetNodeId = isDeletion ? null : (edge.input?.node as DialogueNodeElement)?.NodeId;
-        //             if (portIndex < parNode.branchStartNodeIds.Count)
-        //             {
-        //                 parNode.branchStartNodeIds[portIndex] = targetNodeId;
-        //             }
-        //         }
-        //         return true;
-        //     }
-        //     return false;
-        // }
-
         public void SyncPositionsToAsset()
         {
             if (_graph == null) return;
@@ -498,7 +472,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 貼上選項
             evt.menu.AppendAction("Paste", action => _clipboardHandler.PasteFromClipboard(mousePos), DropdownMenuAction.Status.Normal); // 委託給剪貼簿處理器，並傳遞滑鼠位置
             
-            if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent()) // 檢查剪貼簿內容
+            if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent())
             {
                 evt.menu.AppendSeparator();
             }
@@ -528,7 +502,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 if (element != null)
                 {
                     element.SetPosition(new Rect(_graph.GetNodePosition(node.nodeId), defaultNodeSize));
-                    element.Initialize(this); // 傳遞 GraphView 引用
+                    // 修正這裡的呼叫，傳遞 nodeProperty
+                    element.Initialize(this, nodeProperty); 
                     element.OnDelete = () => 
                     {
                         RecordUndo("Delete Node");

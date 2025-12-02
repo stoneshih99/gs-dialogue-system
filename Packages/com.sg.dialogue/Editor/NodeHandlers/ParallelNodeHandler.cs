@@ -17,7 +17,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onChanged)
         {
-            return new ParallelNodeElement(node as ParallelNode, graphView, onChanged);
+            // 將 nodeProperty 傳遞給 ParallelNodeElement 的建構子
+            return new ParallelNodeElement(node as ParallelNode, graphView, nodeProperty, onChanged);
         }
 
         public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> getInputPort, Action<Port, Port> connect)

@@ -16,7 +16,15 @@ namespace SG.Dialogue.Nodes
     public class ParallelNode : DialogueNodeBase
     {
         [Tooltip("此並行節點的描述性名稱，僅用於編輯器中識別。")]
-        public string parallelName = "New Parallel";
+        public string parallelName = "Parallel"; // 重新加入 parallelName 欄位
+
+        /// <summary>
+        /// 此並行節點的詳細描述或註解，用於說明其功能或流程。
+        /// </summary>
+        [SerializeField]
+        [TextArea(3, 6)]
+        [Tooltip("此並行節點的詳細描述或註解。")]
+        private string description;
 
         [SerializeReference, Tooltip("此並行節點包含的子節點列表。")]
         public List<DialogueNodeBase> childNodes = new List<DialogueNodeBase>();
@@ -30,7 +38,7 @@ namespace SG.Dialogue.Nodes
 
         /// <summary>
         /// 處理並行節點的核心邏輯。
-        /// 它會為每個分支啟動一個獨立的協程，並等待所有協程都完成。
+        /// 它會為每個分支啟動一個獨立的協程，並等待所有並行分支都完成。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個協程迭代器，用於等待所有分支完成。</returns>
@@ -74,6 +82,9 @@ namespace SG.Dialogue.Nodes
             return nextNodeId;
         }
 
+        /// <summary>
+        /// 清除剪貼簿相關的連線資訊。
+        /// </summary>
         public override void ClearConnectionsForClipboard()
         {
             nextNodeId = null;

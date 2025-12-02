@@ -14,7 +14,15 @@ namespace SG.Dialogue.Nodes
     public class SequenceNode : DialogueNodeBase
     {
         [Tooltip("此序列的描述性名稱，僅用於編輯器中識別。")]
-        public string sequenceName = "New Sequence";
+        public string sequenceName = "Sequence"; // 重新加入 sequenceName 欄位
+
+        /// <summary>
+        /// 此序列節點的詳細描述或註解，用於說明其功能或流程。
+        /// </summary>
+        [SerializeField]
+        [TextArea(3, 6)]
+        [Tooltip("此序列節點的詳細描述或註解。")]
+        private string description;
 
         [SerializeReference, Tooltip("此序列包含的子節點列表。這些節點構成了序列內部的對話流程。")]
         public List<DialogueNodeBase> childNodes = new List<DialogueNodeBase>();
@@ -34,7 +42,7 @@ namespace SG.Dialogue.Nodes
         /// <returns>一個包含對話指令的協程迭代器。</returns>
         public override IEnumerator Process(DialogueController controller)
         {
-            Debug.Log($"[對話] 進入序列: {sequenceName}");
+            Debug.Log($"[對話] 進入序列: {sequenceName}"); // 調整回使用 sequenceName
 
             // 1. 將返回位址（即此序列結束後應前往的節點）推入執行堆疊。
             //    當序列內的流程結束時，控制器會從堆疊中彈出這個 ID 來繼續繼續執行。
@@ -54,6 +62,9 @@ namespace SG.Dialogue.Nodes
             return nextNodeId;
         }
 
+        /// <summary>
+        /// 清除剪貼簿相關的連線資訊。
+        /// </summary>
         public override void ClearConnectionsForClipboard()
         {
             nextNodeId = null;

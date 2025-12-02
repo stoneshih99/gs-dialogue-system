@@ -4,6 +4,9 @@ using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Nodes;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
+using UnityEditor.UIElements; // 引入 UnityEditor.UIElements 命名空間以使用 PropertyField
+using UnityEditor; // 引入 UnityEditor 命名空間以使用 SerializedObject
+using UnityEngine;
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {
@@ -29,24 +32,35 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// </summary>
         /// <param name="data">序列節點的數據。</param>
         /// <param name="graphView">GraphView 的實例。</param>
+        /// <param name="nodeSerializedProperty">此節點的 SerializedProperty。</param>
         /// <param name="onChanged">當節點數據改變時觸發的回調。</param>
-        public SequenceNodeElement(SequenceNode data, DialogueGraphView graphView, Action onChanged) : base(data.nodeId)
+        public SequenceNodeElement(SequenceNode data, DialogueGraphView graphView, SerializedProperty nodeSerializedProperty, Action onChanged) : base(data.nodeId)
         {
             _data = data;
             _graphView = graphView;
-            title = "Sequence"; // 節點標題
+
+            // 呼叫基底類別的 Initialize 方法，傳遞 SerializedProperty
+            Initialize(graphView, nodeSerializedProperty);
+
+            title = _data.sequenceName; // 重新設定 title 為 sequenceName
             
             // 設置節點樣式，使其看起來像一個容器
             style.backgroundColor = new StyleColor(new UnityEngine.Color(0.3f, 0.4f, 0.3f));
             
-            // 序列名稱輸入框
-            var nameField = new TextField { value = _data.sequenceName };
-            nameField.RegisterValueChangedCallback(evt =>
+            // 添加描述欄位
+            // 現在使用基底類別儲存的 NodeSerializedProperty 來尋找 "description"
+            var descriptionProperty = NodeSerializedProperty.FindPropertyRelative("description");
+            if (descriptionProperty != null)
             {
-                _data.sequenceName = evt.newValue;
-                onChanged?.Invoke(); // 觸發數據改變回調
-            });
-            titleContainer.Add(nameField);
+                var descriptionField = new PropertyField(descriptionProperty);
+                // 綁定到 NodeSerializedProperty 的 SerializedObject
+                descriptionField.Bind(NodeSerializedProperty.serializedObject);
+                extensionContainer.Add(descriptionField);
+            }
+            else
+            {
+                Debug.LogWarning($"[Dialogue Editor] 無法在 SequenceNode 中找到 'description' 屬性。請確保它是 [SerializeField] private string description;");
+            }
 
             // 創建輸出埠
             OutputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));

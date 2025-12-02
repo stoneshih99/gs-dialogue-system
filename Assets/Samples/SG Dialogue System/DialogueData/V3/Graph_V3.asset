@@ -1,0 +1,217 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c0d229053405472caf5f5e715b9e2ff, type: 3}
+  m_Name: Graph_V3
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
+  graphId: 
+  startNodeId: PARALLEL_1
+  IsSkippable: 1
+  AllNodes:
+  - rid: 736264920620073050
+  - rid: 736264920620073063
+  - rid: 736264920620073064
+  - rid: 736264920620073066
+  onDialogueStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onDialogueEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  onNodeEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  onNodeExited:
+    m_PersistentCalls:
+      m_Calls: []
+  autoAdvanceEnabled: 0
+  defaultAutoAdvanceDelay: 1.2
+  nodePositions:
+  - nodeId: CharAct_1
+    position: {x: -216.5, y: 358}
+  - nodeId: TEXT_1
+    position: {x: 234.5, y: 386}
+  - nodeId: CAM_1
+    position: {x: -113.5, y: 437}
+  - nodeId: PARALLEL_1
+    position: {x: -245.5, y: 231}
+  - nodeId: Anim_1
+    position: {x: 567.5, y: 386}
+  - nodeId: TEXT_2
+    position: {x: -52.5, y: 231}
+  - nodeId: TEXT_3
+    position: {x: 232.5, y: 231}
+  - nodeId: CharAct_2
+    position: {x: -761.5, y: 231}
+  references:
+    version: 2
+    RefIds:
+    - rid: 736264920620073050
+      type: {class: ParallelNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: PARALLEL_1
+        IsEnabled: 1
+        parallelName: Parallel
+        description: 
+        childNodes:
+        - rid: 736264920620073053
+        - rid: 736264920620073054
+        - rid: 736264920620073055
+        branchStartNodeIds:
+        - CharAct_1
+        - TEXT_1
+        - Anim_1
+        nextNodeId: TEXT_2
+    - rid: 736264920620073053
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CharAct_1
+        IsEnabled: 1
+        nextNodeId: 
+        ActionType: 0
+        TargetPosition: 0
+        portraitRenderMode: 2
+        speakerName: NPC
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.2
+    - rid: 736264920620073054
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_1
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: NPC
+        text: 123
+        nextNodeId: 
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: 
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+    - rid: 736264920620073055
+      type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: Anim_1
+        IsEnabled: 1
+        nextNodeId: 
+        targetAnimationPosition: 0
+        motions:
+        - TargetProperty: 0
+          EndValue: {x: 0, y: 0.1, z: 0}
+          Duration: 0.5
+          Ease: 5
+          LoopType: 0
+          Loops: -1
+          Delay: 0
+          IsRelative: 0
+    - rid: 736264920620073063
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_2
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: NPC
+        text: "\u5230\u53F0\u7063"
+        nextNodeId: TEXT_3
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: 
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+    - rid: 736264920620073064
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_3
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: NPC
+        text: "\u53F0\u7063\u6709\u500B\u963F\u91CC\u5C71"
+        nextNodeId: 
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: 
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+    - rid: 736264920620073066
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CharAct_2
+        IsEnabled: 1
+        nextNodeId: PARALLEL_1
+        ActionType: 0
+        TargetPosition: 0
+        portraitRenderMode: 2
+        speakerName: NPC
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        OverrideDuration: 0
+        Duration: 0.2
