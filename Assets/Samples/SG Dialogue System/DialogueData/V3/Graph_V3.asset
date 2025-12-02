@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Graph_V3
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
   graphId: 
-  startNodeId: PARALLEL_1
+  startNodeId: CharAct_2
   IsSkippable: 1
   AllNodes:
   - rid: 736264920620073050
@@ -36,13 +36,13 @@ MonoBehaviour:
   defaultAutoAdvanceDelay: 1.2
   nodePositions:
   - nodeId: CharAct_1
-    position: {x: -216.5, y: 358}
+    position: {x: -167.5, y: 424}
   - nodeId: TEXT_1
-    position: {x: 234.5, y: 386}
+    position: {x: 62.5, y: 454}
   - nodeId: CAM_1
     position: {x: -113.5, y: 437}
   - nodeId: PARALLEL_1
-    position: {x: -245.5, y: 231}
+    position: {x: -414.5, y: 231}
   - nodeId: Anim_1
     position: {x: 567.5, y: 386}
   - nodeId: TEXT_2
@@ -51,6 +51,10 @@ MonoBehaviour:
     position: {x: 232.5, y: 231}
   - nodeId: CharAct_2
     position: {x: -761.5, y: 231}
+  - nodeId: LOG_1
+    position: {x: -456.5, y: 444}
+  - nodeId: LOG_2
+    position: {x: 889.5, y: 424}
   references:
     version: 2
     RefIds:
@@ -65,10 +69,14 @@ MonoBehaviour:
         - rid: 736264920620073053
         - rid: 736264920620073054
         - rid: 736264920620073055
+        - rid: 736264920620073067
+        - rid: 736264920620073068
         branchStartNodeIds:
-        - CharAct_1
+        - LOG_1
         - TEXT_1
         - Anim_1
+        - CharAct_1
+        - LOG_2
         nextNodeId: TEXT_2
     - rid: 736264920620073053
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -77,7 +85,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: 
         ActionType: 0
-        TargetPosition: 0
+        TargetPosition: 1
         portraitRenderMode: 2
         speakerName: NPC
         characterSprite: {fileID: 0}
@@ -107,7 +115,7 @@ MonoBehaviour:
         IsEnabled: 1
         AudioEvent: {fileID: 0}
         speakerName: NPC
-        text: 123
+        text: 123123123123123123123123123123123123123123123123123123123123123123123123123123123123
         nextNodeId: 
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
@@ -135,7 +143,7 @@ MonoBehaviour:
           EndValue: {x: 0, y: 0.1, z: 0}
           Duration: 0.5
           Ease: 5
-          LoopType: 0
+          LoopType: 2
           Loops: -1
           Delay: 0
           IsRelative: 0
@@ -215,3 +223,19 @@ MonoBehaviour:
         ClearAllOnExit: 0
         OverrideDuration: 0
         Duration: 0.2
+    - rid: 736264920620073067
+      type: {class: LogNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: LOG_1
+        IsEnabled: 1
+        messageType: 3
+        message: "\u57F7\u884C ParallelNode"
+        nextNodeId: 
+    - rid: 736264920620073068
+      type: {class: LogNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: LOG_2
+        IsEnabled: 1
+        messageType: 3
+        message: "\u57F7\u884C ParallelNode 2"
+        nextNodeId: 

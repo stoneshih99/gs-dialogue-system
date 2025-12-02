@@ -51,22 +51,20 @@ namespace SG.Dialogue.Nodes
                 yield break; // 直接結束此節點的處理
             }
 
-            var branches = new List<Coroutine>();
+            List<IEnumerator> branchEnumerators = new List<IEnumerator>();
             foreach (var startNodeId in branchStartNodeIds)
             {
                 if (!string.IsNullOrEmpty(startNodeId))
                 {
-                    // 為每個分支啟動一個獨立的執行協程
-                    // DialogueController 的 ExecuteBranch 方法會處理一個完整的子流程
-                    branches.Add(controller.ExecuteBranch(startNodeId));
+                    // 獲取每個分支的迭代器
+                    branchEnumerators.Add(controller.GetBranchEnumerator(startNodeId));
                 }
             }
 
-            // 等待所有分支協程執行完畢
-            // yield return 會等待一個協程執行完成
-            foreach (var branch in branches)
+            // 使用 WaitForAll 指令等待所有分支同時完成
+            if (branchEnumerators.Count > 0)
             {
-                yield return branch;
+                yield return new WaitForAll(controller.CoroutineRunner, branchEnumerators);
             }
             
             // 當所有分支都執行完畢後，Process 方法結束，

@@ -758,9 +758,21 @@ PrefabInstance:
     m_TransformParent: {fileID: 1125954177}
     m_Modifications:
     - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: graph
+      value: 
+      objectReference: {fileID: 11400000, guid: 78160a496220b467ab63b4defa7fc5ea, type: 2}
+    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: globalState
+      value: 
+      objectReference: {fileID: 11400000, guid: 2bfdd96142ba041d99460b191a012257, type: 2}
+    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 348571787}
+    - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: debugLoggingEnabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 974399659758379551, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

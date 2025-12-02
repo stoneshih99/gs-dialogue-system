@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using SG.Dialogue.Core.Instructions;
-using SG.Dialogue.Events;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Presentation;
 using SG.Dialogue.UI;
@@ -19,6 +18,10 @@ namespace SG.Dialogue
         [Header("圖表與狀態")]
         [SerializeField] private DialogueGraph graph;
         [SerializeField] private DialogueStateAsset globalState;
+
+        [Header("除錯功能")]
+        [Tooltip("啟用後，每個執行中的對話節點都會在 Console 中打印日誌。")]
+        [SerializeField] private bool debugLoggingEnabled = false; // 新增除錯開關
 
         [Header("管理器")]
         [SerializeField] private DialogueUIManager uiManager;
@@ -48,10 +51,19 @@ namespace SG.Dialogue
         
         private readonly Stack<string> _executionStack = new Stack<string>();
 
+        /// <summary>
+        /// 提供一個 MonoBehaviour 實例，用於啟動協程。
+        /// </summary>
+        public MonoBehaviour CoroutineRunner => this;
+
         private void Awake()
         {
             if (uiManager == null) uiManager = GetComponent<DialogueUIManager>();
             if (visualManager == null) visualManager = GetComponent<DialogueVisualManager>();
+            
+            #if !UNITY_EDITOR
+            debugLoggingEnabled = false;
+            #endif
         }
 
         private void OnEnable()
@@ -129,6 +141,12 @@ namespace SG.Dialogue
 
             if (node != null)
             {
+                // 打印除錯日誌
+                if (debugLoggingEnabled)
+                {
+                    Debug.Log($"[對話除錯] 執行節點: {node.GetType().Name} (ID: {node.nodeId})");
+                }
+
                 TriggerOnEnterAndVariableChanges(node);
                 _activeNodeCoroutine = StartCoroutine(ProcessNodeCoroutine(node));
             }
@@ -226,12 +244,12 @@ namespace SG.Dialogue
             Advance(defaultNextId);
         }
 
-        public Coroutine ExecuteBranch(string startNodeId)
-        {
-            return StartCoroutine(ExecuteBranchCoroutine(startNodeId));
-        }
-
-        private IEnumerator ExecuteBranchCoroutine(string startNodeId)
+        /// <summary>
+        /// 獲取一個對話分支的協程迭代器。
+        /// </summary>
+        /// <param name="startNodeId">分支的起始節點 ID。</param>
+        /// <returns>用於執行分支的 IEnumerator。</returns>
+        public IEnumerator GetBranchEnumerator(string startNodeId)
         {
             string currentBranchNodeId = startNodeId;
             while (!string.IsNullOrEmpty(currentBranchNodeId))
@@ -248,6 +266,12 @@ namespace SG.Dialogue
                     Debug.Log($"[對話] 在分支中跳過已停用的節點：{currentBranchNodeId}");
                     currentBranchNodeId = node.GetNextNodeId();
                     continue;
+                }
+
+                // 打印除錯日誌
+                if (debugLoggingEnabled)
+                {
+                    Debug.Log($"[對話除錯] 執行分支節點: {node.GetType().Name} (ID: {node.nodeId})");
                 }
 
                 var instructionEnumerator = node.Process(this);
