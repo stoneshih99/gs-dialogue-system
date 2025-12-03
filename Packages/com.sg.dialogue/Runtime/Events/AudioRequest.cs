@@ -15,11 +15,11 @@ namespace SG.Dialogue.Events
         /// 要執行的音訊動作類型（例如：播放BGM、停止BGM、播放SFX）。
         /// </summary>
         public AudioActionType ActionType;
-        
+
         /// <summary>
-        /// 要播放的音訊片段 (AudioClip)。
+        /// 要播放的音訊名稱
         /// </summary>
-        public AudioClip Clip;
+        public string EventName;
         
         /// <summary>
         /// 是否循環播放（主要用於 BGM）。
@@ -32,9 +32,5 @@ namespace SG.Dialogue.Events
         /// </summary>
         public float FadeDuration;
 
-        public override string ToString()
-        {
-            return $"ActionType: {ActionType}, Clip: {Clip}, Loop: {Loop}, FadeDuration: {FadeDuration}";
-        }
     }
 }

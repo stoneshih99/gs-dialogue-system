@@ -972,7 +972,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf94155e119b34845b20305dcbc265a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Managers.GameEventManager
-  gameEventChannel: {fileID: 0}
+  gameEventChannel: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
   eventMappings: []
 --- !u!1 &2481929353084883359
 GameObject:
@@ -1477,7 +1477,7 @@ GameObject:
   - component: {fileID: 7957563912566741350}
   - component: {fileID: 553416336841010890}
   m_Layer: 0
-  m_Name: AudioManager
+  m_Name: AudioEventManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1510,10 +1510,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bc06a6fabac645bfb74d699bcf201e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Managers.DialogueAudioManager
-  audioEvent: {fileID: 0}
-  bgmSource: {fileID: 0}
-  sfxSource: {fileID: 0}
-  defaultBgmFadeDuration: 1
+  audioEventChannel: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
+  eventMappings: []
 --- !u!1 &5691339071422144150
 GameObject:
   m_ObjectHideFlags: 0
@@ -1949,8 +1947,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f08ca7393c1974b4189afd1ad7f1848a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueController
-  graph: {fileID: 11400000, guid: ed72f90c93d4148dc875003a1ec2d5be, type: 2}
-  globalState: {fileID: 11400000, guid: ce7a4b0ec1ce54657a0c39d8e38e9009, type: 2}
+  graph: {fileID: 11400000, guid: 78160a496220b467ab63b4defa7fc5ea, type: 2}
+  globalState: {fileID: 11400000, guid: 2bfdd96142ba041d99460b191a012257, type: 2}
+  debugLoggingEnabled: 1
   uiManager: {fileID: 2282023720654894417}
   visualManager: {fileID: 2990892720674022122}
   cameraController: {fileID: 0}

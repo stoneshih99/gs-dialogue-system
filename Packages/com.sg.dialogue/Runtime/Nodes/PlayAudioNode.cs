@@ -74,7 +74,6 @@ namespace SG.Dialogue.Nodes
         {
             // 清除 AudioEvent 和 AudioClip 的引用
             AudioEvent = null;
-            request.Clip = null;
         }
     }
 }

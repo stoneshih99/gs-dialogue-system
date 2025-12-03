@@ -1,5 +1,6 @@
 using LitMotion;
 using LitMotion.Extensions;
+using SG.Dialogue.Presentation;
 using UnityEngine;
 
 namespace SG.Dialogue.Animation
@@ -63,6 +64,13 @@ namespace SG.Dialogue.Animation
                     break;
                 
                 case MotionTargetProperty.Alpha:
+                    // 如果擁有 Presentation 元件，則綁定到 Presentation 的 Alpha
+                    // var presentation = GetComponent<IDialoguePortraitPresenter>();
+                    // if (presentation != null)
+                    // {
+                    //     var startAlpha = presentation
+                    //     break;
+                    // }
                     var canvasGroup = GetComponent<CanvasGroup>();
                     if (canvasGroup != null)
                     {

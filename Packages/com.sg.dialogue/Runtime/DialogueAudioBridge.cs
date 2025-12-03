@@ -49,31 +49,31 @@ namespace SG.Dialogue
         {
             // 根據請求的類型，呼叫您專案的音訊管理器的方法。
             // 以下是使用 AudioSource 的範例實作。
-            switch (request.ActionType)
-            {
-                case AudioActionType.PlayBGM:
-                    if (bgmSource != null)
-                    {
-                        bgmSource.clip = request.Clip;
-                        bgmSource.loop = request.Loop;
-                        bgmSource.Play();
-                        // 您可以在這裡添加淡入 (Fade In) 的邏輯
-                    }
-                    break;
-                case AudioActionType.StopBGM:
-                    if (bgmSource != null)
-                    {
-                        bgmSource.Stop();
-                        // 您可以在這裡添加淡出 (Fade Out) 的邏輯
-                    }
-                    break;
-                case AudioActionType.PlaySFX:
-                    if (sfxSource != null && request.Clip != null)
-                    {
-                        sfxSource.PlayOneShot(request.Clip);
-                    }
-                    break;
-            }
+            // switch (request.ActionType)
+            // {
+            //     case AudioActionType.PlayBGM:
+            //         if (bgmSource != null)
+            //         {
+            //             bgmSource.clip = request.Clip;
+            //             bgmSource.loop = request.Loop;
+            //             bgmSource.Play();
+            //             // 您可以在這裡添加淡入 (Fade In) 的邏輯
+            //         }
+            //         break;
+            //     case AudioActionType.StopBGM:
+            //         if (bgmSource != null)
+            //         {
+            //             bgmSource.Stop();
+            //             // 您可以在這裡添加淡出 (Fade Out) 的邏輯
+            //         }
+            //         break;
+            //     case AudioActionType.PlaySFX:
+            //         if (sfxSource != null && request.Clip != null)
+            //         {
+            //             sfxSource.PlayOneShot(request.Clip);
+            //         }
+            //         break;
+            // }
         }
     }
 }

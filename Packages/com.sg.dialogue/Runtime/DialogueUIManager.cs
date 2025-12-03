@@ -373,7 +373,8 @@ namespace SG.Dialogue.UI
                 var request = new AudioRequest
                 {
                     ActionType = AudioActionType.PlaySFX,
-                    Clip = typewriterSfx
+                    EventName = typewriterSfx.name
+                    // Clip = typewriterSfx
                 };
                 typewriterAudioEvent.Raise(request);
             }

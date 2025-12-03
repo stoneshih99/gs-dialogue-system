@@ -84,6 +84,7 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
     - rid: 1643815601279336708
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -112,7 +113,6 @@ MonoBehaviour:
           expression: 
           scaleX: 1
         ClearAllOnExit: 0
-        OverrideDuration: 0
         Duration: 0.3
     - rid: 1643815601279336709
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -137,6 +137,7 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
     - rid: 1643815601279336711
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -160,6 +161,7 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
     - rid: 1643815601279336716
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -188,7 +190,6 @@ MonoBehaviour:
           expression: 
           scaleX: 1
         ClearAllOnExit: 0
-        OverrideDuration: 0
         Duration: 0.3
     - rid: 1643815601279336742
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -218,7 +219,6 @@ MonoBehaviour:
           expression: 
           scaleX: 1
         ClearAllOnExit: 0
-        OverrideDuration: 0
         Duration: 0.3
     - rid: 1643815601279336747
       type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -252,6 +252,7 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
     - rid: 1643815607100244167
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -275,3 +276,4 @@ MonoBehaviour:
             m_Calls: []
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3

@@ -6,7 +6,7 @@ namespace SG.Dialogue.Presentation
 {
     /// <summary>
     /// IDialoguePortraitPresenter 是一個對話立繪呈現器的介面。
-    /// 它定義了顯示和隱藏不同類型立繪（例如 Sprite、Spine）以及播放動畫的標準方法。
+    /// 它定義了顯示和隱藏不同類型立繪（例如 Sprite、Spine、Live2D）以及播放動畫的標準方法。
     /// 這允許 DialogueVisualManager 以統一的方式與不同類型的立繪呈現器互動。
     /// </summary>
     public interface IDialoguePortraitPresenter

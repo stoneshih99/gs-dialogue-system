@@ -8,8 +8,14 @@ using UnityEngine.UI;
 
 namespace SG.Dialogue.Presentation
 {
+    /// <summary>
+    /// 管理對話中的視覺元素，包括角色肖像、背景和動畫。
+    /// </summary>
     public class DialogueVisualManager : MonoBehaviour
     {
+        /// <summary>
+        /// 保存角色實例及其狀態的內部類別。
+        /// </summary>
         private class CharacterState
         {
             public GameObject Instance { get; }
@@ -25,20 +31,29 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        [Header("Character Stages")]
+        [Header("角色舞台")]
         [SerializeField] private Transform leftPortraitStage;
         [SerializeField] private Transform centerPortraitStage;
         [SerializeField] private Transform rightPortraitStage;
 
-        [Header("Character Settings")]
+        [Header("角色設定")]
         [SerializeField] private float portraitFadeDuration = 0.2f;
 
-        [Header("Background")]
+        [Header("背景")]
         [SerializeField] private List<Image> backgroundImages;
         [SerializeField] private float backgroundFadeDuration = 0.3f;
 
+        /// <summary>
+        /// 角色位置到舞台 Transform 的查找表。
+        /// </summary>
         private readonly Dictionary<CharacterPosition, Transform> _stageLookup = new();
+        /// <summary>
+        /// 當前活躍角色的狀態字典。 
+        /// </summary>
         private readonly Dictionary<CharacterPosition, CharacterState> _activeCharacters = new();
+        /// <summary>
+        /// 背景淡入淡出協程列表。 
+        /// </summary>
         private readonly List<Coroutine> _backgroundFadeRoutines = new List<Coroutine>();
 
         private void Awake()
@@ -50,11 +65,19 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 根據文本節點更新視覺效果，主要是設定角色高光。
+        /// </summary>
+        /// <param name="node">當前的文本節點。</param>
         public void UpdateFromTextNode(TextNode node)
         {
             SetCharacterHighlights(node.speakerName);
         }
 
+        /// <summary>
+        /// 播放動畫節點中定義的動畫。
+        /// </summary>
+        /// <param name="node">包含動畫數據的節點。</param>
         public IEnumerator PlayAnimations(AnimationNode node)
         {
             if (node.motions == null || node.motions.Count == 0)
@@ -84,6 +107,10 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 根據角色動作節點更新場景，處理角色的進入和退出。
+        /// </summary>
+        /// <param name="node">包含角色動作指令的節點。</param>
         public IEnumerator UpdateFromCharacterActionNode(CharacterActionNode node)
         {
             // float duration = node.OverrideDuration ? node.Duration : portraitFadeDuration;
@@ -103,6 +130,10 @@ namespace SG.Dialogue.Presentation
             if (duration > 0) yield return new WaitForSeconds(duration);
         }
 
+        /// <summary>
+        /// 根據設定背景節點更新背景圖片。
+        /// </summary>
+        /// <param name="node">包含背景設定資訊的節點。</param>
         public IEnumerator UpdateFromSetBackgroundNode(SetBackgroundNode node)
         {
             float bgFadeTime = node.overrideBackgroundFade ? node.backgroundFadeOverride : backgroundFadeDuration;
@@ -119,6 +150,10 @@ namespace SG.Dialogue.Presentation
             yield return UpdateBackground(layerIndex, node.backgroundSprite, node.clearBackground, bgFadeTime);
         }
 
+        /// <summary>
+        /// 執行閃爍效果。
+        /// </summary>
+        /// <param name="node">包含閃爍效果參數的節點。</param>
         public IEnumerator ExecuteFlickerEffect(FlickerEffectNode node)
         {
             if (node.target == FlickerEffectNode.TargetType.Background)
@@ -137,6 +172,9 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 處理角色的進入動作。
+        /// </summary>
         private void ProcessEnterAction(CharacterActionNode node, float duration)
         {
             if (_activeCharacters.TryGetValue(node.TargetPosition, out var existingState))
@@ -150,6 +188,9 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 實例化一個新的角色肖像。
+        /// </summary>
         private void InstantiateNewCharacter(CharacterActionNode node, float duration)
         {
             if (!_stageLookup.TryGetValue(node.TargetPosition, out var stage) || stage == null) return;
@@ -195,6 +236,9 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 更新已存在的角色肖像。
+        /// </summary>
         private void UpdateExistingCharacter(CharacterState existingState, CharacterActionNode node)
         {
             if (node.portraitRenderMode == PortraitRenderMode.Spine)
@@ -209,6 +253,10 @@ namespace SG.Dialogue.Presentation
             }
         }
         
+        /// <summary>
+        /// 根據當前說話者設定角色的高光狀態。
+        /// </summary>
+        /// <param name="currentSpeakerName">當前說話者的名字。</param>
         private void SetCharacterHighlights(string currentSpeakerName)
         {
             bool hasSpeaker = !string.IsNullOrEmpty(currentSpeakerName);
@@ -228,6 +276,11 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 清除指定位置的角色。
+        /// </summary>
+        /// <param name="position">要清除的角色位置。</param>
+        /// <param name="duration">淡出持續時間。</param>
         private void ClearCharacterAt(CharacterPosition position, float duration)
         {
             if (_activeCharacters.TryGetValue(position, out var activeCharacter))
@@ -237,12 +290,19 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// 清除所有角色。
+        /// </summary>
+        /// <param name="duration">淡出持續時間。</param>
         private void ClearAllCharacters(float duration)
         {
             var positions = new List<CharacterPosition>(_activeCharacters.Keys);
             foreach (var position in positions) ClearCharacterAt(position, duration);
         }
 
+        /// <summary>
+        /// 對角色進行淡入或淡出。
+        /// </summary>
         private Coroutine FadeCharacter(CharacterState character, bool fadeIn, float duration, bool destroyOnComplete)
         {
             if (character.FadeRoutine != null) StopCoroutine(character.FadeRoutine);
@@ -254,6 +314,9 @@ namespace SG.Dialogue.Presentation
             return newRoutine;
         }
 
+        /// <summary>
+        /// CanvasGroup 的淡入淡出協程。
+        /// </summary>
         private IEnumerator FadeRoutine(CanvasGroup cg, float targetAlpha, float duration, GameObject destroyTarget)
         {
             if (cg == null) { if(destroyTarget != null) Destroy(destroyTarget); yield break; }
@@ -273,6 +336,9 @@ namespace SG.Dialogue.Presentation
             if (destroyTarget != null && Mathf.Approximately(targetAlpha, 0f)) Destroy(destroyTarget);
         }
         
+        /// <summary>
+        /// 更新背景圖片。
+        /// </summary>
         private IEnumerator UpdateBackground(int layerIndex, Sprite sprite, bool clear, float duration)
         {
             if (layerIndex < 0 || layerIndex >= backgroundImages.Count || backgroundImages[layerIndex] == null) yield break;
@@ -292,6 +358,9 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        /// <summary>
+        /// Image 的淡入淡出協程。
+        /// </summary>
         private IEnumerator FadeImageRoutine(Image image, Sprite targetSprite, bool enable, float duration)
         {
             if (image == null) yield break;
@@ -327,6 +396,9 @@ namespace SG.Dialogue.Presentation
             if (!enable || targetSprite == null) image.enabled = false;
         }
         
+        /// <summary>
+        /// 對 Image 執行閃爍效果。
+        /// </summary>
         private IEnumerator FlickerImage(Image image, float duration, float frequency, float minAlpha)
         {
             if (image == null) yield break;
@@ -335,6 +407,9 @@ namespace SG.Dialogue.Presentation
             yield return FlickerCanvasGroup(cg, duration, frequency, minAlpha);
         }
 
+        /// <summary>
+        /// 對 CanvasGroup 執行閃爍效果。
+        /// </summary>
         private IEnumerator FlickerCanvasGroup(CanvasGroup cg, float duration, float frequency, float minAlpha)
         {
             if (cg == null) yield break;
@@ -350,6 +425,9 @@ namespace SG.Dialogue.Presentation
             cg.alpha = originalAlpha;
         }
 
+        /// <summary>
+        /// 建立角色舞台位置的查找表。
+        /// </summary>
         private void BuildStageLookup()
         {
             _stageLookup.Clear();
