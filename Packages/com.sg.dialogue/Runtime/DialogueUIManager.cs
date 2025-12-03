@@ -194,14 +194,18 @@ namespace SG.Dialogue.UI
                 }
                 else
                 {
-                    CompleteTyping();
+                    // Typewriter disabled. Show everything.
+                    if (bodyLabel != null) bodyLabel.maxVisibleCharacters = int.MaxValue;
+                    _isTyping = false;
+                    TriggerRemainingCues();
+                    OnTypingCompleted?.Invoke();
                 }
             }
             else
             {
                 if (bodyLabel != null) bodyLabel.text = text;
                 _isTyping = false;
-                TriggerRemainingCues(text?.Length ?? 0);
+                TriggerRemainingCues();
                 OnTypingCompleted?.Invoke();
             }
 
@@ -267,7 +271,7 @@ namespace SG.Dialogue.UI
             if (bodyLabel != null)
             {
                 bodyLabel.maxVisibleCharacters = int.MaxValue;
-                TriggerRemainingCues(bodyLabel.textInfo.characterCount);
+                TriggerRemainingCues();
             }
             OnTypingCompleted?.Invoke();
         }
@@ -336,7 +340,7 @@ namespace SG.Dialogue.UI
 
             _isTyping = false;
             _typingRoutine = null;
-            TriggerRemainingCues(_visibleCharIndex);
+            TriggerRemainingCues();
             OnTypingCompleted?.Invoke();
         }
 
@@ -397,14 +401,12 @@ namespace SG.Dialogue.UI
         /// <summary>
         /// 觸發所有剩餘的提示點。
         /// </summary>
-        /// <param name="totalLength">文本總長度。</param>
-        private void TriggerRemainingCues(int totalLength)
+        private void TriggerRemainingCues()
         {
             if (_currentCues == null) return;
             while (_nextCueIndex < _currentCues.Count)
             {
-                var cue = _currentCues[_nextCueIndex];
-                if (cue?.onTrigger != null && cue.charIndex < totalLength) cue.onTrigger.Invoke();
+                _currentCues[_nextCueIndex]?.onTrigger?.Invoke();
                 _nextCueIndex++;
             }
         }

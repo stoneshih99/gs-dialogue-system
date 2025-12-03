@@ -17,8 +17,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 {
     public class TextNodeElement : DialogueNodeElement
     {
-        private const int MaxWidth = 350;
-        
         public Port OutputPort { get; private set; }
         public Port InterruptPort { get; private set; }
 

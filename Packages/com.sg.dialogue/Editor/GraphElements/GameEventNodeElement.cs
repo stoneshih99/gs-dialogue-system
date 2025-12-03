@@ -30,6 +30,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 var requestProp = nodeProperty.FindPropertyRelative("request");
 
                 var eventField = new PropertyField(eventProp);
+                eventField.style.width = MaxWidth;
                 eventField.Bind(nodeProperty.serializedObject);
                 mainContainer.Add(eventField);
 

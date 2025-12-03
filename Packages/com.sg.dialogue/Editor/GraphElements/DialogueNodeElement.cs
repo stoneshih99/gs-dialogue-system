@@ -12,6 +12,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
 {
     public abstract class DialogueNodeElement : Node
     {
+        protected const int MaxWidth = 250;
         public string NodeId { get; private set; }
         public Port InputPort { get; protected set; }
         public Action OnDelete;

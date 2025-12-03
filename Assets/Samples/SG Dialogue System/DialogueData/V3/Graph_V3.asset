@@ -47,15 +47,15 @@ MonoBehaviour:
   - nodeId: CAM_1
     position: {x: -113.5, y: 437}
   - nodeId: PARALLEL_1
-    position: {x: -414.5, y: 231}
+    position: {x: -626, y: 231}
   - nodeId: Anim_1
     position: {x: 533.5, y: 408}
   - nodeId: TEXT_2
-    position: {x: -227.5, y: 231}
+    position: {x: -441.5, y: 231}
   - nodeId: TEXT_3
     position: {x: 301.5, y: 231}
   - nodeId: CharAct_2
-    position: {x: -762.5, y: 231}
+    position: {x: -916.5, y: 231}
   - nodeId: LOG_1
     position: {x: -456.5, y: 444}
   - nodeId: LOG_2
@@ -183,7 +183,7 @@ MonoBehaviour:
         IsEnabled: 1
         AudioEvent: {fileID: 0}
         speakerName: NPC
-        text: "\u5230\u53F0\u7063"
+        text: "\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063"
         nextNodeId: CharAct_3
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}

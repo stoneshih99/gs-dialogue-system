@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,54 +10,91 @@ namespace SG.Dialogue.Core.Instructions
     /// </summary>
     public class WaitForAll : CustomYieldInstruction
     {
-        private List<IEnumerator> _enumerators;
-        private MonoBehaviour _runner;
+        private readonly List<IEnumerator> _enumerators;
+        private readonly MonoBehaviour _runner;
+        private readonly List<Coroutine> _coroutines = new List<Coroutine>();
         private int _completedCount = 0;
-
+        private bool _forceCompleted = false;
+        
         /// <summary>
-        /// 構造函數。
+        /// 當所有協程完成時觸發的事件。 
         /// </summary>
-        /// <param name="runner">用於啟動子協程的 MonoBehaviour 實例。</param>
-        /// <param name="enumerators">要等待完成的協程迭代器列表。</param>
+        public event Action OnComplete;
+
         public WaitForAll(MonoBehaviour runner, List<IEnumerator> enumerators)
         {
             if (runner == null)
             {
-                Debug.LogError("WaitForAll: MonoBehaviour runner 不能為空。");
+                Debug.LogError("WaitForAll: MonoBehaviour runner cannot be null.");
                 return;
             }
             if (enumerators == null)
             {
-                Debug.LogError("WaitForAll: 協程迭代器列表不能為空。");
+                Debug.LogError("WaitForAll: Coroutine enumerator list cannot be null.");
                 return;
             }
 
             _runner = runner;
             _enumerators = enumerators;
-            _completedCount = 0;
 
-            foreach (var enumerator in _enumerators)
+            if (_enumerators.Count == 0)
             {
-                if (enumerator != null)
+                _completedCount = 0;
+            }
+            else
+            {
+                foreach (var enumerator in _enumerators)
                 {
-                    _runner.StartCoroutine(WrapCoroutine(enumerator));
-                }
-                else
-                {
-                    _completedCount++; // 如果有空的迭代器，直接計為完成
+                    if (enumerator != null)
+                    {
+                        _coroutines.Add(_runner.StartCoroutine(WrapCoroutine(enumerator)));
+                    }
+                    else
+                    {
+                        _completedCount++;
+                    }
                 }
             }
         }
 
         private IEnumerator WrapCoroutine(IEnumerator enumerator)
         {
-            yield return enumerator; // 等待這個子協程完成
-            _completedCount++; // 完成後計數
+            yield return enumerator;
+            HandleCompletion();
+        }
+
+        private void HandleCompletion()
+        {
+            if (_forceCompleted) return;
+            _completedCount++;
+            if (_completedCount >= _enumerators.Count)
+            {
+                OnComplete?.Invoke();
+            }
         }
 
         /// <summary>
-        /// 當所有子協程都完成時，keepWaiting 為 false。
+        /// 強制將所有協程標記為完成，並停止它們的執行。 
         /// </summary>
-        public override bool keepWaiting => _completedCount < _enumerators.Count;
+        public void ForceComplete()
+        {
+            if (_forceCompleted) return;
+            _forceCompleted = true;
+
+            foreach (var coroutine in _coroutines)
+            {
+                if (coroutine != null)
+                {
+                    _runner.StopCoroutine(coroutine);
+                }
+            }
+            _completedCount = _enumerators.Count;
+            OnComplete?.Invoke();
+        }
+
+        /// <summary>
+        /// 指示是否仍在等待所有協程完成。 
+        /// </summary>
+        public override bool keepWaiting => !_forceCompleted && _completedCount < _enumerators.Count;
     }
 }
