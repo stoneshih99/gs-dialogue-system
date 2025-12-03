@@ -41,7 +41,7 @@ namespace SG.Dialogue.Presentation
 
         [Header("背景")]
         [SerializeField] private List<Image> backgroundImages;
-        [SerializeField] private float backgroundFadeDuration = 0.3f;
+        // [SerializeField] private float backgroundFadeDuration = 0.3f;
 
         /// <summary>
         /// 角色位置到舞台 Transform 的查找表。
@@ -136,9 +136,9 @@ namespace SG.Dialogue.Presentation
         /// <param name="node">包含背景設定資訊的節點。</param>
         public IEnumerator UpdateFromSetBackgroundNode(SetBackgroundNode node)
         {
-            float bgFadeTime = node.overrideBackgroundFade ? node.backgroundFadeOverride : backgroundFadeDuration;
-            int layerIndex = 0;
-
+            float bgFadeTime = node.backgroundFadeOverride;
+            // int layerIndex = 0;
+            var layerIndex = node.spriteIndex;
             if (node.useBlackScreen && backgroundImages.Count > layerIndex && backgroundImages[layerIndex] != null)
             {
                 if (_backgroundFadeRoutines[layerIndex] != null) StopCoroutine(_backgroundFadeRoutines[layerIndex]);
@@ -343,6 +343,10 @@ namespace SG.Dialogue.Presentation
         {
             if (layerIndex < 0 || layerIndex >= backgroundImages.Count || backgroundImages[layerIndex] == null) yield break;
             Image targetImage = backgroundImages[layerIndex];
+            if (!targetImage.gameObject.activeSelf)
+            {
+                targetImage.gameObject.SetActive(true);
+            }
             if (layerIndex < _backgroundFadeRoutines.Count && _backgroundFadeRoutines[layerIndex] != null) StopCoroutine(_backgroundFadeRoutines[layerIndex]);
             if (clear)
             {

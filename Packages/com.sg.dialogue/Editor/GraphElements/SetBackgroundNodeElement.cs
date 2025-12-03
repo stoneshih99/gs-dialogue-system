@@ -20,9 +20,39 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             _data = data;
             title = "Set Background";
 
+           var bgIndexField = new IntegerField("Sprite Index") { value = _data.spriteIndex };
+            bgIndexField.RegisterValueChangedCallback(e =>
+            {
+                int clamped = Mathf.Clamp(e.newValue, 0, 2);
+                _data.spriteIndex = clamped;
+                bgIndexField.SetValueWithoutNotify(clamped);
+                onChanged?.Invoke();
+            });
+            mainContainer.Add(bgIndexField);
+            
             var bgField = new ObjectField("Background") { objectType = typeof(Sprite), allowSceneObjects = false, value = _data.backgroundSprite };
-            bgField.RegisterValueChangedCallback(e => { _data.backgroundSprite = e.newValue as Sprite; onChanged?.Invoke(); });
+            bgField.RegisterValueChangedCallback(e =>
+            {
+                _data.backgroundSprite = e.newValue as Sprite; onChanged?.Invoke();
+            });
             mainContainer.Add(bgField);
+            
+            // 依據當前指定的 spriteIndex 取得對應的 Sprite，並顯示預覽
+            var spritePreview = new Image();
+            void UpdateSpritePreview()
+            {
+                Sprite sprite = null;
+                if (_data.backgroundSprite != null)
+                {
+                    sprite = _data.backgroundSprite;
+                }
+                spritePreview.sprite = sprite;
+                spritePreview.style.width = 60;
+                spritePreview.style.height = 60;
+                spritePreview.style.unityBackgroundImageTintColor = Color.white;
+            }
+            UpdateSpritePreview();
+            mainContainer.Add(spritePreview);
 
             var clearBgToggle = new Toggle("Clear Before") { value = _data.clearBackground };
             clearBgToggle.RegisterValueChangedCallback(e => { _data.clearBackground = e.newValue; onChanged?.Invoke(); });
@@ -33,24 +63,24 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             var blackScreenToggle = new Toggle("Use Black Screen") { value = _data.useBlackScreen };
             var blackDurationField = new FloatField("Black Duration") { value = _data.blackScreenDuration };
             
-            var overrideBgToggle = new Toggle("Override BG Fade") { value = _data.overrideBackgroundFade };
+            // var overrideBgToggle = new Toggle("Override BG Fade") { value = _data.overrideBackgroundFade };
             var bgFadeField = new FloatField("BG Fade Time") { value = _data.backgroundFadeOverride };
 
             void UpdateVisibility()
             {
                 blackDurationField.style.display = _data.useBlackScreen ? DisplayStyle.Flex : DisplayStyle.None;
-                bgFadeField.style.display = _data.overrideBackgroundFade ? DisplayStyle.Flex : DisplayStyle.None;
+                // bgFadeField.style.display = _data.overrideBackgroundFade ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             blackScreenToggle.RegisterValueChangedCallback(e => { _data.useBlackScreen = e.newValue; UpdateVisibility(); onChanged?.Invoke(); });
             blackDurationField.RegisterValueChangedCallback(e => { _data.blackScreenDuration = Mathf.Max(0f, e.newValue); onChanged?.Invoke(); });
             
-            overrideBgToggle.RegisterValueChangedCallback(e => { _data.overrideBackgroundFade = e.newValue; UpdateVisibility(); onChanged?.Invoke(); });
+            // overrideBgToggle.RegisterValueChangedCallback(e => { _data.overrideBackgroundFade = e.newValue; UpdateVisibility(); onChanged?.Invoke(); });
             bgFadeField.RegisterValueChangedCallback(e => { _data.backgroundFadeOverride = Mathf.Max(0f, e.newValue); onChanged?.Invoke(); });
 
             fadeFold.Add(blackScreenToggle);
             fadeFold.Add(blackDurationField);
-            fadeFold.Add(overrideBgToggle);
+            // fadeFold.Add(overrideBgToggle);
             fadeFold.Add(bgFadeField);
             mainContainer.Add(fadeFold);
 

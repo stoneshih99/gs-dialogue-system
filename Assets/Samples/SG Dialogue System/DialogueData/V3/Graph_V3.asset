@@ -79,7 +79,7 @@ MonoBehaviour:
   - nodeId: EVENT_2
     position: {x: 318.5, y: 698}
   - nodeId: SetBG_1
-    position: {x: -1163, y: 231}
+    position: {x: -1185, y: 247.5}
   - nodeId: SetBG_2
     position: {x: 579, y: 231}
   references:
@@ -430,10 +430,10 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: CharAct_2
         backgroundSprite: {fileID: -17047998526634394, guid: 2818376cd865444b5ba976a2efa8c6a0, type: 3}
+        spriteIndex: 0
         clearBackground: 0
         useBlackScreen: 0
         blackScreenDuration: 1
-        overrideBackgroundFade: 0
         backgroundFadeOverride: 0.3
     - rid: 736264946891620429
       type: {class: SetBackgroundNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -442,8 +442,8 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: SEQ_1
         backgroundSprite: {fileID: 1871320442809445088, guid: bcd837c602c674d1cb5e1c7d70373e0a, type: 3}
+        spriteIndex: 1
         clearBackground: 0
         useBlackScreen: 0
         blackScreenDuration: 1
-        overrideBackgroundFade: 0
         backgroundFadeOverride: 0.3
