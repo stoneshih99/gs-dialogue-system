@@ -12,11 +12,11 @@ public class GameRequestDrawer : PropertyDrawer
         // 創建一個根容器
         var container = new VisualElement();
 
-        // 為每個子屬性創建帶有標籤的 PropertyField
-        var eventField = new PropertyField(property.FindPropertyRelative("EventName"), "Event Name");
-        
-        // 將子屬性欄位加入到容器中
-        container.Add(eventField);
+        // // 為每個子屬性創建帶有標籤的 PropertyField
+        // var eventField = new PropertyField(property.FindPropertyRelative("EventName"), "Event Name");
+        //
+        // // 將子屬性欄位加入到容器中
+        // container.Add(eventField);
         
         return container;
         

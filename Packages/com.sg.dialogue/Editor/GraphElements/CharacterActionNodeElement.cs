@@ -10,7 +10,10 @@ using UnityEngine.UIElements;
 
 namespace SG.Dialogue.Editor.Editor.GraphElements
 {
-    public class CharacterActionNodeElement : DialogueNodeElement
+    /// <summary>
+    /// CharacterActionNodeElement 是 CharacterActionNode 的視覺化表示，用於在 GraphView 中顯示和編輯角色動作節點。
+    /// </summary>
+    public sealed class CharacterActionNodeElement : DialogueNodeElement
     {
         public Port OutputPort { get; private set; }
         public override DialogueNodeBase NodeData => _data;

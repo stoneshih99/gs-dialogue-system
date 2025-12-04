@@ -52,7 +52,7 @@ MonoBehaviour:
   - nodeId: TEXT_2
     position: {x: -441.5, y: 231}
   - nodeId: CharAct_2
-    position: {x: -1126.5, y: 231}
+    position: {x: -1127.5, y: 231}
   - nodeId: LOG_1
     position: {x: -456.5, y: 444}
   - nodeId: LOG_2
@@ -207,7 +207,7 @@ MonoBehaviour:
         nextNodeId: PARALLEL_1
         ActionType: 0
         TargetPosition: 0
-        portraitRenderMode: 4
+        portraitRenderMode: 2
         speakerName: NPC
         characterSprite: {fileID: 0}
         spinePortraitConfig:
@@ -227,7 +227,7 @@ MonoBehaviour:
           expression: 
           scaleX: 1
         spriteSheetPresenter: {fileID: 8288865117904589972, guid: 4040c057d6ac54abfa699f6723d085da, type: 3}
-        spriteSheetAnimationName: idle
+        spriteSheetAnimationName: attack
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 736264920620073067

@@ -12,5 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bef1fa5a43d2e43e5b887a7a9dd5916c, type: 3}
   m_Name: FishAttack
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Presentation.SpriteSheetStateConfig
-  animationName: default
-  frames: []
+  animationName: attack
+  frames:
+  - {fileID: 204257534, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 2051986760, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 1307658754, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: -1315543755, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 62905243, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 1621223555, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 121678472, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 213880044, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
