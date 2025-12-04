@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bef1fa5a43d2e43e5b887a7a9dd5916c, type: 3}
+  m_Name: FishIdle
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Presentation.SpriteSheetPortraitConfig
+  animationName: idle
+  frames:
+  - {fileID: -6526082524257928245, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 1179442780, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 74441094, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: -1894658934, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: -590029935, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 2061904732, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 1185274217, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: -1039550633, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: 1856314646, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: -600470983, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  - {fileID: -806605876, guid: ab094e228ea1c49d3a4e504ea41d9a67, type: 3}
+  fps: 60
+  loop: 1

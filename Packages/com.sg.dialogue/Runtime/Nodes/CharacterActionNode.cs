@@ -41,6 +41,12 @@ namespace SG.Dialogue.Nodes
         [Tooltip("Live2D 立繪的設定。僅在 Live2D 模式下有效。")]
         public Live2DPortraitConfig live2DPortraitConfig;
 
+        [Tooltip("Sprite Sheet 立繪的設定。僅在 Sprite Sheet 模式下有效。")]
+        public GameObject spriteSheetPresenter;
+        
+        [Tooltip("要播放的 Sprite Sheet 動畫名稱。僅在 Sprite Sheet 模式下有效。")]
+        public string spriteSheetAnimationName;
+
         [Header("Action Settings")]
         [Tooltip("是否在退場時清除所有角色，而不僅僅是目標位置的角色。僅在退場時有效。")]
         public bool ClearAllOnExit;

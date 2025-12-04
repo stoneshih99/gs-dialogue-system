@@ -34,11 +34,19 @@ namespace SG.Dialogue.Presentation
 
         public void ShowSprite(Sprite sprite, float fadeDuration)
         {
+            Debug.LogWarning("Live2DDialoguePortraitPresenter does not support Sprites. Hiding portrait.");
             HideImmediate();
         }
 
         public void ShowSpine(SpinePortraitConfig config, float fadeDuration)
         {
+            Debug.LogWarning("Live2DDialoguePortraitPresenter does not support Spine. Hiding portrait.");
+            HideImmediate();
+        }
+
+        public void ShowSpriteSheet(string animationName, float fadeDuration)
+        {
+            Debug.LogWarning("Live2DDialoguePortraitPresenter does not support Sprite Sheets. Hiding portrait.");
             HideImmediate();
         }
 

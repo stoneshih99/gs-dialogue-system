@@ -23,6 +23,10 @@ namespace SG.Dialogue.Enums
         /// <summary>
         /// 使用 Live2D 模型作為立繪。
         /// </summary>
-        Live2D = 3
+        Live2D = 3,
+        /// <summary>
+        /// 使用 Sprite Sheet 動畫作為立繪。
+        /// </summary>
+        SpriteSheet = 4
     }
 }

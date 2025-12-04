@@ -221,6 +221,12 @@ namespace SG.Dialogue.Presentation
                     if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, duration);
                     presenter = live2DPresenter;
                     break;
+                case PortraitRenderMode.SpriteSheet:
+                    characterInstance = Instantiate(node.spriteSheetPresenter);
+                    var spriteSheetPresenter = characterInstance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
+                    if(spriteSheetPresenter != null) spriteSheetPresenter.ShowSpriteSheet(node.spriteSheetAnimationName, duration);
+                    presenter = spriteSheetPresenter;
+                    break;
             }
 
             if (characterInstance != null && presenter != null)
@@ -250,6 +256,11 @@ namespace SG.Dialogue.Presentation
             {
                 var live2DPresenter = existingState.Instance.GetComponent<Live2DDialoguePortraitPresenter>();
                 if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
+            }
+            else if (node.portraitRenderMode == PortraitRenderMode.SpriteSheet)
+            {
+                var spriteSheetPresenter = existingState.Instance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
+                if (spriteSheetPresenter != null) spriteSheetPresenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
             }
         }
         

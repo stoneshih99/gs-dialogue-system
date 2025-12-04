@@ -56,6 +56,18 @@ namespace SG.Dialogue.Presentation
         /// <param name="fadeDuration">淡入持續時間（秒）。</param>
         public void ShowSpine(SpinePortraitConfig config, float fadeDuration)
         {
+            Debug.LogWarning("ImageDialoguePortraitPresenter does not support Spine. Hiding portrait.");
+            HideImmediate();
+        }
+
+        /// <summary>
+        /// 此呈現器不支援 Sprite Sheet 動畫，因此呼叫此方法會立即隱藏立繪。
+        /// </summary>
+        /// <param name="animationName">動畫名稱。</param>
+        /// <param name="fadeDuration">淡入持續時間（秒）。</param>
+        public void ShowSpriteSheet(string animationName, float fadeDuration)
+        {
+            Debug.LogWarning("ImageDialoguePortraitPresenter does not support Sprite Sheets. Hiding portrait.");
             HideImmediate();
         }
 

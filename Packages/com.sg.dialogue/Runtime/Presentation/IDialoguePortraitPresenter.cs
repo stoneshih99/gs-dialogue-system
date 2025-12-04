@@ -27,6 +27,14 @@ namespace SG.Dialogue.Presentation
         void ShowSpine(SpinePortraitConfig config, float fadeDuration);
 
         /// <summary>
+        /// 根據指定的淡入時間顯示一個 Sprite Sheet 動畫立繪。
+        /// 如果實現此介面的類別不支援 Sprite Sheet，可以忽略此方法。
+        /// </summary>
+        /// <param name="animationName">動畫名稱。</param>
+        /// <param name="fadeDuration">淡入持續時間（秒）。</param>
+        void ShowSpriteSheet(string animationName, float fadeDuration);
+
+        /// <summary>
         /// 根據指定的淡出時間隱藏當前顯示的立繪。
         /// </summary>
         /// <param name="fadeDuration">淡出持續時間（秒）。</param>

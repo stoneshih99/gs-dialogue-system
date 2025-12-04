@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using System;
-using SG.Dialogue.Animation;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Presentation;
@@ -21,7 +20,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         {
             _data = data;
             title = "Character Action";
-
+            
             var actionTypeField = new EnumField("Action", _data.ActionType);
             mainContainer.Add(actionTypeField);
             
@@ -58,15 +57,70 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             live2DConfigBox.Add(live2DExpressionField);
             mainContainer.Add(live2DConfigBox);
 
+            var spriteSheetConfigBox = new Foldout { text = "SpriteSheet Config", value = false };
+            
+          var spriteSheetConfigField = new ObjectField("Object")
+            {
+                objectType = typeof(GameObject),
+                allowSceneObjects = false,
+                value = _data.spriteSheetPresenter
+            };
+            spriteSheetConfigField.RegisterValueChangedCallback(e =>
+            {
+                _data.spriteSheetPresenter = e.newValue as GameObject;
+                onChanged?.Invoke();
+            });
+            
+            // 播放動名稱
+            var spriteSheetAnimationField = new TextField("Animation Name")
+            {
+                value = _data.spriteSheetAnimationName
+            };
+            spriteSheetAnimationField.RegisterValueChangedCallback(e =>
+            {
+                _data.spriteSheetAnimationName = e.newValue;
+                onChanged?.Invoke();
+            });
+            
+            var fpsField = new IntegerField("FPS")
+            {
+                value = _data.spriteSheetPresenter != null ? _data.spriteSheetPresenter.GetComponent<SpriteSheetDialoguePortraitPresenter>().fps : 60
+            };
+            fpsField.RegisterValueChangedCallback(e =>
+            {
+                if (_data.spriteSheetPresenter != null)
+                {
+                    _data.spriteSheetPresenter.GetComponent<SpriteSheetDialoguePortraitPresenter>().fps = e.newValue;
+                    onChanged?.Invoke();
+                }
+            });
+            
+            var loopField = new Toggle("Loop")
+            {
+                value = _data.spriteSheetPresenter != null ? _data.spriteSheetPresenter.GetComponent<SpriteSheetDialoguePortraitPresenter>().loop : true
+            };
+            loopField.RegisterValueChangedCallback(e =>
+            {
+                if (_data.spriteSheetPresenter != null)
+                {
+                    _data.spriteSheetPresenter.GetComponent<SpriteSheetDialoguePortraitPresenter>().loop = e.newValue;
+                    onChanged?.Invoke();
+                }
+            });
+            
+            
+            spriteSheetConfigBox.Add(spriteSheetConfigField);
+            spriteSheetConfigBox.Add(spriteSheetAnimationField);
+            spriteSheetConfigBox.Add(fpsField);
+            spriteSheetConfigBox.Add(loopField);
+            mainContainer.Add(spriteSheetConfigBox);
+
             var clearAllField = new Toggle("Clear All On Exit") { value = _data.ClearAllOnExit };
             clearAllField.RegisterValueChangedCallback(e => { _data.ClearAllOnExit = e.newValue; onChanged?.Invoke(); });
             mainContainer.Add(clearAllField);
             
-            // var overrideToggle = new Toggle("Override Duration") { value = _data.OverrideDuration };
             var durationField = new FloatField("Duration") { value = _data.Duration };
-            // overrideToggle.RegisterValueChangedCallback(e => { _data.OverrideDuration = e.newValue; durationField.style.display = e.newValue ? DisplayStyle.Flex : DisplayStyle.None; onChanged?.Invoke(); });
             durationField.RegisterValueChangedCallback(e => { _data.Duration = Mathf.Max(0, e.newValue); onChanged?.Invoke(); });
-            // mainContainer.Add(overrideToggle);
             mainContainer.Add(durationField);
 
             void UpdateVisibility()
@@ -79,9 +133,9 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                 spriteField.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Sprite ? DisplayStyle.Flex : DisplayStyle.None;
                 spineConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Spine ? DisplayStyle.Flex : DisplayStyle.None;
                 live2DConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Live2D ? DisplayStyle.Flex : DisplayStyle.None;
+                spriteSheetConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.SpriteSheet ? DisplayStyle.Flex : DisplayStyle.None;
                 
                 durationField.style.display = _data.Duration > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-                // durationField.style.display = _data.OverrideDuration ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             actionTypeField.RegisterValueChangedCallback(e => { _data.ActionType = (CharacterActionType)e.newValue; UpdateVisibility(); onChanged?.Invoke(); });

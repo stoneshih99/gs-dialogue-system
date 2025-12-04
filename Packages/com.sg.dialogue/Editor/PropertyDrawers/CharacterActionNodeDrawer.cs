@@ -16,7 +16,6 @@ public class CharacterActionNodeDrawer : PropertyDrawer
         var actionTypeProp = property.FindPropertyRelative("ActionType");
         var targetPositionProp = property.FindPropertyRelative("TargetPosition");
         var clearAllOnExitProp = property.FindPropertyRelative("ClearAllOnExit");
-        var overrideDurationProp = property.FindPropertyRelative("OverrideDuration");
         var durationProp = property.FindPropertyRelative("Duration");
         var speakerNameProp = property.FindPropertyRelative("speakerName");
         var portraitRenderModeProp = property.FindPropertyRelative("portraitRenderMode");
@@ -24,6 +23,7 @@ public class CharacterActionNodeDrawer : PropertyDrawer
         var spinePortraitConfigProp = property.FindPropertyRelative("spinePortraitConfig");
         var live2DModelPrefabProp = property.FindPropertyRelative("live2DModelPrefab");
         var live2DPortraitConfigProp = property.FindPropertyRelative("live2DPortraitConfig");
+        var spriteSheetPortraitConfigProp = property.FindPropertyRelative("spriteSheetPortraitConfig");
 
         // 建立基礎 UI 元素
         var actionTypeField = new PropertyField(actionTypeProp);
@@ -44,14 +44,15 @@ public class CharacterActionNodeDrawer : PropertyDrawer
         var spineField = new PropertyField(spinePortraitConfigProp);
         var live2dPrefabField = new PropertyField(live2DModelPrefabProp);
         var live2dConfigField = new PropertyField(live2DPortraitConfigProp);
+        var spriteSheetField = new PropertyField(spriteSheetPortraitConfigProp);
         
         enterContainer.Add(spriteField);
         enterContainer.Add(spineField);
         enterContainer.Add(live2dPrefabField);
         enterContainer.Add(live2dConfigField);
+        enterContainer.Add(spriteSheetField);
 
         // --- 其他設定 ---
-        var overrideToggle = new PropertyField(overrideDurationProp);
         var durationField = new PropertyField(durationProp);
 
         // 將所有元素加入到主容器
@@ -59,7 +60,6 @@ public class CharacterActionNodeDrawer : PropertyDrawer
         container.Add(targetPositionField);
         container.Add(exitContainer);
         container.Add(enterContainer);
-        container.Add(overrideToggle);
         container.Add(durationField);
 
         // --- UI 更新邏輯 ---
@@ -74,19 +74,16 @@ public class CharacterActionNodeDrawer : PropertyDrawer
                 var renderMode = (PortraitRenderMode)portraitRenderModeProp.enumValueIndex;
                 spriteField.style.display = renderMode == PortraitRenderMode.Sprite ? DisplayStyle.Flex : DisplayStyle.None;
                 spineField.style.display = renderMode == PortraitRenderMode.Spine ? DisplayStyle.Flex : DisplayStyle.None;
-                
-                // Live2D 相關欄位一起顯示/隱藏
                 live2dPrefabField.style.display = renderMode == PortraitRenderMode.Live2D ? DisplayStyle.Flex : DisplayStyle.None;
                 live2dConfigField.style.display = renderMode == PortraitRenderMode.Live2D ? DisplayStyle.Flex : DisplayStyle.None;
+                spriteSheetField.style.display = renderMode == PortraitRenderMode.SpriteSheet ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
-            durationField.style.display = overrideDurationProp.boolValue ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         // 註冊回調
         actionTypeField.RegisterValueChangeCallback(evt => RefreshUI());
         portraitRenderModeField.RegisterValueChangeCallback(evt => RefreshUI());
-        overrideToggle.RegisterValueChangeCallback(evt => RefreshUI());
 
         // 初始刷新
         RefreshUI();

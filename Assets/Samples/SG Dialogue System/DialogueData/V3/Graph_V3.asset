@@ -12,13 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c0d229053405472caf5f5e715b9e2ff, type: 3}
   m_Name: Graph_V3
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
-  graphId: 
+  graphId: V3
   startNodeId: SetBG_1
   IsSkippable: 1
   AllNodes:
   - rid: 736264920620073050
   - rid: 736264920620073063
-  - rid: 736264920620073064
   - rid: 736264920620073066
   - rid: 736264920620073072
   - rid: 736264920620073073
@@ -47,15 +46,13 @@ MonoBehaviour:
   - nodeId: CAM_1
     position: {x: -113.5, y: 437}
   - nodeId: PARALLEL_1
-    position: {x: -626, y: 231}
+    position: {x: -636, y: 231}
   - nodeId: Anim_1
     position: {x: 533.5, y: 408}
   - nodeId: TEXT_2
     position: {x: -441.5, y: 231}
-  - nodeId: TEXT_3
-    position: {x: 301.5, y: 231}
   - nodeId: CharAct_2
-    position: {x: -916.5, y: 231}
+    position: {x: -1126.5, y: 231}
   - nodeId: LOG_1
     position: {x: -456.5, y: 444}
   - nodeId: LOG_2
@@ -79,9 +76,9 @@ MonoBehaviour:
   - nodeId: EVENT_2
     position: {x: 318.5, y: 698}
   - nodeId: SetBG_1
-    position: {x: -1185, y: 247.5}
+    position: {x: -1416, y: 231}
   - nodeId: SetBG_2
-    position: {x: 579, y: 231}
+    position: {x: 386, y: 241}
   references:
     version: 2
     RefIds:
@@ -134,6 +131,8 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
         ClearAllOnExit: 0
         Duration: 0.2
     - rid: 736264920620073054
@@ -200,30 +199,6 @@ MonoBehaviour:
         overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
         postTypingDelay: 0.3
-    - rid: 736264920620073064
-      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
-      data:
-        nodeId: TEXT_3
-        IsEnabled: 1
-        AudioEvent: {fileID: 0}
-        speakerName: NPC
-        text: "\u53F0\u7063\u6709\u500B\u963F\u91CC\u5C71"
-        nextNodeId: SetBG_2
-        IsInterruptible: 0
-        InterruptEvent: {fileID: 0}
-        InterruptNextNodeId: 
-        textKey: 
-        textCues: []
-        variableChanges: []
-        onEnter:
-          m_PersistentCalls:
-            m_Calls: []
-        onExit:
-          m_PersistentCalls:
-            m_Calls: []
-        overrideAutoAdvance: 0
-        autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 736264920620073066
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -232,7 +207,7 @@ MonoBehaviour:
         nextNodeId: PARALLEL_1
         ActionType: 0
         TargetPosition: 0
-        portraitRenderMode: 2
+        portraitRenderMode: 4
         speakerName: NPC
         characterSprite: {fileID: 0}
         spinePortraitConfig:
@@ -251,6 +226,8 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 8288865117904589972, guid: 4040c057d6ac54abfa699f6723d085da, type: 3}
+        spriteSheetAnimationName: idle
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 736264920620073067
@@ -274,7 +251,7 @@ MonoBehaviour:
       data:
         nodeId: CharAct_3
         IsEnabled: 1
-        nextNodeId: TEXT_3
+        nextNodeId: SetBG_2
         ActionType: 1
         TargetPosition: 0
         portraitRenderMode: 2
@@ -296,6 +273,8 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 736264920620073073
@@ -395,6 +374,8 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 736264920620073079
