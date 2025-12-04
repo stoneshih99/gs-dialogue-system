@@ -12,12 +12,37 @@ using UnityEngine.Events;
 
 namespace SG.Dialogue
 {
+    /// <summary>
+    /// 定義 DialogueController 應如何處理自動前進功能。
+    /// </summary>
+    public enum AutoAdvanceMode
+    {
+        /// <summary>
+        /// 使用在 DialogueGraph 資產中定義的設定。
+        /// </summary>
+        Default,
+        /// <summary>
+        /// 強制啟用自動前進，覆寫圖表設定。
+        /// </summary>
+        ForceEnable,
+        /// <summary>
+        /// 強制停用自動前進，覆寫圖表設定。
+        /// </summary>
+        ForceDisable
+    }
+
     [RequireComponent(typeof(DialogueUIManager), typeof(DialogueVisualManager))]
     public class DialogueController : MonoBehaviour
     {
         [Header("圖表與狀態")]
         [SerializeField] private DialogueGraph graph;
         [SerializeField] private DialogueStateAsset globalState;
+
+        [Header("流程控制覆寫")]
+        [Tooltip("覆寫對話圖的自動前進設定")]
+        public AutoAdvanceMode autoAdvanceOverride = AutoAdvanceMode.Default;
+        [Tooltip("當強制啟用自動前進時，使用的延遲時間")]
+        public float forcedAutoAdvanceDelay = 1.5f;
 
         [Header("除錯功能")]
         [SerializeField] private bool debugLoggingEnabled = false;
@@ -249,7 +274,7 @@ namespace SG.Dialogue
             Advance(defaultNextId);
         }
 
-        public IEnumerator GetBranchEnumerator(string startNodeId)
+        public IEnumerator GetBranchEnumerator(string startNodeId, Action onInputSwallowed)
         {
             string currentBranchNodeId = startNodeId;
             while (!string.IsNullOrEmpty(currentBranchNodeId))
@@ -281,6 +306,11 @@ namespace SG.Dialogue
                     {
                         Debug.LogWarning($"[Dialogue Debug] Node {node.GetType().Name} (ID: {node.nodeId}) tried to issue a global flow control instruction ({instruction.GetType().Name}), which is consumed in a parallel branch.");
                         yield break;
+                    }
+                    else if (instruction is WaitForUserInput)
+                    {
+                        onInputSwallowed?.Invoke();
+                        continue;
                     }
                     else if (instruction != null)
                     {
@@ -329,9 +359,9 @@ namespace SG.Dialogue
                 return;
             }
 
-            if (_lastNode is TextNode textNode)
+            if (_lastNode != null)
             {
-                Advance(textNode.nextNodeId);
+                Advance(_lastNode.GetNextNodeId());
             }
         }
 
@@ -346,8 +376,8 @@ namespace SG.Dialogue
         {
             if (_activeWaitForAll != null)
             {
-                // This logic might be redundant if ForceComplete is handled correctly.
-                // Consider if a branch should auto-advance or wait.
+                // 此處的邏輯可能在 ForceComplete 被正確處理後變得多餘。
+                // 需要考慮一個分支是應該自動前進還是等待。
             }
         }
 

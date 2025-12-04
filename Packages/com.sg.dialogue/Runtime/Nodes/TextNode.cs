@@ -56,7 +56,7 @@ namespace SG.Dialogue.Nodes
         [Tooltip("此節點的自動前進延遲時間（秒）。僅在『覆寫自動前進』為 true 時生效。")]
         public float autoAdvanceDelay = 1.2f;
         [Tooltip("打字機效果完成後，進入下一步驟（等待輸入或自動前進）前的額外延遲時間。")]
-        public float postTypingDelay = 0.3f; // 新增的延遲欄位
+        public float postTypingDelay = 0.3f;
 
         public override IEnumerator Process(DialogueController controller)
         {
@@ -71,23 +71,50 @@ namespace SG.Dialogue.Nodes
             
             controller.VisualManager.UpdateFromTextNode(displayNode); 
             
-            // 等待打字機效果完成
             yield return controller.UiManager.ShowText(displayNode, formattedText);
             
-            // 在打字機效果完成後，加入一個短暫的延遲
             if (postTypingDelay > 0)
             {
                 yield return new WaitForSeconds(postTypingDelay);
             }
             
-            // 根據自動前進設定決定等待方式
-            if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
+            bool advance = false;
+            float delay = 0f;
+
+            if (overrideAutoAdvance)
             {
-                float delay = overrideAutoAdvance ? autoAdvanceDelay : controller.AutoAdvanceDelay;
+                advance = true;
+                delay = autoAdvanceDelay;
+            }
+            else
+            {
+                switch (controller.autoAdvanceOverride)
+                {
+                    case AutoAdvanceMode.ForceEnable:
+                        advance = true;
+                        delay = controller.forcedAutoAdvanceDelay;
+                        break;
+                    case AutoAdvanceMode.ForceDisable:
+                        advance = false;
+                        break;
+                    case AutoAdvanceMode.Default:
+                        if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
+                        {
+                            advance = true;
+                            delay = controller.AutoAdvanceDelay;
+                        }
+                        break;
+                }
+            }
+
+            if (advance)
+            {
                 yield return new WaitForSeconds(delay);
             }
             else
             {
+                Debug.LogFormat("Waiting for user input to advance from TextNode '{0}, Content {1}", 
+                    nodeId, formattedText);
                 yield return new WaitForUserInput();
             }
         }
@@ -107,8 +134,6 @@ namespace SG.Dialogue.Nodes
         {
             AudioEvent = null;
             InterruptEvent = null;
-            // UnityEvent 內部可能包含對 Unity 物件的引用，但通常不需要在剪貼簿操作時清除其內部細節
-            // 如果需要，可以考慮遍歷 GetPersistentEventCount() 並清除
         }
     }
 }

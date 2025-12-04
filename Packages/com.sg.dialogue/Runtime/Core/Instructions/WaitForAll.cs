@@ -7,6 +7,7 @@ namespace SG.Dialogue.Core.Instructions
 {
     /// <summary>
     /// 一個自定義的 YieldInstruction，用於等待多個協程同時完成。
+    /// 現在包含一個可以被強制完成的機制。
     /// </summary>
     public class WaitForAll : CustomYieldInstruction
     {
@@ -17,7 +18,7 @@ namespace SG.Dialogue.Core.Instructions
         private bool _forceCompleted = false;
         
         /// <summary>
-        /// 當所有協程完成時觸發的事件。 
+        /// 當所有協程完成或被強制完成時觸發的事件。
         /// </summary>
         public event Action OnComplete;
 
@@ -25,12 +26,12 @@ namespace SG.Dialogue.Core.Instructions
         {
             if (runner == null)
             {
-                Debug.LogError("WaitForAll: MonoBehaviour runner cannot be null.");
+                Debug.LogError("WaitForAll: MonoBehaviour runner 不能為空。");
                 return;
             }
             if (enumerators == null)
             {
-                Debug.LogError("WaitForAll: Coroutine enumerator list cannot be null.");
+                Debug.LogError("WaitForAll: 協程迭代器列表不能為空。");
                 return;
             }
 
@@ -74,7 +75,7 @@ namespace SG.Dialogue.Core.Instructions
         }
 
         /// <summary>
-        /// 強制將所有協程標記為完成，並停止它們的執行。 
+        /// 強制停止所有正在執行的協程，並將此指令標記為完成。
         /// </summary>
         public void ForceComplete()
         {
@@ -92,9 +93,6 @@ namespace SG.Dialogue.Core.Instructions
             OnComplete?.Invoke();
         }
 
-        /// <summary>
-        /// 指示是否仍在等待所有協程完成。 
-        /// </summary>
         public override bool keepWaiting => !_forceCompleted && _completedCount < _enumerators.Count;
     }
 }

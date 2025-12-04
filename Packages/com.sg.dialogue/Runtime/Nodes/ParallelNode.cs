@@ -6,21 +6,12 @@ using UnityEngine;
 
 namespace SG.Dialogue.Nodes
 {
-    /// <summary>
-    /// ParallelNode 是一個並行節點，它作為一個容器，可以包含自己的子節點。
-    /// 當流程進入此節點時，它會同時啟動多個對話分支（子流程）。
-    /// 主流程會在此暫停，直到所有並行分支都執行完畢後，才會繼續前進到下一個節點。
-    /// 這對於同時觸發多個獨立事件（例如，兩個角色同時做動作、播放音效和顯示特效）非常有用。
-    /// </summary>
     [Serializable]
     public class ParallelNode : DialogueNodeBase
     {
         [Tooltip("此並行節點的描述性名稱，僅用於編輯器中識別。")]
-        public string parallelName = "Parallel"; // 重新加入 parallelName 欄位
+        public string parallelName = "Parallel";
 
-        /// <summary>
-        /// 此並行節點的詳細描述或註解，用於說明其功能或流程。
-        /// </summary>
         [SerializeField]
         [TextArea(3, 6)]
         [Tooltip("此並行節點的詳細描述或註解。")]
@@ -36,58 +27,44 @@ namespace SG.Dialogue.Nodes
         [Tooltip("當所有並行分支都執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        /// <summary>
-        /// 處理並行節點的核心邏輯。
-        /// 它會為每個分支啟動一個獨立的協程，並等待所有並行分支都完成。
-        /// </summary>
-        /// <param name="controller">對話總控制器。</param>
-        /// <returns>一個協程迭代器，用於等待所有分支完成。</returns>
         public override IEnumerator Process(DialogueController controller)
         {
-            // 檢查是否有分支可以執行
             if (branchStartNodeIds == null || branchStartNodeIds.Count == 0)
             {
-                Debug.LogWarning($"[對話] 並行節點 '{nodeId}' 沒有設定任何要執行的分支。");
-                yield break; // 直接結束此節點的處理
+                Debug.LogWarning($"[Dialogue] ParallelNode '{nodeId}' has no branches to execute.");
+                yield break;
             }
 
-            List<IEnumerator> branchEnumerators = new List<IEnumerator>();
+            bool wasInputSwallowed = false;
+            var branchEnumerators = new List<IEnumerator>();
             foreach (var startNodeId in branchStartNodeIds)
             {
                 if (!string.IsNullOrEmpty(startNodeId))
                 {
-                    // 獲取每個分支的迭代器
-                    branchEnumerators.Add(controller.GetBranchEnumerator(startNodeId));
+                    branchEnumerators.Add(controller.GetBranchEnumerator(startNodeId, () => wasInputSwallowed = true));
                 }
             }
 
-            // 使用 WaitForAll 指令等待所有分支同時完成
             if (branchEnumerators.Count > 0)
             {
                 yield return new WaitForAll(controller.CoroutineRunner, branchEnumerators);
             }
             
-            // 當所有分支都執行完畢後，Process 方法結束，
-            // DialogueController 會自動根據 GetNextNodeId() 的結果前進到下一個節點。
+            if (wasInputSwallowed)
+            {
+                yield return new WaitForUserInput();
+            }
         }
 
-        /// <summary>
-        /// 覆寫基底類別的方法，返回此並行節點本身的下一個節點 ID。
-        /// </summary>
-        /// <returns>下一個節點的 ID。</returns>
         public override string GetNextNodeId()
         {
             return nextNodeId;
         }
 
-        /// <summary>
-        /// 清除剪貼簿相關的連線資訊。
-        /// </summary>
         public override void ClearConnectionsForClipboard()
         {
             nextNodeId = null;
             branchStartNodeIds = new List<string>();
-            // 遞迴清除子節點的連線
             foreach (var childNode in childNodes)
             {
                 childNode.ClearConnectionsForClipboard();

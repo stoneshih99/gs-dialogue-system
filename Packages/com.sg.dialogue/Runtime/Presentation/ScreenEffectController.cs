@@ -9,18 +9,18 @@ namespace SG.Dialogue.Presentation
     /// </summary>
     public class ScreenEffectController : MonoBehaviour
     {
-        [Header("Grayscale Effect")]
+        [Header("灰階效果")]
         [Tooltip("用於灰階效果的 Image 遮罩")]
         [SerializeField] private Image grayscaleMask;
         [Tooltip("灰階效果的目標 Alpha 值")]
         [Range(0f, 1f)]
         [SerializeField] private float targetGrayscaleAlpha = 0.8f;
 
-        [Header("Flash Effect")]
+        [Header("閃爍效果")]
         [Tooltip("用於畫面閃爍效果的 Image 遮罩")]
         [SerializeField] private Image flashMask;
 
-        [Header("Blur Effect")]
+        [Header("背景模糊效果")]
         [Tooltip("帶有模糊材質的背景 Image 組件")]
         [SerializeField] private Image backgroundBlurImage;
 
