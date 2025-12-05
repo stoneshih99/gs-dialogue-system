@@ -761,10 +761,6 @@ PrefabInstance:
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 348571787}
-    - target: {fileID: 538131960732218131, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_text
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 974399659758379551, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

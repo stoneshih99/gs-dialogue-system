@@ -23,64 +23,9 @@ namespace SG.Dialogue.Managers
     /// 觸發在 Inspector 中設定好的對應 UnityEvent。
     /// 這種模式統一了事件處理架構，使其與 DialogueAudioManager 保持一致。
     /// </summary>
-    public class GameEventManager : MonoBehaviour
+    public class GameEventManager : BaseEventManager<GameEvent, GameRequest, GameEventMapping, UnityEvent<GameRequest>>
     {
-        [Header("事件通道")]
-        [Tooltip("要監聽的 GameEvent 事件通道(依據 ScriptableObject)。")]
-        [SerializeField] private GameEvent eventChannel;
-
-        [Header("事件映射")]
-        [Tooltip("設定事件名稱與對應的回應。")]
-        [SerializeField] private List<GameEventMapping> eventMappings;
-
-        // 用於快速查找的字典
-        private Dictionary<string, UnityEvent<GameRequest>> _eventDictionary;
-
-        private void Awake()
-        {
-            // 將 Inspector 中的列表轉換為字典，以提高執行時的查找效率。
-            _eventDictionary = new Dictionary<string, UnityEvent<GameRequest>>();
-            foreach (var mapping in eventMappings)
-            {
-                if (!string.IsNullOrEmpty(mapping.EventName) && !_eventDictionary.ContainsKey(mapping.EventName))
-                {
-                    _eventDictionary.Add(mapping.EventName, mapping.Response);
-                }
-            }
-        }
-
-        private void OnEnable()
-        {
-            if (eventChannel != null)
-            {
-                eventChannel.RegisterListener(OnGameRequest);
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (eventChannel != null)
-            {
-                eventChannel.UnregisterListener(OnGameRequest);
-            }
-        }
-
-        /// <summary>
-        /// 接收到事件請求時的回呼。
-        /// </summary>
-        private void OnGameRequest(GameRequest request)
-        {
-            Debug.Log($"[GameEventManager] 收到事件請求: {request.EventName}");
-
-            // 嘗試從字典中找到對應的 UnityEvent 並觸發它。
-            if (_eventDictionary.TryGetValue(request.EventName, out UnityEvent<GameRequest> response))
-            {
-                response?.Invoke(request);
-            }
-            else
-            {
-                Debug.LogWarning($"[GameEventManager] 找不到針對事件 '{request.EventName}' 的回應設定。");
-            }
-        }
+        protected override string GetEventName(GameEventMapping mapping) => mapping.EventName;
+        protected override UnityEvent<GameRequest> GetResponse(GameEventMapping mapping) => mapping.Response;
     }
 }

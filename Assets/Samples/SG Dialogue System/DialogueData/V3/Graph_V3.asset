@@ -53,7 +53,7 @@ MonoBehaviour:
   - nodeId: TEXT_2
     position: {x: -850, y: 255.5}
   - nodeId: CharAct_2
-    position: {x: -1360.5, y: 235.5}
+    position: {x: -1455.5, y: 213.5}
   - nodeId: LOG_1
     position: {x: -594.5, y: 393}
   - nodeId: LOG_2
@@ -81,7 +81,7 @@ MonoBehaviour:
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
   - nodeId: StageText_1
-    position: {x: -463.5, y: 241}
+    position: {x: -506.5, y: 255.5}
   references:
     version: 2
     RefIds:
@@ -140,10 +140,11 @@ MonoBehaviour:
       data:
         nodeId: TEXT_1
         IsEnabled: 1
+        nextNodeId: 
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 0}
         speakerName: NPC
         text: "\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D"
-        nextNodeId: 
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -157,7 +158,6 @@ MonoBehaviour:
           m_PersistentCalls:
             m_Calls: []
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 736264920620073055
       type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -179,10 +179,11 @@ MonoBehaviour:
       data:
         nodeId: TEXT_2
         IsEnabled: 1
+        nextNodeId: StageText_1
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
         speakerName: NPC
         text: "\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063"
-        nextNodeId: StageText_1
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -196,7 +197,6 @@ MonoBehaviour:
           m_PersistentCalls:
             m_Calls: []
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 736264920620073066
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -295,10 +295,11 @@ MonoBehaviour:
       data:
         nodeId: TEXT_4
         IsEnabled: 1
+        nextNodeId: TEXT_5
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 0}
         speakerName: NPC
         text: 1
-        nextNodeId: TEXT_5
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -312,16 +313,16 @@ MonoBehaviour:
           m_PersistentCalls:
             m_Calls: []
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 736264920620073075
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_5
         IsEnabled: 1
+        nextNodeId: WAIT_1
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 0}
         speakerName: NPC
         text: 2
-        nextNodeId: WAIT_1
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -335,7 +336,6 @@ MonoBehaviour:
           m_PersistentCalls:
             m_Calls: []
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 736264920620073076
       type: {class: WaitNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -388,8 +388,6 @@ MonoBehaviour:
         nodeId: EVENT_1
         IsEnabled: 1
         GameEvent: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
-        request:
-          EventName: GameOver
         nextNodeId: 
     - rid: 736264946891620427
       type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -397,8 +395,6 @@ MonoBehaviour:
         nodeId: EVENT_2
         IsEnabled: 1
         GameEvent: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
-        request:
-          EventName: "\u6E2C\u5B50\u7BC0\u9EDE\u767C\u9001\u4E8B\u4EF6"
         nextNodeId: 
     - rid: 736264946891620428
       type: {class: SetBackgroundNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -429,8 +425,8 @@ MonoBehaviour:
       data:
         nodeId: StageText_1
         IsEnabled: 1
+        nextNodeId: CharAct_3
+        postTypingDelay: 0.3
         message: "\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C"
         messageKey: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
-        nextNodeId: 
         typingSpeed: 0.1
-        postTypingDelay: 0.3
