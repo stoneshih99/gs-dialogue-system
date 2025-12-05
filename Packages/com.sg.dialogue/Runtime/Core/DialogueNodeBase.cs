@@ -36,6 +36,16 @@ namespace SG.Dialogue
         public abstract IEnumerator Process(DialogueController controller);
 
         /// <summary>
+        /// 當對話流程離開此節點時，由 DialogueController 呼叫。
+        /// 子類別可以覆寫此方法來執行清理邏輯，例如隱藏 UI 元素。
+        /// </summary>
+        /// <param name="controller">對話總控制器，提供對管理器的存取。</param>
+        public virtual void OnExit(DialogueController controller)
+        {
+            // 預設什麼都不做。
+        }
+
+        /// <summary>
         /// 取得此節點的預設下一個節點 ID。
         /// 這個方法主要用於當節點執行完畢後，決定流程的預設走向。
         /// 對於大多數只有單一輸出的節點，這會直接回傳其 nextNodeId 欄位。

@@ -40,6 +40,12 @@ namespace SG.Dialogue.Nodes
             yield return new WaitForUserInput();
         }
 
+        public override void OnExit(DialogueController controller)
+        {
+            base.OnExit(controller);
+            onExit?.Invoke();
+        }
+
         /// <summary>
         /// 選項節點沒有單一的預設「下一個」節點，因為流程將由玩家的選擇來決定。
         /// 因此，此方法總是返回 null。

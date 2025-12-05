@@ -324,8 +324,10 @@ namespace SG.Dialogue
         
         private void TriggerOnExit(DialogueNodeBase node)
         {
-            if (node is TextNode t) t.onExit?.Invoke();
-            else if (node is ChoiceNode c) c.onExit?.Invoke();
+            // 呼叫節點自身的退出邏輯
+            node.OnExit(this);
+
+            // 觸發圖層級的退出事件
             graph?.onNodeExited?.Invoke(node.nodeId);
         }
 

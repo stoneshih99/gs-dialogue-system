@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Events;
 using SG.Dialogue.Variables;
 using UnityEngine;
@@ -10,7 +9,7 @@ using UnityEngine.Events;
 namespace SG.Dialogue.Nodes
 {
     [Serializable]
-    public class TextNode : DialogueNodeBase
+    public class TextNode : BaseTextNode
     {
         [Header("事件通道")]
         [Tooltip("用於發出音訊請求的事件通道。")]
@@ -21,10 +20,6 @@ namespace SG.Dialogue.Nodes
         [Tooltip("對話的文本內容。同樣支援 {variableName} 格式的變數。")]
         [TextArea(2, 5)] public string text;
         
-        [Header("流程控制")]
-        [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。如果留空，對話將在此節點後結束。")]
-        public string nextNodeId;
-
         [Header("打斷設定")]
         [Tooltip("如果勾選，這句對話可以在顯示期間被一個遊戲事件打斷。")]
         public bool IsInterruptible;
@@ -51,70 +46,32 @@ namespace SG.Dialogue.Nodes
 
         [Tooltip("此節點的自動前進延遲時間（秒）。僅在『覆寫自動前進』為 true 時生效。")]
         public float autoAdvanceDelay = 1.2f;
-        [Tooltip("打字機效果完成後，進入下一步驟（等待輸入或自動前進）前的額外延遲時間。")]
-        public float postTypingDelay = 0.3f;
 
-        public override IEnumerator Process(DialogueController controller)
+        // --- 抽象屬性實作 ---
+        protected override string Text => text;
+        protected override string TextKey => textKey;
+
+        protected override IEnumerator DoShowText(DialogueController controller, string formattedText)
         {
             string formattedSpeaker = controller.FormatString(speakerName);
 
-            string rawText = !string.IsNullOrEmpty(textKey) ? LocalizationManager.GetText(textKey) : text;
-            if (string.IsNullOrEmpty(rawText)) rawText = text;
-            string formattedText = controller.FormatString(rawText);
-            
             var displayNode = (TextNode)this.MemberwiseClone();
             displayNode.speakerName = formattedSpeaker;
             
             controller.VisualManager.UpdateFromTextNode(displayNode); 
             
             yield return controller.UiManager.ShowText(displayNode, formattedText);
-            
-            if (postTypingDelay > 0)
-            {
-                yield return new WaitForSeconds(postTypingDelay);
-            }
-            
-            bool advance = false;
-            float delay = 0f;
-
-            switch (controller.autoAdvanceOverride)
-            {
-                case AutoAdvanceMode.ForceEnable:
-                    advance = true;
-                    delay = controller.forcedAutoAdvanceDelay;
-                    break;
-                case AutoAdvanceMode.ForceDisable:
-                    advance = false;
-                    break;
-                case AutoAdvanceMode.Default:
-                    if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
-                    {
-                        advance = true;
-                        delay = controller.AutoAdvanceDelay;
-                    }
-                    break;
-            }
-
-            if (advance)
-            {
-                yield return new WaitForSeconds(delay);
-            }
-            else
-            {
-                Debug.LogFormat("Waiting for user input to advance from TextNode '{0}, Content {1}", 
-                    nodeId, formattedText);
-                yield return new WaitForUserInput();
-            }
         }
 
-        public override string GetNextNodeId()
+        public override void OnExit(DialogueController controller)
         {
-            return nextNodeId;
+            base.OnExit(controller);
+            onExit?.Invoke();
         }
 
         public override void ClearConnectionsForClipboard()
         {
-            nextNodeId = null;
+            base.ClearConnectionsForClipboard(); // 呼叫基底類別的實作
             InterruptNextNodeId = null;
         }
 
