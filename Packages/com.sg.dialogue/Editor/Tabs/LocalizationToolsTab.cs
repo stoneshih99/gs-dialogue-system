@@ -283,56 +283,24 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (_table == null) { EditorUtility.DisplayDialog("Sync Keys", "請先選擇 LocalizationTable。", "OK"); return; }
             if (_graph == null) { EditorUtility.DisplayDialog("Sync Keys", "請先選擇 DialogueGraph。", "OK"); return; }
 
-            // 詢問使用者是否確定要清空並同步
             if (!EditorUtility.DisplayDialog("確認同步", $"即將清空 '{_table.name}' 的所有內容，並從 '{_graph.name}' 同步新的 key。\n\n確定要繼續嗎？", "確定同步", "取消"))
             {
                 return;
             }
 
-            // 詢問是否用圖表節點上的文字初始化新鍵的 zh-TW 內容
             bool fillFromGraph = EditorUtility.DisplayDialog("Sync Keys", "要不要用目前 Graph 節點上的文字，初始化新 key 的 zh-TW 內容？", "是，填入目前文字", "否，全部留空");
 
-            // 清空表格現有條目
             _table.entries.Clear();
 
             var allKeysFromGraph = new HashSet<string>();
             var defaultZhFromGraph = fillFromGraph ? new Dictionary<string, string>() : null;
-
-            var graph = _graph;
+            
             bool graphDirty = false;
-            // 獲取安全的圖表 ID
-            string graphIdSafe = SanitizeKey(string.IsNullOrEmpty(graph.graphId) ? Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(graph)) : graph.graphId);
+            CollectKeysRecursively(_graph.AllNodes, ref graphDirty, allKeysFromGraph, defaultZhFromGraph);
 
-            foreach (var node in graph.AllNodes)
-            {
-                if (node is TextNode n)
-                {
-                    // 為沒有 textKey 的 TextNode 自動生成 textKey
-                    if (string.IsNullOrEmpty(n.textKey)) { n.textKey = $"{graph.name}_{n.nodeId}"; graphDirty = true; }
-                    allKeysFromGraph.Add(n.textKey);
-                    if (fillFromGraph && defaultZhFromGraph != null && !defaultZhFromGraph.ContainsKey(n.textKey))
-                    {
-                        defaultZhFromGraph[n.textKey] = n.text ?? "";
-                    }
-                }
-                else if (node is ChoiceNode c)
-                {
-                    string nodeIdSafe = SanitizeKey(string.IsNullOrEmpty(c.nodeId) ? "NODE" : c.nodeId);
-                    for (int i = 0; i < c.choices.Count; i++)
-                    {
-                        string key = $"{graphIdSafe}_CHOICE_{nodeIdSafe}_{i}";
-                        allKeysFromGraph.Add(key);
-                        if (fillFromGraph && defaultZhFromGraph != null && !defaultZhFromGraph.ContainsKey(key))
-                        {
-                            defaultZhFromGraph[key] = c.choices[i].text ?? "";
-                        }
-                    }
-                }
-            }
-            if (graphDirty) EditorUtility.SetDirty(graph); // 如果圖表有修改則標記為 Dirty
+            if (graphDirty) EditorUtility.SetDirty(_graph);
 
             int added = 0;
-            // 將所有從圖表中收集到的鍵添加到 LocalizationTable 中
             foreach (var key in allKeysFromGraph.Where(k => !string.IsNullOrEmpty(k)))
             {
                 var entry = new LocalizationTable.Entry { key = key };
@@ -354,6 +322,64 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 AssetDatabase.SaveAssets();
             }
             EditorUtility.DisplayDialog("Sync Keys", $"同步完成！\n\n'{_table.name}' 已被清空，並從 '{_graph.name}' 新增了 {added} 筆 key。", "OK");
+        }
+
+        private void CollectKeysRecursively(List<DialogueNodeBase> nodes, ref bool graphDirty, HashSet<string> allKeys, Dictionary<string, string> defaultTexts)
+        {
+            if (nodes == null) return;
+
+            string graphIdSafe = SanitizeKey(string.IsNullOrEmpty(_graph.graphId) ? Path.GetFileNameWithoutExtension(AssetDatabase.GetAssetPath(_graph)) : _graph.graphId);
+
+            foreach (var node in nodes)
+            {
+                if (node is TextNode textNode)
+                {
+                    if (string.IsNullOrEmpty(textNode.textKey))
+                    {
+                        textNode.textKey = $"{_graph.name}_{textNode.nodeId}";
+                        graphDirty = true;
+                    }
+                    allKeys.Add(textNode.textKey);
+                    if (defaultTexts != null && !defaultTexts.ContainsKey(textNode.textKey))
+                    {
+                        defaultTexts[textNode.textKey] = textNode.text ?? "";
+                    }
+                }
+                else if (node is StageTextNode stageTextNode)
+                {
+                    if (string.IsNullOrEmpty(stageTextNode.messageKey))
+                    {
+                        stageTextNode.messageKey = $"{_graph.name}_{stageTextNode.nodeId}";
+                        graphDirty = true;
+                    }
+                    allKeys.Add(stageTextNode.messageKey);
+                    if (defaultTexts != null && !defaultTexts.ContainsKey(stageTextNode.messageKey))
+                    {
+                        defaultTexts[stageTextNode.messageKey] = stageTextNode.message ?? "";
+                    }
+                }
+                else if (node is ChoiceNode choiceNode)
+                {
+                    string nodeIdSafe = SanitizeKey(string.IsNullOrEmpty(choiceNode.nodeId) ? "NODE" : choiceNode.nodeId);
+                    for (int i = 0; i < choiceNode.choices.Count; i++)
+                    {
+                        string key = $"{graphIdSafe}_CHOICE_{nodeIdSafe}_{i}";
+                        allKeys.Add(key);
+                        if (defaultTexts != null && !defaultTexts.ContainsKey(key))
+                        {
+                            defaultTexts[key] = choiceNode.choices[i].text ?? "";
+                        }
+                    }
+                }
+                else if (node is SequenceNode sequenceNode)
+                {
+                    CollectKeysRecursively(sequenceNode.childNodes, ref graphDirty, allKeys, defaultTexts);
+                }
+                else if (node is ParallelNode parallelNode)
+                {
+                    CollectKeysRecursively(parallelNode.childNodes, ref graphDirty, allKeys, defaultTexts);
+                }
+            }
         }
 
         /// <summary>

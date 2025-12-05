@@ -24,6 +24,7 @@ MonoBehaviour:
   - rid: 736264946891620425
   - rid: 736264946891620428
   - rid: 736264946891620429
+  - rid: 736264991698321481
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -46,13 +47,13 @@ MonoBehaviour:
   - nodeId: CAM_1
     position: {x: -113.5, y: 437}
   - nodeId: PARALLEL_1
-    position: {x: -799.5, y: 235.5}
+    position: {x: -1031.5, y: 255.5}
   - nodeId: Anim_1
     position: {x: 533.5, y: 408}
   - nodeId: TEXT_2
-    position: {x: -562, y: 235.5}
+    position: {x: -770, y: 249}
   - nodeId: CharAct_2
-    position: {x: -1212.5, y: 235.5}
+    position: {x: -1360.5, y: 235.5}
   - nodeId: LOG_1
     position: {x: -594.5, y: 393}
   - nodeId: LOG_2
@@ -76,9 +77,11 @@ MonoBehaviour:
   - nodeId: EVENT_2
     position: {x: 318.5, y: 698}
   - nodeId: SetBG_1
-    position: {x: -1592, y: 235.5}
+    position: {x: -1700, y: 235.5}
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
+  - nodeId: StageText_1
+    position: {x: -452, y: 249}
   references:
     version: 2
     RefIds:
@@ -144,7 +147,7 @@ MonoBehaviour:
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: 
+        textKey: Graph_V3_TEXT_1
         textCues: []
         variableChanges: []
         onEnter:
@@ -153,7 +156,6 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
         postTypingDelay: 0.3
     - rid: 736264920620073055
@@ -177,14 +179,14 @@ MonoBehaviour:
       data:
         nodeId: TEXT_2
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        AudioEvent: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
         speakerName: NPC
         text: "\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063"
-        nextNodeId: CharAct_3
+        nextNodeId: StageText_1
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: 
+        textKey: Graph_V3_TEXT_2
         textCues: []
         variableChanges: []
         onEnter:
@@ -193,7 +195,6 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
         postTypingDelay: 0.3
     - rid: 736264920620073066
@@ -301,7 +302,7 @@ MonoBehaviour:
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: 
+        textKey: Graph_V3_TEXT_4
         textCues: []
         variableChanges: []
         onEnter:
@@ -310,7 +311,6 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
         postTypingDelay: 0.3
     - rid: 736264920620073075
@@ -325,7 +325,7 @@ MonoBehaviour:
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
-        textKey: 
+        textKey: Graph_V3_TEXT_5
         textCues: []
         variableChanges: []
         onEnter:
@@ -334,7 +334,6 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
         postTypingDelay: 0.3
     - rid: 736264920620073076
@@ -425,3 +424,12 @@ MonoBehaviour:
         useBlackScreen: 0
         blackScreenDuration: 1
         backgroundFadeOverride: 0.3
+    - rid: 736264991698321481
+      type: {class: StageTextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: StageText_1
+        IsEnabled: 1
+        message: 
+        messageKey: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
+        nextNodeId: CharAct_3
+        typingSpeed: 0.05

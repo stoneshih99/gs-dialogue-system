@@ -35,6 +35,10 @@ namespace SG.Dialogue.Presentation
         [SerializeField] private Transform leftPortraitStage;
         [SerializeField] private Transform centerPortraitStage;
         [SerializeField] private Transform rightPortraitStage;
+        
+        [Header("中央舞台文字")]
+        [Tooltip("用於在舞台中央顯示文字的呈現器。")]
+        [SerializeField] private StageTextPresenter stageTextPresenter;
 
         [Header("角色設定")]
         [SerializeField] private float portraitFadeDuration = 0.2f;
@@ -62,6 +66,30 @@ namespace SG.Dialogue.Presentation
             for (int i = 0; i < backgroundImages.Count; i++)
             {
                 _backgroundFadeRoutines.Add(null);
+            }
+        }
+
+        /// <summary>
+        /// 顯示中央舞台文字。
+        /// </summary>
+        /// <param name="message">要顯示的最終文字訊息。</param>
+        /// <param name="speed"></param>
+        public void ShowStageText(string message, float speed)
+        {
+            if (stageTextPresenter != null)
+            {
+                stageTextPresenter.ShowMessage(message, speed);
+            }
+        }
+
+        /// <summary>
+        /// 隱藏中央舞台文字。
+        /// </summary>
+        public void HideStageText()
+        {
+            if (stageTextPresenter != null)
+            {
+                stageTextPresenter.Hide();
             }
         }
 
@@ -260,7 +288,13 @@ namespace SG.Dialogue.Presentation
             else if (node.portraitRenderMode == PortraitRenderMode.SpriteSheet)
             {
                 var spriteSheetPresenter = existingState.Instance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
-                if (spriteSheetPresenter != null) spriteSheetPresenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
+                if (spriteSheetPresenter != null)
+                    spriteSheetPresenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
+            }
+            else if (node.portraitRenderMode == PortraitRenderMode.Sprite)
+            {
+                var imagePresenter = existingState.Instance.GetComponent<ImageDialoguePortraitPresenter>();
+                if (imagePresenter != null) imagePresenter.ShowSprite(node.characterSprite, 0f);
             }
         }
         

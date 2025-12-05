@@ -12,4 +12,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd0bd841fec54a018cbff7a27538b4d, type: 3}
   m_Name: LocalizationTable_V3
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.LocalizationTable
-  entries: []
+  entries:
+  - key: Graph_V3_TEXT_1
+    zhTW: "\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D\u6E2C\u8A66\u4E2D"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V3_TEXT_2
+    zhTW: "\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063\u5230\u53F0\u7063"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V3_TEXT_4
+    zhTW: 1
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V3_TEXT_5
+    zhTW: 2
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
+    zhTW: 
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 

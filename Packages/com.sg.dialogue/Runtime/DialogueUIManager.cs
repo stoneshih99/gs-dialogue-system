@@ -51,8 +51,10 @@ namespace SG.Dialogue.UI
         [SerializeField] private int soundInterval = 3;
         [Tooltip("用於觸發打字音效的事件通道")]
         [SerializeField] private AudioEvent typewriterAudioEvent;
-        [Tooltip("要播放的打字音效")]
-        [SerializeField] private AudioClip typewriterSfx;
+        [Tooltip("打字音效的事件名稱")]
+        [SerializeField] private string typewriterEventName = "Typewriter";
+        // [Tooltip("要播放的打字音效")]
+        // [SerializeField] private AudioClip typewriterSfx;
 
         [Header("行為")]
         [Tooltip("是否使用 CanvasGroup 來隱藏/顯示根面板（影響互動性）")]
@@ -372,13 +374,12 @@ namespace SG.Dialogue.UI
         /// </summary>
         private void PlayTypewriterSound()
         {
-            if (enableTypewriterSound && typewriterAudioEvent != null && typewriterSfx != null)
+            if (enableTypewriterSound && typewriterAudioEvent != null)
             {
                 var request = new AudioRequest
                 {
                     ActionType = AudioActionType.PlaySFX,
-                    EventName = typewriterSfx.name
-                    // Clip = typewriterSfx
+                    EventName = typewriterEventName
                 };
                 typewriterAudioEvent.Raise(request);
             }
