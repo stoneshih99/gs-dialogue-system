@@ -33,12 +33,15 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         
         private bool _isPopulating;
 
-        // 子圖起始節點的引用 (現在設為 public)
+        // 子圖起始節點的引用
         public SequenceStartNodeElement SequenceStartNode { get; private set; }
         public ParallelBranchStartNodeElement ParallelStartNode { get; private set; }
 
         private NodeClipboardHandler _clipboardHandler;
-        private GraphConnectionHandler _connectionHandler; // 新增連接處理器
+        private GraphConnectionHandler _connectionHandler;
+        
+        // 用於追蹤執行狀態的欄位
+        private DialogueNodeElement _executingNode;
 
         public DialogueGraphView()
         {
@@ -58,13 +61,85 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             Undo.undoRedoPerformed += OnUndoRedo;
             
             _clipboardHandler = new NodeClipboardHandler(this);
-            _connectionHandler = new GraphConnectionHandler(this); // 初始化連接處理器
+            _connectionHandler = new GraphConnectionHandler(this);
+
+            // 註冊面板事件，用於管理事件監聽器的生命週期
+            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
         }
 
-        ~DialogueGraphView()
+        // 不再使用解構函式，改用 DetachFromPanelEvent
+        // ~DialogueGraphView()
+        // {
+        //     Undo.undoRedoPerformed -= OnUndoRedo;
+        // }
+
+        #region Event Handling
+
+        private void OnAttachToPanel(AttachToPanelEvent evt)
         {
-            Undo.undoRedoPerformed -= OnUndoRedo;
+            // 當 View 被加入到 UI 中時，開始監聽圖表事件
+            RegisterGraphEvents();
         }
+
+        private void OnDetachFromPanel(DetachFromPanelEvent evt)
+        {
+            // 當 View 從 UI 中移除時，停止監聽圖表事件，防止記憶體洩漏
+            UnregisterGraphEvents();
+            Undo.undoRedoPerformed -= OnUndoRedo; // 也在此處移除 Undo/Redo 的監聽
+        }
+
+        private void RegisterGraphEvents()
+        {
+            if (_graph == null) return;
+            _graph.onNodeEntered.AddListener(OnNodeEntered);
+            _graph.onDialogueEnded.AddListener(OnDialogueEnded);
+        }
+
+        private void UnregisterGraphEvents()
+        {
+            if (_graph == null) return;
+            _graph.onNodeEntered.RemoveListener(OnNodeEntered);
+            _graph.onDialogueEnded.RemoveListener(OnDialogueEnded);
+            
+            // 清除執行狀態
+            OnDialogueEnded();
+        }
+
+        /// <summary>
+        /// 當對話執行進入一個新節點時呼叫。
+        /// </summary>
+        private void OnNodeEntered(string nodeId)
+        {
+            // 清除上一個執行節點的高亮
+            if (_executingNode != null)
+            {
+                _executingNode.SetExecutionState(false);
+                _executingNode = null;
+            }
+
+            // 找到並高亮目前節點
+            if (_nodeViews.TryGetValue(nodeId, out var currentNodeView))
+            {
+                _executingNode = currentNodeView;
+                _executingNode.SetExecutionState(true);
+            }
+        }
+
+        /// <summary>
+        /// 當對話結束時呼叫。
+        /// </summary>
+        private void OnDialogueEnded()
+        {
+            // 清除所有執行高亮
+            if (_executingNode != null)
+            {
+                _executingNode.SetExecutionState(false);
+                _executingNode = null;
+            }
+        }
+
+        #endregion
 
         private void OnUndoRedo()
         {
@@ -101,12 +176,19 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             _isPopulating = true;
             try
             {
+                // 在更換圖表前，先取消監聽舊圖表的事件
+                UnregisterGraphEvents();
+
                 _graph = graph;
                 _navigationStack.Clear();
                 if (graph)
                 {
                     _navigationStack.Push(graph);
                 }
+
+                // 註冊新圖表的事件
+                RegisterGraphEvents();
+
                 PopulateFromCurrentNavigation();
             }
             finally
@@ -124,21 +206,15 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 _nodeViews.Clear();
                 SequenceStartNode = null;
                 ParallelStartNode = null;
+                _executingNode = null; // 重置執行節點
 
                 if (!_graph || _navigationStack.Count == 0) return;
                 
                 var currentContainer = _navigationStack.Peek();
                 if (currentContainer == null) return;
 
-                // 如果在子圖中，創建對應的起始節點
-                if (currentContainer is SequenceNode seqNode)
-                {
-                    CreateSequenceStartNode(seqNode);
-                }
-                else if (currentContainer is ParallelNode parNode)
-                {
-                    CreateParallelStartNode(parNode);
-                }
+                if (currentContainer is SequenceNode seqNode) CreateSequenceStartNode(seqNode);
+                else if (currentContainer is ParallelNode parNode) CreateParallelStartNode(parNode);
                 
                 List<DialogueNodeBase> nodesToDisplay = GetNodesFromContainer(currentContainer);
                 if (nodesToDisplay == null) return;
@@ -161,14 +237,10 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                     ConnectPortsForNode(sourceView, nodeData);
                 }
 
-                // 連接子圖起始節點的埠
                 if (SequenceStartNode != null && currentContainer is SequenceNode seqNodeData)
                 {
                     var inputPort = TryGetInputPort(seqNodeData.startNodeId);
-                    if (inputPort != null)
-                    {
-                        ConnectPorts(SequenceStartNode.OutputPort, inputPort);
-                    }
+                    if (inputPort != null) ConnectPorts(SequenceStartNode.OutputPort, inputPort);
                 }
                 else if (ParallelStartNode != null && currentContainer is ParallelNode parNodeData)
                 {
@@ -184,8 +256,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 
                 ResetView();
                 OnNavigationChanged?.Invoke(_navigationStack);
-
-                // 更新所有節點的起始節點視覺狀態
                 UpdateStartNodeVisuals();
             }
             finally
@@ -207,15 +277,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             ParallelStartNode.OnBranchesChanged = () =>
             {
                 RecordUndo("Modify Parallel Branches");
-                // 同步埠數量到數據模型
-                while (parNode.branchStartNodeIds.Count < ParallelStartNode.BranchPorts.Count)
-                {
-                    parNode.branchStartNodeIds.Add(null);
-                }
-                while (parNode.branchStartNodeIds.Count > ParallelStartNode.BranchPorts.Count)
-                {
-                    parNode.branchStartNodeIds.RemoveAt(parNode.branchStartNodeIds.Count - 1);
-                }
+                while (parNode.branchStartNodeIds.Count < ParallelStartNode.BranchPorts.Count) parNode.branchStartNodeIds.Add(null);
+                while (parNode.branchStartNodeIds.Count > ParallelStartNode.BranchPorts.Count) parNode.branchStartNodeIds.RemoveAt(parNode.branchStartNodeIds.Count - 1);
             };
             AddElement(ParallelStartNode);
         }
@@ -291,27 +354,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             
             if (container is DialogueGraph graph)
             {
-                if (!string.IsNullOrEmpty(graph.startNodeId) && _nodeViews.TryGetValue(graph.startNodeId, out var startNodeElement))
-                {
-                    FrameSelectionOrAll(startNodeElement);
-                }
-                else
-                {
-                    FrameAllOrReset();
-                }
+                if (!string.IsNullOrEmpty(graph.startNodeId) && _nodeViews.TryGetValue(graph.startNodeId, out var startNodeElement)) FrameSelectionOrAll(startNodeElement);
+                else FrameAllOrReset();
             }
-            else if (container is SequenceNode)
-            {
-                FrameSelectionOrAll(SequenceStartNode);
-            }
-            else if (container is ParallelNode)
-            {
-                FrameSelectionOrAll(ParallelStartNode);
-            }
-            else
-            {
-                FrameAllOrReset();
-            }
+            else if (container is SequenceNode) FrameSelectionOrAll(SequenceStartNode);
+            else if (container is ParallelNode) FrameSelectionOrAll(ParallelStartNode);
+            else FrameAllOrReset();
         }
 
         private void FrameSelectionOrAll(GraphElement elementToSelect)
@@ -322,30 +370,18 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 AddToSelection(elementToSelect);
                 FrameSelection();
             }
-            else
-            {
-                FrameAllOrReset();
-            }
+            else FrameAllOrReset();
         }
 
         private void FrameAllOrReset()
         {
-            if (nodes.Any())
-            {
-                FrameAll();
-            }
-            else
-            {
-                UpdateViewTransform(Vector3.zero, Vector3.one);
-            }
+            if (nodes.Any()) FrameAll();
+            else UpdateViewTransform(Vector3.zero, Vector3.one);
         }
 
         private void ResetView()
         {
-            if (!TryLoadViewTransform())
-            {
-                FrameGraph();
-            }
+            if (!TryLoadViewTransform()) FrameGraph();
         }
         
         private string GetViewTransformKey()
@@ -353,10 +389,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (_graph == null) return null;
             string path = AssetDatabase.GetAssetPath(_graph);
             string context = "root";
-            if (_navigationStack.Count > 1 && _navigationStack.Peek() is DialogueNodeBase node)
-            {
-                context = node.nodeId;
-            }
+            if (_navigationStack.Count > 1 && _navigationStack.Peek() is DialogueNodeBase node) context = node.nodeId;
             return $"{ViewTransformKeyPrefix}{path}_{context}";
         }
 
@@ -366,24 +399,15 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             if (change.edgesToCreate != null)
             {
-                foreach (var edge in change.edgesToCreate)
-                {
-                    _connectionHandler.HandleEdgeConnection(edge); // 委託給連接處理器
-                }
+                foreach (var edge in change.edgesToCreate) _connectionHandler.HandleEdgeConnection(edge);
             }
 
             if (change.elementsToRemove != null)
             {
                 foreach (var el in change.elementsToRemove)
                 {
-                    if (el is Edge edge)
-                    {
-                        _connectionHandler.HandleEdgeDisconnection(edge); // 委託給連接處理器
-                    }
-                    else if (el is DialogueNodeElement nodeElement)
-                    {
-                        nodeElement.OnDelete?.Invoke();
-                    }
+                    if (el is Edge edge) _connectionHandler.HandleEdgeDisconnection(edge);
+                    else if (el is DialogueNodeElement nodeElement) nodeElement.OnDelete?.Invoke();
                 }
             }
 
@@ -416,45 +440,27 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (targetList == null) return;
 
             _graph.BuildLookup(); 
-            node.nodeId = _clipboardHandler.GenerateUniqueNodeId(handler.GetPrefix()); // 使用剪貼簿處理器生成唯一 ID
+            node.nodeId = _clipboardHandler.GenerateUniqueNodeId(handler.GetPrefix());
             
             targetList.Add(node); 
-            _graph.SetNodePosition(node.nodeId, pos); // 儲存新節點的初始位置
+            _graph.SetNodePosition(node.nodeId, pos);
 
             var serializedGraph = new SerializedObject(_graph);
             var nodesProperty = FindNodesProperty(serializedGraph, container);
             var newNodeProperty = nodesProperty?.GetArrayElementAtIndex(targetList.Count - 1);
             
             var element = CreateAndRegisterNode(node, newNodeProperty); 
-            // CreateAndRegisterNode 內部會從 _graph 讀取位置，所以不需要再手動設定
             
             EditorUtility.SetDirty(_graph);
         }
 
-        /// <summary>
-        /// 設定當前圖的起始節點。
-        /// </summary>
-        /// <param name="nodeId">要設定為起始節點的 ID。</param>
         public void SetStartNode(string nodeId)
         {
             if (_graph == null) return;
-
             RecordUndo("Set Start Node");
-
-            // 移除舊的起始節點視覺標記
-            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var oldStartNodeElement))
-            {
-                oldStartNodeElement.SetIsStartNode(false);
-            }
-
-            _graph.startNodeId = nodeId; // 更新資料
-
-            // 添加新的起始節點視覺標記
-            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var newStartNodeElement))
-            {
-                newStartNodeElement.SetIsStartNode(true);
-            }
-
+            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var oldStartNodeElement)) oldStartNodeElement.SetIsStartNode(false);
+            _graph.startNodeId = nodeId;
+            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var newStartNodeElement)) newStartNodeElement.SetIsStartNode(true);
             EditorUtility.SetDirty(_graph);
         }
 
@@ -463,34 +469,16 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             base.BuildContextualMenu(evt);
             var mousePos = contentViewContainer.WorldToLocal(evt.mousePosition);
             
-            // 複製選項
-            if (selection.Any(s => s is DialogueNodeElement))
-            {
-                evt.menu.AppendAction("Copy", action => _clipboardHandler.CopySelectionToClipboard()); // 委託給剪貼簿處理器
-            }
-
-            // 貼上選項
-            evt.menu.AppendAction("Paste", action => _clipboardHandler.PasteFromClipboard(mousePos), DropdownMenuAction.Status.Normal); // 委託給剪貼簿處理器，並傳遞滑鼠位置
-            
-            if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent())
-            {
-                evt.menu.AppendSeparator();
-            }
+            if (selection.Any(s => s is DialogueNodeElement)) evt.menu.AppendAction("Copy", action => _clipboardHandler.CopySelectionToClipboard());
+            evt.menu.AppendAction("Paste", action => _clipboardHandler.PasteFromClipboard(mousePos), DropdownMenuAction.Status.Normal);
+            if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent()) evt.menu.AppendSeparator();
             
             bool inSubGraph = _navigationStack.Count > 1;
 
             foreach (var handler in NodeHandlerRegistry.Handlers.Values)
             {
-                if (inSubGraph && (handler.CreateNodeData() is SequenceNode || handler.CreateNodeData() is ParallelNode))
-                {
-                    continue;
-                }
-                
-                evt.menu.AppendAction(handler.MenuName, _ => 
-                {
-                    var nodeData = handler.CreateNodeData();
-                    CreateAndAddNode(nodeData, mousePos, handler);
-                });
+                if (inSubGraph && (handler.CreateNodeData() is SequenceNode || handler.CreateNodeData() is ParallelNode)) continue;
+                evt.menu.AppendAction(handler.MenuName, _ => { CreateAndAddNode(handler.CreateNodeData(), mousePos, handler); });
             }
         }
 
@@ -502,7 +490,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 if (element != null)
                 {
                     element.SetPosition(new Rect(_graph.GetNodePosition(node.nodeId), defaultNodeSize));
-                    // 修正這裡的呼叫，傳遞 nodeProperty
                     element.Initialize(this, nodeProperty); 
                     element.OnDelete = () => 
                     {
@@ -523,10 +510,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         private SerializedProperty FindNodesProperty(SerializedObject serializedGraph, object container)
         {
-            if (container is DialogueGraph)
-            {
-                return serializedGraph.FindProperty("AllNodes");
-            }
+            if (container is DialogueGraph) return serializedGraph.FindProperty("AllNodes");
             if (container is DialogueNodeBase containerNode)
             {
                 string path = FindPropertyPath(_graph.AllNodes, "AllNodes", containerNode);
@@ -542,15 +526,10 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         private string FindPropertyPath(List<DialogueNodeBase> nodes, string currentPath, DialogueNodeBase targetNode)
         {
             if (nodes == null) return null;
-
             for (int i = 0; i < nodes.Count; i++)
             {
                 var node = nodes[i];
-                if (node.nodeId == targetNode.nodeId)
-                {
-                    return $"{currentPath}.Array.data[{i}]";
-                }
-
+                if (node.nodeId == targetNode.nodeId) return $"{currentPath}.Array.data[{i}]";
                 if (node is SequenceNode seqNode)
                 {
                     string foundPath = FindPropertyPath(seqNode.childNodes, $"{currentPath}.Array.data[{i}].childNodes", targetNode);
@@ -584,18 +563,10 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         private Port GetOutputPort(string nodeId, string portName = "Next")
         {
             if (string.IsNullOrEmpty(nodeId) || !_nodeViews.TryGetValue(nodeId, out var element)) return null;
-            
-            // 使用 NodeHandlerRegistry 來獲取埠
-            if (NodeHandlerRegistry.Handlers.TryGetValue(element.NodeData.GetType(), out var handler))
-            {
-                return handler.GetOutputPort(element, portName);
-            }
+            if (NodeHandlerRegistry.Handlers.TryGetValue(element.NodeData.GetType(), out var handler)) return handler.GetOutputPort(element, portName);
             return null;
         }
 
-        /// <summary>
-        /// 更新所有節點的起始節點視覺標記。
-        /// </summary>
         private void UpdateStartNodeVisuals()
         {
             foreach (var nodeView in _nodeViews.Values)

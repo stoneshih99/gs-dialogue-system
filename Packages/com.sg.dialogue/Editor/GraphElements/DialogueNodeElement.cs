@@ -1,6 +1,6 @@
 #if UNITY_EDITOR
 using System;
-using System.Linq; // 引入 System.Linq 以使用 Any()
+using System.Linq;
 using SG.Dialogue.Editor.Dialogue.Editor;
 using SG.Dialogue.Nodes;
 using UnityEditor;
@@ -17,7 +17,9 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         public Port InputPort { get; protected set; }
         public Action OnDelete;
         protected DialogueGraphView GraphView { get; private set; }
-        protected SerializedProperty NodeSerializedProperty { get; private set; } // 新增：儲存節點的 SerializedProperty
+        protected SerializedProperty NodeSerializedProperty { get; private set; }
+
+        private readonly Color _defaultBackgroundColor;
 
         protected DialogueNodeElement(string nodeId)
         {
@@ -25,18 +27,19 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             InputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Multi, typeof(bool));
             InputPort.portName = "In";
             inputContainer.Add(InputPort);
+
+            // 儲存節點的預設背景顏色，以便之後恢復
+            _defaultBackgroundColor = style.backgroundColor.value;
         }
 
-        // 修改 Initialize 方法，使其接收 SerializedProperty
         public void Initialize(DialogueGraphView graphView, SerializedProperty nodeSerializedProperty)
         {
             GraphView = graphView;
-            NodeSerializedProperty = nodeSerializedProperty; // 儲存傳入的 SerializedProperty
+            NodeSerializedProperty = nodeSerializedProperty;
 
-            // 檢查是否已經添加過 IsEnabled 的 Toggle，避免重複添加
             if (titleButtonContainer.Children().OfType<Toggle>().All(t => t.name != "IsEnabledToggle"))
             {
-                var enabledToggle = new Toggle { value = NodeData.IsEnabled, name = "IsEnabledToggle" }; // 給 Toggle 一個名稱以便識別
+                var enabledToggle = new Toggle { value = NodeData.IsEnabled, name = "IsEnabledToggle" };
                 enabledToggle.RegisterValueChangedCallback(evt =>
                 {
                     NodeData.IsEnabled = evt.newValue;
@@ -50,14 +53,9 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             SetIsStartNode(GraphView.Graph.startNodeId == NodeId);
         }
 
-        /// <summary>
-        /// 建立節點的上下文菜單。 
-        /// </summary>
-        /// <param name="evt"></param>
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             base.BuildContextualMenu(evt);
-            // 修正：不再直接呼叫 OnDelete，而是讓 GraphView 處理刪除操作
             evt.menu.AppendAction("Delete", action => GraphView.DeleteSelection());
             evt.menu.AppendSeparator();
             evt.menu.AppendAction("Set as Start Node", (action) => { GraphView.SetStartNode(NodeId); }, DropdownMenuAction.Status.Normal);
@@ -79,6 +77,22 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             {
                 style.borderBottomColor = style.borderLeftColor = style.borderRightColor = style.borderTopColor = new StyleColor(new Color(0.1f, 0.1f, 0.1f));
                 style.borderBottomWidth = style.borderLeftWidth = style.borderRightWidth = style.borderTopWidth = 1f;
+            }
+        }
+
+        /// <summary>
+        /// 設定節點的執行狀態，並根據狀態改變其視覺外觀。
+        /// </summary>
+        /// <param name="isExecuting">節點是否正在執行。</param>
+        public void SetExecutionState(bool isExecuting)
+        {
+            if (isExecuting)
+            {
+                style.backgroundColor = new StyleColor(new Color(0.9f, 0.9f, 0.6f)); // 設定為淡黃色
+            }
+            else
+            {
+                style.backgroundColor = _defaultBackgroundColor; // 恢復為預設顏色
             }
         }
 
