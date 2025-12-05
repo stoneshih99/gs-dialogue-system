@@ -26,8 +26,8 @@ namespace SG.Dialogue.Managers
     public class DialogueAudioEventManager : MonoBehaviour
     {
         [Header("事件通道")]
-        [Tooltip("要監聽的 AudioEvent 事件通道。")]
-        [SerializeField] private AudioEvent audioEventChannel;
+        [Tooltip("要監聽的 AudioEvent 事件通道(依據 ScriptableObject)。")]
+        [SerializeField] private AudioEvent eventChannel;
 
         [Header("事件映射")]
         [Tooltip("設定事件名稱與對應的回應。")]
@@ -51,17 +51,17 @@ namespace SG.Dialogue.Managers
 
         private void OnEnable()
         {
-            if (audioEventChannel != null)
+            if (eventChannel != null)
             {
-                audioEventChannel.RegisterListener(OnAudioRequest);
+                eventChannel.RegisterListener(OnAudioRequest);
             }
         }
 
         private void OnDisable()
         {
-            if (audioEventChannel != null)
+            if (eventChannel != null)
             {
-                audioEventChannel.UnregisterListener(OnAudioRequest);
+                eventChannel.UnregisterListener(OnAudioRequest);
             }
         }
 

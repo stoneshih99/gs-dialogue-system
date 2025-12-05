@@ -26,8 +26,8 @@ namespace SG.Dialogue.Managers
     public class GameEventManager : MonoBehaviour
     {
         [Header("事件通道")]
-        [Tooltip("要監聽的 GameEvent 事件通道。")]
-        [SerializeField] private GameEvent gameEventChannel;
+        [Tooltip("要監聽的 GameEvent 事件通道(依據 ScriptableObject)。")]
+        [SerializeField] private GameEvent eventChannel;
 
         [Header("事件映射")]
         [Tooltip("設定事件名稱與對應的回應。")]
@@ -51,17 +51,17 @@ namespace SG.Dialogue.Managers
 
         private void OnEnable()
         {
-            if (gameEventChannel != null)
+            if (eventChannel != null)
             {
-                gameEventChannel.RegisterListener(OnGameRequest);
+                eventChannel.RegisterListener(OnGameRequest);
             }
         }
 
         private void OnDisable()
         {
-            if (gameEventChannel != null)
+            if (eventChannel != null)
             {
-                gameEventChannel.UnregisterListener(OnGameRequest);
+                eventChannel.UnregisterListener(OnGameRequest);
             }
         }
 

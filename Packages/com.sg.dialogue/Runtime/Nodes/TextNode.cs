@@ -50,9 +50,6 @@ namespace SG.Dialogue.Nodes
         [Tooltip("當退出此節點時觸發的 UnityEvent。")]
         public UnityEvent onExit;
 
-        [Header("自動前進與延遲")]
-        [Tooltip("是否覆寫全域的自動前進設定。如果啟用，將使用下方定義的延遲時間。")]
-        public bool overrideAutoAdvance;
         [Tooltip("此節點的自動前進延遲時間（秒）。僅在『覆寫自動前進』為 true 時生效。")]
         public float autoAdvanceDelay = 1.2f;
         [Tooltip("打字機效果完成後，進入下一步驟（等待輸入或自動前進）前的額外延遲時間。")]
@@ -81,30 +78,22 @@ namespace SG.Dialogue.Nodes
             bool advance = false;
             float delay = 0f;
 
-            if (overrideAutoAdvance)
+            switch (controller.autoAdvanceOverride)
             {
-                advance = true;
-                delay = autoAdvanceDelay;
-            }
-            else
-            {
-                switch (controller.autoAdvanceOverride)
-                {
-                    case AutoAdvanceMode.ForceEnable:
+                case AutoAdvanceMode.ForceEnable:
+                    advance = true;
+                    delay = controller.forcedAutoAdvanceDelay;
+                    break;
+                case AutoAdvanceMode.ForceDisable:
+                    advance = false;
+                    break;
+                case AutoAdvanceMode.Default:
+                    if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
+                    {
                         advance = true;
-                        delay = controller.forcedAutoAdvanceDelay;
-                        break;
-                    case AutoAdvanceMode.ForceDisable:
-                        advance = false;
-                        break;
-                    case AutoAdvanceMode.Default:
-                        if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
-                        {
-                            advance = true;
-                            delay = controller.AutoAdvanceDelay;
-                        }
-                        break;
-                }
+                        delay = controller.AutoAdvanceDelay;
+                    }
+                    break;
             }
 
             if (advance)

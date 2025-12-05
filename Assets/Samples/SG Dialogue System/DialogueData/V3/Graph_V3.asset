@@ -42,23 +42,23 @@ MonoBehaviour:
   - nodeId: CharAct_1
     position: {x: -172.5, y: 424}
   - nodeId: TEXT_1
-    position: {x: 90, y: 424}
+    position: {x: 91, y: 457}
   - nodeId: CAM_1
     position: {x: -113.5, y: 437}
   - nodeId: PARALLEL_1
-    position: {x: -636, y: 231}
+    position: {x: -799.5, y: 235.5}
   - nodeId: Anim_1
     position: {x: 533.5, y: 408}
   - nodeId: TEXT_2
-    position: {x: -441.5, y: 231}
+    position: {x: -562, y: 235.5}
   - nodeId: CharAct_2
-    position: {x: -1127.5, y: 231}
+    position: {x: -1212.5, y: 235.5}
   - nodeId: LOG_1
-    position: {x: -456.5, y: 444}
+    position: {x: -594.5, y: 393}
   - nodeId: LOG_2
     position: {x: 889.5, y: 424}
   - nodeId: CharAct_3
-    position: {x: 25.5, y: 231}
+    position: {x: -155.5, y: 231}
   - nodeId: SEQ_1
     position: {x: -361, y: 505.5}
   - nodeId: TEXT_4
@@ -76,7 +76,7 @@ MonoBehaviour:
   - nodeId: EVENT_2
     position: {x: 318.5, y: 698}
   - nodeId: SetBG_1
-    position: {x: -1416, y: 231}
+    position: {x: -1592, y: 235.5}
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
   references:
@@ -98,11 +98,8 @@ MonoBehaviour:
         - rid: 736264946891620427
         branchStartNodeIds:
         - LOG_1
-        - TEXT_1
-        - Anim_1
         - CharAct_1
-        - LOG_2
-        - EVENT_2
+        - CharAct_1
         nextNodeId: TEXT_2
     - rid: 736264920620073053
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -207,7 +204,7 @@ MonoBehaviour:
         nextNodeId: PARALLEL_1
         ActionType: 0
         TargetPosition: 0
-        portraitRenderMode: 2
+        portraitRenderMode: 4
         speakerName: NPC
         characterSprite: {fileID: 0}
         spinePortraitConfig:

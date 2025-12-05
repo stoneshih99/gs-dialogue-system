@@ -36,7 +36,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             title = $"Text ({data.nodeId})";
 
             // 還原為手動建立 UI 元素
-            var nameField = new TextField("Speaker") { value = data.speakerName };
+            var nameField = new TextField("Speaker") { value = data.speakerName , tooltip = "Supports {variableName} format for variable insertion."};
+            nameField.style.maxWidth = MaxWidth;
             nameField.RegisterValueChangedCallback(e => { _data.speakerName = e.newValue; _onChanged?.Invoke(); });
             mainContainer.Add(nameField);
 
@@ -94,7 +95,9 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 _onChanged?.Invoke();
             });
 
-            var eventField = new ObjectField("Interrupt Event") { objectType = typeof(GameEvent), allowSceneObjects = false, value = _data.InterruptEvent };
+            var eventField = new ObjectField("Interrupt Event") { 
+                objectType = typeof(GameEvent), allowSceneObjects = false,
+                value = _data.InterruptEvent, tooltip = "GameEvent asset 主要用於觸發對話的中斷。" };
             eventField.RegisterValueChangedCallback(evt => { _data.InterruptEvent = evt.newValue as GameEvent; _onChanged?.Invoke(); });
             interruptFieldsContainer.Add(eventField);
 
@@ -118,7 +121,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         private void BuildCuesSettings(VisualElement container)
         {
-            var cuesFold = new Foldout { text = "Text Cues", value = false };
+            var cuesFold = new Foldout { text = "Text Cues", value = false, tooltip = "Events 觸發器主要在打字機效果過程中使用。" };
             if (_data.textCues == null) _data.textCues = new List<TextCue>();
             var cuesToolbar = new VisualElement { style = { flexDirection = FlexDirection.Row } };
             var cuesContainer = new VisualElement();
@@ -129,9 +132,9 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             container.Add(cuesFold);
         }
 
-        private void RebuildCuesUI(VisualElement _cuesContainer)
+        private void RebuildCuesUI(VisualElement container)
         {
-            _cuesContainer.Clear();
+            container.Clear();
             for (int i = 0; i < _data.textCues.Count; i++)
             {
                 int index = i;
@@ -140,8 +143,8 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 var idxField = new IntegerField("Index") { value = cue.charIndex, style = { minWidth = 140 } };
                 idxField.RegisterValueChangedCallback(e => { cue.charIndex = Mathf.Max(0, e.newValue); _onChanged?.Invoke(); });
                 row.Add(idxField);
-                row.Add(new Button(() => { _data.textCues.RemoveAt(index); RebuildCuesUI(_cuesContainer); }) { text = "-" });
-                _cuesContainer.Add(row);
+                row.Add(new Button(() => { _data.textCues.RemoveAt(index); RebuildCuesUI(container); }) { text = "-" });
+                container.Add(row);
             }
         }
 
@@ -149,11 +152,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         {
             var autoFold = new Foldout { text = "Auto Advance & Delay", value = false };
             
-            // 手動建立 Toggle
-            var overrideAutoToggle = new Toggle("Override Auto") { value = _data.overrideAutoAdvance };
-            overrideAutoToggle.RegisterValueChangedCallback(e => { _data.overrideAutoAdvance = e.newValue; _onChanged?.Invoke(); });
-            autoFold.Add(overrideAutoToggle);
-
             // 手動建立 FloatField
             var autoDelayField = new FloatField("Delay (s)") { value = _data.autoAdvanceDelay };
             autoDelayField.RegisterValueChangedCallback(e => { _data.autoAdvanceDelay = Mathf.Max(0f, e.newValue); _onChanged?.Invoke(); });
