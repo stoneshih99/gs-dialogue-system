@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 
 namespace SG.Dialogue.Nodes
@@ -30,8 +31,6 @@ namespace SG.Dialogue.Nodes
 
         public override IEnumerator Process(DialogueController controller)
         {
-            Debug.LogFormat("StageTextNode: 顯示舞台文字，MessageKey='{0}', Message='{1}'", messageKey, message);
-            
             // 取得原始文字，優先使用本地化 Key，失敗時回退到 message
             string rawText = message;
             
@@ -85,7 +84,35 @@ namespace SG.Dialogue.Nodes
                 yield return new WaitForSeconds(postTypingDelay);
             }
             
-            Debug.LogFormat("StageTextNode: 文字顯示完成");
+            bool advance = false;
+            float delay = 0f;
+
+            switch (controller.autoAdvanceOverride)
+            {
+                case AutoAdvanceMode.ForceEnable:
+                    advance = true;
+                    delay = controller.forcedAutoAdvanceDelay;
+                    break;
+                case AutoAdvanceMode.ForceDisable:
+                    advance = false;
+                    break;
+                case AutoAdvanceMode.Default:
+                    if (controller.CurrentGraph != null && controller.CurrentGraph.autoAdvanceEnabled)
+                    {
+                        advance = true;
+                        delay = controller.AutoAdvanceDelay;
+                    }
+                    break;
+            }
+
+            if (advance)
+            {
+                yield return new WaitForSeconds(delay);
+            }
+            else
+            {
+                yield return new WaitForUserInput();
+            }
         }
 
         public override string GetNextNodeId()
