@@ -16,13 +16,14 @@ namespace SG.Dialogue.Presentation
         [Tooltip("用於顯示文字的 TextMeshProUGUI 元件。")]
         [SerializeField] private TextMeshProUGUI textLabel;
 
-        // [Header("打字機效果")]
-        // [Tooltip("每個字元出現的間隔時間（秒）。")]
-        // [SerializeField] public float typingSpeed = 0.05f;
-
         private Coroutine _typewriterCoroutine;
 
         private float _typingSpeed;
+        
+        /// <summary>
+        /// 查詢打字機效果是否正在進行中。
+        /// </summary>
+        public bool IsTyping => _typewriterCoroutine != null;
 
         private void Awake()
         {
@@ -41,7 +42,7 @@ namespace SG.Dialogue.Presentation
         /// 以打字機效果顯示一條訊息。
         /// </summary>
         /// <param name="message">要顯示的最終文字內容。</param>
-        /// <param name="speed">打字機速度</param>
+        /// <param name="speed"></param>
         public void ShowMessage(string message, float speed)
         {
             _typingSpeed = speed;
@@ -51,7 +52,6 @@ namespace SG.Dialogue.Presentation
                 return;
             }
 
-            Debug.LogFormat("Showing stage text message: {0}", message);
             container.SetActive(true);
             if (_typewriterCoroutine != null)
             {

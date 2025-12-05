@@ -18,31 +18,27 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             _data = data;
             title = "Stage Text";
             
-            var messageKeyField = new TextField("Message Key")
+            var messageField = new TextField("Message")
             {
-                value = _data.messageKey,
-                tooltip = "對話內容",
-                style = { width = 200}
+                value = _data.message
             };
-            messageKeyField.RegisterValueChangedCallback(evt =>
+            messageField.RegisterValueChangedCallback(evt =>
             {
-                _data.messageKey = evt.newValue;
+                _data.message = evt.newValue;
                 onChanged?.Invoke();
             });
-            mainContainer.Add(messageKeyField);
+            mainContainer.Add(messageField);
             
-            var messageSpeedField = new FloatField("Message Speed")
+            var speedField = new FloatField("Typing Speed")
             {
-                value = _data.typingSpeed,
-                tooltip = "文字顯示速度（字元/秒）",
-                style = { width = 200}
+                value = _data.typingSpeed
             };
-            messageSpeedField.RegisterValueChangedCallback(evt =>
+            speedField.RegisterValueChangedCallback(evt =>
             {
                 _data.typingSpeed = evt.newValue;
                 onChanged?.Invoke();
             });
-            mainContainer.Add(messageSpeedField);
+            mainContainer.Add(speedField);
 
             OutputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));
             OutputPort.portName = "Next";

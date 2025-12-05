@@ -68,7 +68,7 @@ namespace SG.Dialogue.Presentation
                 _backgroundFadeRoutines.Add(null);
             }
         }
-
+        
         /// <summary>
         /// 顯示中央舞台文字。
         /// </summary>
@@ -91,6 +91,15 @@ namespace SG.Dialogue.Presentation
             {
                 stageTextPresenter.Hide();
             }
+        }
+
+        /// <summary>
+        /// 查詢中央舞台文字的打字機效果是否正在進行中。
+        /// </summary>
+        /// <returns>如果正在打字，則為 true；否則為 false。</returns>
+        public bool IsStageTextTyping()
+        {
+            return stageTextPresenter != null && stageTextPresenter.IsTyping;
         }
 
         /// <summary>

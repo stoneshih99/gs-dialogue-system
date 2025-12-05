@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using SG.Dialogue.Core.Instructions;
-using SG.Dialogue.Enums;
 using SG.Dialogue.Events;
 using SG.Dialogue.Variables;
 using UnityEngine;
