@@ -771,7 +771,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf94155e119b34845b20305dcbc265a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Managers.GameEventManager
-  eventChannel: {fileID: 0}
+  eventChannel: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
   eventMappings: []
 --- !u!1 &2481929353084883359
 GameObject:
@@ -1430,7 +1430,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bc06a6fabac645bfb74d699bcf201e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Managers.DialogueAudioManager
-  eventChannel: {fileID: 0}
+  eventChannel: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
   eventMappings: []
 --- !u!1 &5691339071422144150
 GameObject:
