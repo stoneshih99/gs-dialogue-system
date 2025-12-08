@@ -20,10 +20,12 @@ namespace SG.Dialogue.Enums
         /// 使用 Spine 骨骼動畫作為立繪。
         /// </summary>
         Spine = 2,
+#if LIVE2D_KIT_AVAILABLE
         /// <summary>
         /// 使用 Live2D 模型作為立繪。
         /// </summary>
         Live2D = 3,
+#endif
         /// <summary>
         /// 使用 Sprite Sheet 動畫作為立繪。
         /// </summary>

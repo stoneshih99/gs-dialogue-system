@@ -25,7 +25,9 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         private Toggle _clearAllField;
         private ObjectField _spriteField;
         private Foldout _spineConfigBox;
+#if LIVE2D_KIT_AVAILABLE
         private Foldout _live2DConfigBox;
+#endif
         private Foldout _spriteSheetConfigBox;
         private FloatField _durationField;
 
@@ -72,7 +74,9 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             mainContainer.Add(_spriteField);
 
             BuildSpineConfig(onChanged);
+#if LIVE2D_KIT_AVAILABLE
             BuildLive2DConfig(onChanged);
+#endif
             BuildSpriteSheetConfig(onChanged);
 
             _clearAllField = new Toggle("Clear All On Exit")
@@ -177,6 +181,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             mainContainer.Add(_spineConfigBox);
         }
 
+        #if LIVE2D_KIT_AVAILABLE
         private void BuildLive2DConfig(Action onChanged)
         {
             _live2DConfigBox = new Foldout
@@ -212,6 +217,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             _live2DConfigBox.Add(live2DExpressionField);
             mainContainer.Add(_live2DConfigBox);
         }
+#endif
 
         private void BuildSpriteSheetConfig(Action onChanged)
         {
@@ -324,13 +330,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
-
+#if LIVE2D_KIT_AVAILABLE
             if (_live2DConfigBox != null)
             {
                 _live2DConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Live2D
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
+#endif
 
             if (_spriteSheetConfigBox != null)
             {

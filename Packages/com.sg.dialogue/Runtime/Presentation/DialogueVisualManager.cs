@@ -252,12 +252,14 @@ namespace SG.Dialogue.Presentation
                     spinePresenter.ShowSpine(node.spinePortraitConfig, duration);
                     presenter = spinePresenter;
                     break;
+#if LIVE2D_KIT_AVAILABLE
                 case PortraitRenderMode.Live2D:
                     characterInstance = Instantiate(node.live2DModelPrefab);
                     var live2DPresenter = characterInstance.GetComponent<Live2DDialoguePortraitPresenter>();
                     if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, duration);
                     presenter = live2DPresenter;
                     break;
+#endif
                 case PortraitRenderMode.SpriteSheet:
                     characterInstance = Instantiate(node.spriteSheetPresenter);
                     var spriteSheetPresenter = characterInstance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
@@ -289,11 +291,13 @@ namespace SG.Dialogue.Presentation
                 var spinePresenter = existingState.Instance.GetComponent<SpineDialoguePortraitPresenter>();
                 if (spinePresenter != null) spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
             }
+#if LIVE2D_KIT_AVAILABLE
             else if (node.portraitRenderMode == PortraitRenderMode.Live2D)
             {
                 var live2DPresenter = existingState.Instance.GetComponent<Live2DDialoguePortraitPresenter>();
                 if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
             }
+#endif
             else if (node.portraitRenderMode == PortraitRenderMode.SpriteSheet)
             {
                 var spriteSheetPresenter = existingState.Instance.GetComponent<SpriteSheetDialoguePortraitPresenter>();

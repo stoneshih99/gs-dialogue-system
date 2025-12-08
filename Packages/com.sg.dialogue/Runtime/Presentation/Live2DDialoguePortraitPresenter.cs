@@ -1,5 +1,6 @@
-using System.Collections;
+#if LIVE2D_KIT_AVAILABLE
 using Live2DActorKit.Core;
+using System.Collections;
 using SG.Dialogue.Animation;
 using UnityEngine;
 
@@ -163,3 +164,4 @@ namespace SG.Dialogue.Presentation
         }
     }
 }
+#endif
