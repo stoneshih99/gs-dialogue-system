@@ -1,0 +1,17 @@
+{
+    "name": "com.sg.dialogue",
+    "version": "1.0.0",
+    "displayName": "SG Dialogue System",
+    "description": "A flexible and extensible graph-based dialogue system for Unity, featuring custom nodes, event handling, and a visual editor.",
+    "unity": "2022.3",
+    "author": {
+        "name": "Stone Shih"
+    },
+     "samples": [
+        {
+            "displayName": "1. Basic Dialogue Example",
+            "description": "Shows a simple dialogue tree and how to trigger it.",
+            "path": "Samples~/Dialogue"
+        }
+    ]
+}
