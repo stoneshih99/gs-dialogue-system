@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -18,7 +19,13 @@ namespace SG.Dialogue
         {
             // 在遊戲開始時啟動對話（如果 DialogueController 已設定）
             Debug.LogFormat("UI_FavorDisplay.Start()");
-            dialogueController.StartDialogue();
+
+            // TextNode 中的變數要使用 {} 包起來，例如 {Nickname}
+            var playerDataVariables = new Dictionary<string, string>
+            {
+                ["Nickname"] = "亞瑟"
+            };
+            dialogueController.StartDialogue(playerDataVariables);
         }
 
         private void Update()

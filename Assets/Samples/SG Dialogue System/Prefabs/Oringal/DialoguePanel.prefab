@@ -1593,6 +1593,8 @@ GameObject:
   - component: {fileID: 2990892720674022122}
   - component: {fileID: 432268647813499672}
   - component: {fileID: 2817269173376254361}
+  - component: {fileID: 7291456040836068195}
+  - component: {fileID: 4719698692525247661}
   m_Layer: 0
   m_Name: DialoguePanel
   m_TagString: Untagged
@@ -1699,6 +1701,7 @@ MonoBehaviour:
   uiManager: {fileID: 2282023720654894417}
   visualManager: {fileID: 2990892720674022122}
   cameraController: {fileID: 0}
+  playerDataResolver: {fileID: 4719698692525247661}
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -1721,6 +1724,31 @@ MonoBehaviour:
   targetGrayscaleAlpha: 0.8
   flashMask: {fileID: 5963786462256199739}
   backgroundBlurImage: {fileID: 7993267241850615304}
+--- !u!114 &7291456040836068195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7639811759149525801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d8407a8c6759464eb426b146729acc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.VariableResolver.PlayerVariableResolver
+--- !u!114 &4719698692525247661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7639811759149525801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64fc23b0110640fbb2dd7f9a7503f34b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.VariableResolver.DialoguePlayerDataResolver
+  resolver: {fileID: 7291456040836068195}
 --- !u!1 &7697269485669614275
 GameObject:
   m_ObjectHideFlags: 0

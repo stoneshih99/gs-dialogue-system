@@ -66,7 +66,7 @@ MonoBehaviour:
         nextNodeId: Anim_1
         ActionType: 0
         TargetPosition: 0
-        portraitRenderMode: 2
+        portraitRenderMode: 4
         speakerName: "\u5976\u7403"
         characterSprite: {fileID: 0}
         spinePortraitConfig:
@@ -85,8 +85,9 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
         ClearAllOnExit: 0
-        OverrideDuration: 0
         Duration: 0.2
     - rid: 736264902029869257
       type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -109,10 +110,11 @@ MonoBehaviour:
       data:
         nodeId: TEXT_1
         IsEnabled: 1
+        nextNodeId: CharAct_2
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 0}
         speakerName: "\u5976\u7403"
         text: "\u6211\u7B49\u7B49\u8981\u5403\u52A0\u71B1\u98DF\u7269"
-        nextNodeId: CharAct_2
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -125,7 +127,6 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
     - rid: 736264902029869259
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -154,18 +155,20 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
         ClearAllOnExit: 0
-        OverrideDuration: 0
         Duration: 0.2
     - rid: 736264902029869260
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_2
         IsEnabled: 1
+        nextNodeId: Anim_2
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 0}
         speakerName: "\u9ED1\u5BF6"
         text: "\u6211\u5410\u51FA\u4F86\u7D66\u4F60\u5403"
-        nextNodeId: Anim_2
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -178,7 +181,6 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
     - rid: 736264902029869261
       type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
@@ -223,18 +225,20 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
         ClearAllOnExit: 0
-        OverrideDuration: 0
         Duration: 0.2
     - rid: 736264902029869267
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_3
         IsEnabled: 1
+        nextNodeId: 
+        postTypingDelay: 0.3
         AudioEvent: {fileID: 0}
         speakerName: "\u5976\u7403"
         text: "\u6211\u7B49\u7B49\u8981\u5403\u52A0\u71B1\u98DF\u7269"
-        nextNodeId: 
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -247,5 +251,4 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2

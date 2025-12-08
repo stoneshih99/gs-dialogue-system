@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Presentation;
 using SG.Dialogue.UI;
+using SG.Dialogue.VariableResolver;
 using SG.Dialogue.Variables;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,17 +19,8 @@ namespace SG.Dialogue
     /// </summary>
     public enum AutoAdvanceMode
     {
-        /// <summary>
-        /// 使用在 DialogueGraph 資產中定義的設定。
-        /// </summary>
         Default,
-        /// <summary>
-        /// 強制啟用自動前進，覆寫圖表設定。
-        /// </summary>
         ForceEnable,
-        /// <summary>
-        /// 強制停用自動前進，覆寫圖表設定。
-        /// </summary>
         ForceDisable
     }
 
@@ -56,10 +49,19 @@ namespace SG.Dialogue
         
         [SerializeField] private DialogueCameraController cameraController;
         public DialogueCameraController CameraController => cameraController;
+        
+        [SerializeField] private DialoguePlayerDataResolver playerDataResolver;
 
         [Header("事件")]
         public UnityEvent onDialogueStarted;
         public UnityEvent onDialogueEnded;
+
+        /// <summary>
+        /// 當 FormatString 無法從內部狀態解析變數時觸發。
+        /// 允許外部系統提供變數值。
+        /// Func<string, string>: 輸入參數是變數名稱，返回參數是解析後的值。如果無法解析，應返回 null。
+        /// </summary>
+        public event Func<string, string> OnResolveVariable;
 
         public bool IsRunning { get; private set; }
         public string CurrentNodeId => _currentNodeId;
@@ -103,7 +105,13 @@ namespace SG.Dialogue
             uiManager.OnTypingCompleted -= OnTypingCompleted;
         }
 
-        public void StartDialogue(DialogueGraph newGraph)
+        /// <summary>
+        /// 開始一段新的對話。 
+        /// </summary>
+        /// <param name="newGraph"></param>
+        /// <param name="playerDataVariables">在 runtime 中取代字</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void StartDialogue(DialogueGraph newGraph, Dictionary<string, string> playerDataVariables=null)
         {
             if (IsRunning)
             {
@@ -113,6 +121,14 @@ namespace SG.Dialogue
             if (string.IsNullOrEmpty(newGraph.startNodeId))
             {
                 throw new ArgumentNullException(nameof(newGraph), "newGraph.startNodeId must be specified.");
+            }
+
+            if (playerDataVariables != null)
+            {
+                foreach (var entry in playerDataVariables.ToList())
+                {
+                    playerDataResolver.AddDataMapping(entry.Key, entry.Value);
+                }
             }
             
             graph = newGraph;
@@ -135,6 +151,16 @@ namespace SG.Dialogue
         {
             if (graph == null) { Debug.LogError("DialogueController: DialogueGraph is null."); return; }
             StartDialogue(graph);
+        }
+        
+        /// <summary>
+        /// 開始一段新的對話，並提供玩家資料變數。
+        /// </summary>
+        /// <param name="playerDataVariables"></param>
+        public void StartDialogue(Dictionary<string, string> playerDataVariables)
+        {
+            if (graph == null) { Debug.LogError("DialogueController: DialogueGraph is null."); return; }
+            StartDialogue(graph, playerDataVariables);
         }
 
         private void Advance(string nextNodeId)
@@ -324,10 +350,7 @@ namespace SG.Dialogue
         
         private void TriggerOnExit(DialogueNodeBase node)
         {
-            // 呼叫節點自身的退出邏輯
             node.OnExit(this);
-
-            // 觸發圖層級的退出事件
             graph?.onNodeExited?.Invoke(node.nodeId);
         }
 
@@ -376,11 +399,6 @@ namespace SG.Dialogue
 
         private void OnTypingCompleted()
         {
-            if (_activeWaitForAll != null)
-            {
-                // 此處的邏輯可能在 ForceComplete 被正確處理後變得多餘。
-                // 需要考慮一個分支是應該自動前進還是等待。
-            }
         }
 
         public void EndDialogue()
@@ -465,6 +483,7 @@ namespace SG.Dialogue
             {
                 string varName = match.Groups[1].Value;
                 
+                // 1. 優先從內部狀態查找
                 if (_localState.HasString(varName)) return _localState.GetString(varName);
                 if (globalState != null && globalState.HasString(varName)) return globalState.GetString(varName);
                 
@@ -474,6 +493,21 @@ namespace SG.Dialogue
                 if (_localState.HasBool(varName)) return _localState.GetBool(varName).ToString();
                 if (globalState != null && globalState.HasBool(varName)) return globalState.GetBool(varName).ToString();
 
+                // 2. 如果內部找不到，觸發外部事件
+                if (OnResolveVariable != null)
+                {
+                    // 遍歷所有監聽者
+                    foreach (Func<string, string> resolver in OnResolveVariable.GetInvocationList())
+                    {
+                        string result = resolver(varName);
+                        if (result != null)
+                        {
+                            return result; // 一旦有監聽者成功解析，就返回結果
+                        }
+                    }
+                }
+
+                // 3. 如果都找不到，返回原始匹配的字串 (例如 "{PlayerName}")
                 return match.Value;
             });
         }
