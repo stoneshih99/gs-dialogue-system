@@ -176,3 +176,14 @@
     5.  點擊「**Next >**」按鈕或選擇選項，來推進對話流程。
     6.  您可以透過修改 `GlobalStateAsset` 中的變數，來測試 `ConditionNode` 的不同分支。
     7.  點擊「**Stop Simulation**」按鈕來結束模擬。
+
+### 第三方整合 (Third-Party Integration)
+
+#### Live2D
+本系統支援透過 Scripting Define Symbol 來啟用 Live2D Cubism SDK 的整合功能。
+- **需求**: 您的專案中必須已經安裝了 Live2D Cubism SDK。
+- **啟用步驟**:
+    1. 前往 `Edit > Project Settings > Player`。
+    2. 在 `Other Settings` 區塊下，找到 `Scripting Define Symbols`。
+    3. 新增 `LIVE2D_KIT_AVAILABLE` 這個符號。
+- **效果**: 新增此符號後，`CharacterActionNode` 中將會出現 `Live2D` 的選項，讓您可以直接控制 Live2D 角色的顯示與動作。
