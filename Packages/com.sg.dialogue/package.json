@@ -9,7 +9,7 @@
     },
      "samples": [
         {
-            "displayName": "1. Basic Dialogue Example",
+            "displayName": "Dialogue Example",
             "description": "Shows a simple dialogue tree and how to trigger it.",
             "path": "Samples~/Dialogue"
         }
