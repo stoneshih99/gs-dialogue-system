@@ -1,0 +1,279 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c0d229053405472caf5f5e715b9e2ff, type: 3}
+  m_Name: Graph_V1
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueGraph
+  graphId: V1
+  startNodeId: CHAR_1
+  IsSkippable: 1
+  AllNodes:
+  - rid: 1643815601279336707
+  - rid: 1643815601279336708
+  - rid: 1643815601279336709
+  - rid: 1643815601279336711
+  - rid: 1643815601279336716
+  - rid: 1643815601279336742
+  - rid: 1643815601279336747
+  - rid: 1643815607100244166
+  - rid: 1643815607100244167
+  onDialogueStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onDialogueEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  onNodeEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  onNodeExited:
+    m_PersistentCalls:
+      m_Calls: []
+  autoAdvanceEnabled: 0
+  defaultAutoAdvanceDelay: 1.2
+  nodePositions:
+  - nodeId: TEXT_1
+    position: {x: 356.5, y: 343}
+  - nodeId: CHAR_1
+    position: {x: 104.5, y: 343}
+  - nodeId: TEXT_2
+    position: {x: 564.5, y: 343}
+  - nodeId: TEXT_3
+    position: {x: 833.5, y: 343}
+  - nodeId: CHAR_2
+    position: {x: 1162, y: 343}
+  - nodeId: CHAR_3
+    position: {x: 1911.5, y: 343}
+  - nodeId: EVENT_1
+    position: {x: 2509, y: 343}
+  - nodeId: TEXT_4
+    position: {x: 1579.5, y: 343}
+  - nodeId: TEXT_5
+    position: {x: 2203, y: 343}
+  references:
+    version: 2
+    RefIds:
+    - rid: 1643815601279336707
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_1
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u9ED1\u5BF6"
+        text: Hi
+        nextNodeId: TEXT_2
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_1
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
+    - rid: 1643815601279336708
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CHAR_1
+        IsEnabled: 1
+        nextNodeId: TEXT_1
+        ActionType: 0
+        TargetPosition: 1
+        portraitRenderMode: 0
+        speakerName: 
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        Duration: 0.3
+    - rid: 1643815601279336709
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_2
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u9ED1\u5BF6"
+        text: "\u6211\u662F\u4E00\u4F4D\u8056\u9A0E\u58EB"
+        nextNodeId: TEXT_3
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_2
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
+    - rid: 1643815601279336711
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_3
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u9ED1\u5BF6"
+        text: "\u8B93\u6211\u70BA\u5C55\u793A\u4E00\u4E0B\u6211\u7684\u80FD\u529B"
+        nextNodeId: CHAR_2
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_3
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
+    - rid: 1643815601279336716
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CHAR_2
+        IsEnabled: 1
+        nextNodeId: TEXT_4
+        ActionType: 0
+        TargetPosition: 1
+        portraitRenderMode: 0
+        speakerName: 
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        Duration: 0.3
+    - rid: 1643815601279336742
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CHAR_3
+        IsEnabled: 1
+        nextNodeId: TEXT_5
+        ActionType: 0
+        TargetPosition: 0
+        portraitRenderMode: 0
+        speakerName: 
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        ClearAllOnExit: 0
+        Duration: 0.3
+    - rid: 1643815601279336747
+      type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: EVENT_1
+        IsEnabled: 1
+        GameEvent: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
+        request:
+          EventName: "\u5C0D\u8A71\u6D41\u7A0B\u7D50\u675F"
+        nextNodeId: 
+    - rid: 1643815607100244166
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_4
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u5976\u7403"
+        text: "\u63DB\u6211\u767B\u5834\u56C9"
+        nextNodeId: CHAR_3
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_4
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3
+    - rid: 1643815607100244167
+      type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TEXT_5
+        IsEnabled: 1
+        AudioEvent: {fileID: 0}
+        speakerName: "\u5976\u7403"
+        text: "\u6211\u662F\u64C1\u6709\u98DB\u884C\u80FD\u529B\u7684"
+        nextNodeId: EVENT_1
+        IsInterruptible: 0
+        InterruptEvent: {fileID: 0}
+        InterruptNextNodeId: 
+        textKey: Graph_V1_TEXT_5
+        textCues: []
+        variableChanges: []
+        onEnter:
+          m_PersistentCalls:
+            m_Calls: []
+        onExit:
+          m_PersistentCalls:
+            m_Calls: []
+        overrideAutoAdvance: 0
+        autoAdvanceDelay: 1.2
+        postTypingDelay: 0.3

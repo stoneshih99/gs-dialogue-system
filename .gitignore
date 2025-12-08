@@ -17,6 +17,15 @@
 # Recordings can get excessive in size
 /[Rr]ecordings/
 
+# Ignore all packages by default
+/[Pp]ackages/
+
+# But DO NOT ignore the local package that is part of this repository
+!/[Pp]ackages/com.sg.dialogue/
+
+# A global .gitignore might ignore files ending with ~, so we must explicitly un-ignore Samples~
+!/[Pp]ackages/com.sg.dialogue/Samples~/
+
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
 

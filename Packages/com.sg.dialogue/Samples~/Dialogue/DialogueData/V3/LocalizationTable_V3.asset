@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fd0bd841fec54a018cbff7a27538b4d, type: 3}
+  m_Name: LocalizationTable_V3
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.LocalizationTable
+  entries:
+  - key: Graph_V3_TEXT_1
+    zhTW: "\u5728\u4E00\u500B\u5929\u6C23\u6674\u90CE\u7684\u4E0B\u5348\u4E0D\u77E5\u9053\u8981\u5E79\u561B"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V3_TEXT_2
+    zhTW: "\u6211\u5011\u4E00\u8D77\u4F86\u53BB\u73A9\u5FCD\u8C46\u98A8\u96F24\u5427!"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V3_TEXT_4
+    zhTW: "\u5148\u9078\u64C7\u4F3A\u670D\u5668"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: Graph_V3_TEXT_5
+    zhTW: "\u767B\u5165\u9B3C\u5CF6\u8A0E\u4F10\u60E1\u9B3C\u5427"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
+  - key: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
+    zhTW: "\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
+      {Nickname}"
+    jaJP: 
+    enUS: 
+    speakerZhTW: 
+    speakerJaJP: 
+    speakerEnUS: 
