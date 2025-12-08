@@ -1,5 +1,24 @@
 # SG Dialogue System - 使用手冊
 
+## 安裝 (Installation)
+
+1.  **安裝相依套件 (Install Dependencies)**
+    **重要:** 在使用本對話系統前，您需要透過 Unity Package Manager 的 "Add package from git URL..." 功能，手動安裝以下所有相依套件：
+
+    *   **LitMotion**: `https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion`
+    *   **LitMotion.Animation**: `https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion.Animation`
+    *   **Editor Toolbox**: `https://github.com/arimger/Unity-Editor-Toolbox.git#upm`
+    *   **Spine C# Runtime**: `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-csharp/src#4.2`
+    *   **Spine Unity Runtime**: `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Assets/Spine#4.2`
+    *   **NuGetForUnity**: `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`
+
+2.  **安裝對話系統 (Install Dialogue System)**
+    在這些套件都安裝完畢後，您就可以使用相同的 "Add package from git URL..." 功能，安裝本對話系統：
+
+    `https://github.com/stoneshih99/gs-dialogue-system.git?path=Packages/com.sg.dialogue`
+
+---
+
 ## 1. 總覽
 
 ### 系統目標
@@ -141,7 +160,7 @@
     **步驟 3: 在對話中使用**
     現在，您可以在任何對話文字中自由地使用 `{PlayerName}`、`{PlayerLevel}`、`{Gold}` 等您剛剛定義的變數。
 
-- **優點**: 這個設計將對話系統與您的遊戲邏輯**完全解耦**。對話系統不需要知道 `PlayerProfile` 或 `YourGameManager` 的存在，它只與實現了 `IVariableDataProvider` 介面的物件溝通。這使得系統非常乾淨、模組化且易於擴展。
+- **優點**: 這個設計將對話系統與您的遊戲 logique **完全解耦**。對話系統不需要知道 `PlayerProfile` 或 `YourGameManager` 的存在，它只與實現了 `IVariableDataProvider` 介面的物件溝通。這使得系統非常乾淨、模組化且易於擴展。
 
 ### 圖表驗證與執行高亮
 - **圖表驗證**: 在完成一個複雜的對話圖後，請務必使用「Localization」分頁中的「**Validate Graph**」按鈕。這個「一鍵體檢」功能可以為您找出懸空的連線或無法到達的「孤島」節點。
