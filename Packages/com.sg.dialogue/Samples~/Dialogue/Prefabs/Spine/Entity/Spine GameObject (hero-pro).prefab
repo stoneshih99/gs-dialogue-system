@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7343395476029251546}
   - component: {fileID: 1017081591690287311}
   - component: {fileID: 8066745287465858992}
-  m_Layer: 11
+  m_Layer: 20
   m_Name: Spine GameObject (hero-pro)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

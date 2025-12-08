@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3476956230119722217}
   - component: {fileID: 7748314127123298409}
   - component: {fileID: -6547883860402967324}
-  m_Layer: 11
+  m_Layer: 20
   m_Name: Spine GameObject (dragon)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
