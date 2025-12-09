@@ -1,39 +1,16 @@
 # SG Dialogue System - 使用手冊
 
-## 安裝 (Installation)
-
-1.  **安裝相依套件 (Install Dependencies)**
-    **重要:** 在使用本對話系統前，您需要透過 Unity Package Manager 的 "Add package from git URL..." 功能，手動安裝以下所有相依套件：
-
-    *   **LitMotion**: `https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion`
-    *   **LitMotion.Animation**: `https://github.com/annulusgames/LitMotion.git?path=src/LitMotion/Assets/LitMotion.Animation`
-    *   **Editor Toolbox**: `https://github.com/arimger/Unity-Editor-Toolbox.git#upm`
-    *   **Spine C# Runtime**: `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-csharp/src#4.2`
-    *   **Spine Unity Runtime**: `https://github.com/EsotericSoftware/spine-runtimes.git?path=spine-unity/Assets/Spine#4.2`
-    *   **NuGetForUnity**: `https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity`
-
-2.  **安裝對話系統 (Install Dialogue System)**
-    在這些套件都安裝完畢後，您就可以使用相同的 "Add package from git URL..." 功能，安裝本對話系統：
-
-    `https://github.com/stoneshih99/gs-dialogue-system.git?path=Packages/com.sg.dialogue`
+歡迎使用 SG Dialogue System！本文件將引導您了解系統的核心概念、使用方法與進階技巧。
 
 ---
 
-## 1. 總覽
+## 1. 核心概念
 
-### 系統目標
 本系統旨在成為一個基於節點、時間軸式的、可擴充的對話編輯工具。其核心設計理念是讓敘事設計師能夠以最少的程式碼，創作出複雜、動態且具有電影感的對話演出。
 
-### 核心概念
-- **DialogueGraph (對話圖)**: 一個 `ScriptableObject` 資產，作用類似於「演出時間軸」。它包含一系列定義了對話流程與事件的節點。
-- **DialogueController (對話控制器)**: 場景中的一個 `MonoBehaviour`，扮演「導演」的角色。它會讀取一個 `DialogueGraph` 並逐一執行其中的節點，同時協調各個管理器（UI、視覺、音訊）。
-- **Nodes (節點)**: 每一個節點都是序列中的一個獨立、具體的動作（例如：顯示文字、讓角色登場、播放音樂）。透過連接這些節點，您可以創造出一場複雜的演出。
-
-### 設計哲學
-本系統建立在**單一職責原則 (Single Responsibility Principle)** 之上。每個節點只做一件事，並把它做好。這種模組化的方法帶來了以下好處：
-- **清晰**: 對話圖變得易於閱讀和理解。任何人都能一眼看懂事件的發生順序。
-- **靈活**: 複雜的序列是透過組合簡單的節點來完成的，這讓您能精準地控制事件的節奏和順序。
-- **可擴充**: 新增功能（例如攝影機震動或新的動畫類型）就像建立一個新的節點類型一樣簡單，而無需修改現有的節點。
+*   **DialogueGraph (對話圖)**: 一個 `ScriptableObject` 資產，是所有對話的藍圖。它作用類似於「演出時間軸」，包含一系列定義了對話流程與事件的節點。
+*   **DialogueController (對話控制器)**: 場景中的一個 `MonoBehaviour`，扮演「導演」的角色。它會讀取一個 `DialogueGraph` 並逐一執行其中的節點，同時協調各個管理器（如 UI、視覺、音訊）。
+*   **Nodes (節點)**: 每一個節點都是序列中的一個獨立、具體的動作（例如：顯示文字、讓角色登場、播放音樂）。透過連接這些節點，您可以創造出一場複雜的演出。
 
 ---
 
@@ -41,149 +18,208 @@
 
 請依照以下步驟來建立並執行您的第一個對話序列。
 
-### 步驟一：建立資產
-1.  **建立對話圖**: 在 Project 視窗中，點擊右鍵並選擇 `Create > SG/Dialogue > Dialogue Graph`。將它命名為，例如 `CH1_Intro_Graph`。
-2.  **建立全域狀態資產**: 點擊右鍵並選擇 `Create > SG/Dialogue > Dialogue State Asset`。將它命名為 `Global_GameState`。這個檔案將用來儲存跨對話的變數（例如：玩家聲望、任務旗標）。
+### 步驟 1: 建立核心資產
 
-### 步驟二：開啟編輯器
-1.  從頂部選單，導航至 `SG/Dialogue > Graph + Localization Window`。
-2.  這會開啟主要的對話編輯視窗。
+1.  **建立對話圖**: 在 Project 視窗中，點擊右鍵並選擇 `Create > SG/Dialogue > Dialogue Graph`。將它命名為 `CH1_Intro_Graph`。
+2.  **建立全域狀態資產**: 同樣地，選擇 `Create > SG/Dialogue > Dialogue State Asset`。將它命名為 `Global_GameState`。這個檔案將用來儲存跨對話的變數（例如：玩家聲望、任務旗標）。
 
-### 步驟三：編排對話流
-1.  **選取資產**:
-    *   在「Graph」分頁中，找到「Graph」物件欄位，並將您的 `CH1_Intro_Graph.asset` 拖曳進去。
-    *   找到「Global State」物件欄位，並將您的 `Global_GameState.asset` 拖曳進去。
-2.  **建立節點**:
-    *   在灰色的網格上點擊右鍵，開啟快捷選單。
-    *   選擇「Add Character Action Node」。一個新的節點將會出現。
-    *   選擇「Add Text Node」。
-3.  **設定節點**:
-    *   **CharacterActionNode**:
-        *   將 `Action Type` 設為 `Enter`。
-        *   將 `Position` 設為 `Center`。
-        *   將 `Render Mode` 設為 `Sprite` 並指定一個角色圖片。
-    *   **TextNode**:
-        *   將 `Speaker Name` 設為「英雄」。
-        *   將 `Text` 設為「哈囉，世界！」。
-4.  **連接節點**:
-    *   從 `CharacterActionNode` 的「Next」輸出口點擊並拖曳，連接到 `TextNode` 的「In」輸入口。一條線會將它們連起來，定義了流程。
-5.  **設定開始節點**:
-    *   在 `CharacterActionNode` 上點擊右鍵，選擇 `Set as Start Node`。該節點的邊框會變為綠色，表示它是對話的入口。
+### 步驟 2: 開啟並設定編輯器
 
-### 步驟四：在場景中執行
+1.  從頂部選單，導航至 `SG/Dialogue > Graph + Localization Window` 以開啟主編輯視窗。
+2.  在「Graph」分頁中，將您剛建立的 `CH1_Intro_Graph` 和 `Global_GameState` 拖曳到對應的物件欄位中。
+
+### 步驟 3: 編排對話流
+
+1.  **建立節點**: 在灰色的網格上點擊右鍵，開啟快捷選單。
+    *   選擇 `Add Character Action Node`。
+    *   選擇 `Add Text Node`。
+2.  **設定節點**:
+    *   **CharacterActionNode**: 將 `Action Type` 設為 `Enter`，`Position` 設為 `Center`，並指定一個角色圖片。
+    *   **TextNode**: 將 `Speaker Name` 設為「英雄」，`Text` 設為「哈囉，世界！」。
+3.  **連接節點**: 從 `CharacterActionNode` 的「Next」輸出口點擊並拖曳，連接到 `TextNode` 的「In」輸入口。
+4.  **設定開始節點**: 在 `CharacterActionNode` 上點擊右鍵，選擇 `Set as Start Node`。該節點的邊框會變為綠色，表示它是對話的入口。
+
+### 步驟 4: 在場景中執行
+
 1.  **設定控制器**:
     *   在您的場景中，建立一個空的 GameObject 並命名為 `DialogueSystem`。
     *   將 `DialogueController` 元件加入到這個物件上。
-    *   將您的 `CH1_Intro_Graph.asset` 拖曳到 `DialogueController` 的 `Graph` 欄位。
-    *   將您的 `Global_GameState.asset` 拖曳到 `Global State` 欄位。
-    *   確保 `UI Manager`, `Visual Manager` 等欄位都已連結到它們各自的元件。
-2.  **觸發對話**:
-    *   要開始對話，您需要在某個腳本中取得 `DialogueController` 的引用，並呼叫 `controller.StartDialogue()`。
-    *   為了快速測試，您可以建立一個簡單的觸發腳本：
-        ```csharp
-        public class DialogueTrigger : MonoBehaviour
-        {
-            public DialogueController controller;
-            void Start()
-            {
-                if (controller != null) controller.StartDialogue();
-            }
-        }
-        ```
+    *   將您的 `CH1_Intro_Graph` 和 `Global_GameState` 拖曳到 `DialogueController` 對應的欄位。
+2.  **觸發對話**: 要開始對話，您需要在某個腳本中取得 `DialogueController` 的引用，並呼叫 `controller.StartDialogue()`。
 
-現在，當您執行遊戲時，您應該會看到您的角色登場並說出「哈囉，世界！」。恭喜！
+> **快速測試**: 您可以建立一個簡單的觸發腳本來立即開始對話：
+> ```csharp
+> public class DialogueTrigger : MonoBehaviour
+> {
+>     public DialogueController controller;
+>     void Start() { if (controller != null) controller.StartDialogue(); }
+> }
+> ```
+
+現在，執行遊戲，您應該會看到您的第一個對話成功演出！
 
 ---
 
 ## 3. 節點參考手冊
 
-(此處節點說明與前一版本相同，為求簡潔省略)
+本章節將詳細介紹各個節點的功能與用途。
+
+### 3.1 文字與敘事 (Text & Narrative)
+
+#### Text Node
+*   **功能**: 顯示一段對話文字。這是最核心的節點。
+*   **屬性**:
+    *   `Speaker Name`: 說話者的名字。
+    *   `Text`: 要顯示的對話內容，支援使用 `{變數名}` 來動態插入變數。
+    *   `Auto Advance`: 是否在顯示完畢後自動前進到下一個節點。
+
+#### Choice Node
+*   **功能**: 向玩家呈現多個選項，並根據玩家的選擇，將流程導向不同的分支。
+*   **屬性**:
+    *   `Choices`: 一個選項列表，每個選項包含 `Text` (選項文字) 和一個輸出口 (Port)。
+
+#### Stage Text Node
+*   **功能**: 顯示非對話性質的文字，例如場景描述、旁白或螢幕中央的提示。
+*   **屬性**:
+    *   `Text`: 要顯示的文字內容。
+    *   `Display Time`: 文字顯示的持續時間。
+
+### 3.2 流程控制 (Flow Control)
+
+#### Condition Node
+*   **功能**: 根據一個或多個變數的狀態來決定對話的走向，實現分支邏輯。
+*   **屬性**:
+    *   `Conditions`: 一個條件列表，每個條件包含要檢查的變數、比較方式 (如等於、大於) 和目標值。
+    *   提供 `If` (條件成立) 和 `Else` (條件不成立) 兩個輸出口。
+
+#### Wait Node
+*   **功能**: 暫停對話流程一段指定的時間。常用於控制演出節奏。
+*   **屬性**:
+    *   `Wait Time`: 等待的秒數。
+
+#### Parallel Node
+*   **功能**: 將流程分岔為多個同時執行的分支。所有分支都執行完畢後，才會前進到下一個節點。適用於需要同時觸發多個獨立事件的場合 (如：一個角色說話的同時，另一個角色做動作)。
+
+#### Sequence Node
+*   **功能**: 將多個節點打包成一個可重複使用的序列。可以簡化複雜的圖表結構。
+
+### 3.3 角色與視覺 (Character & Visuals)
+
+#### Character Action Node
+*   **功能**: 控制角色的所有視覺表現，是演出的核心。
+*   **屬性**:
+    *   `Action Type`: 執行的動作，如 `Enter` (登場), `Exit` (退場), `Move` (移動), `Change Sprite` (更換表情/服裝)。
+    *   `Render Mode`: 渲染模式，支援 `Sprite`, `Live2D`, `Spine` 等。
+    *   其他屬性會根據 `Action Type` 動態變化。
+
+#### Animation Node
+*   **功能**: 播放指定物件 (不一定是角色) 的 Animator 動畫。
+*   **屬性**:
+    *   `Target`: 要播放動畫的 GameObject。
+    *   `Animation Clip`: 要播放的動畫片段。
+
+#### Set Background Node
+*   **功能**: 更換場景的背景圖片。
+*   **屬性**:
+    *   `Background Sprite`: 新的背景圖片。
+    *   `Fade Duration`: 漸變的持續時間。
+
+### 3.4 攝影機與特效 (Camera & Effects)
+
+#### Camera Control Node
+*   **功能**: 控制主攝影機的行為，營造電影感。
+*   **屬性**:
+    *   `Action Type`: 執行的動作，如 `Move To` (移動到目標), `Zoom` (縮放), `Shake` (震動), `Follow` (跟隨目標)。
+    *   其他屬性會根據 `Action Type` 動態變化。
+
+#### Screen Effect Node
+*   **功能**: 觸發一個通用的螢幕後期處理特效。
+
+#### Flash / Flicker / Blur Effect Node
+*   **功能**: 觸發特定的內建螢幕特效，如閃光、閃爍或模糊。
+*   **屬性**:
+    *   `Duration`: 特效持續時間。
+    *   `Intensity`: 特效強度。
+
+### 3.5 遊戲整合 (Game Integration)
+
+#### Game Event Node
+*   **功能**: 觸發一個在遊戲邏輯中定義的全域事件。這是實現對話系統與遊戲玩法解耦的關鍵。
+*   **屬性**:
+    *   `Event Name`: 要觸發的事件名稱字串。
+
+#### Play Audio Node
+*   **功能**: 播放背景音樂 (BGM) 或音效 (SFX)。
+*   **屬性**:
+    *   `Audio Type`: BGM 或 SFX。
+    *   `Audio Clip`: 要播放的音訊片段。
+    *   `Action`: 播放、暫停或停止。
+
+### 3.6 除錯 (Debugging)
+
+#### Log Node
+*   **功能**: 在 Unity 主控台印出一條訊息。主要用於在不中斷遊戲的情況下除錯對話流程或變數狀態。
+*   **屬性**:
+    *   `Message`: 要印出的訊息內容。
 
 ---
 
 ## 4. 進階主題與最佳實踐
 
-### 演出時間軸概念
-本系統的核心優勢在於將複雜的演出拆解為一系列簡單、獨立的步驟。請始終以「時間軸」的思維來編排您的對話。
+### 4.1 事件驅動架構
 
-### 事件驅動架構 (Event-Driven Architecture)
 `GameEventNode` 和 `PlayAudioNode` 是將對話與遊戲玩法深度整合的關鍵。請盡可能地使用它們，而不是在對話系統的程式碼中硬式編寫遊戲邏輯。
-- **優點**: **解耦**。您的對話團隊可以專心編寫故事，而不需要知道程式設計師是如何實現「開門」或「播放特定音樂」的。他們只需要在正確的時機，觸發正確的 `EventName` 即可。
-- **如何設定**:
-    1. 在場景中建立一個 GameObject，並掛載 `GameEventManager` 或 `DialogueAudioEventManager`。
-    2. 在對應的 Manager 上，設定 `Event Channel`。
-    3. 在 `Event Mappings` 列表中，新增一個項目，填寫 `Event Name` (例如 `PlayerGetItem`)，並將希望觸發的 `UnityEvent` (例如 `Inventory.AddItem`) 拖曳到 `Response` 欄位中。
-    4. 在對話圖中，使用 `GameEventNode` 或 `PlayAudioNode`，並在其 `Event Name` 欄位中輸入您剛剛設定的名稱。
 
-### 變數系統
+*   **優點**: **解耦**。您的敘事團隊可以專心編寫故事，而不需要知道程式設計師是如何實現「開門」或「播放特定音樂」的。他們只需要在正確的時機，觸發正確的 `EventName` 即可。
+*   **設定方法**:
+    1.  在場景中建立一個掛載 `GameEventManager` 或 `DialogueAudioEventManager` 的物件。
+    2.  在 Manager 上設定 `Event Channel` 和 `Event Mappings`。
+    3.  在對話圖中，使用 `GameEventNode` 或 `PlayAudioNode`，並在其 `Event Name` 欄位中輸入您設定的名稱。
+
+### 4.2 變數系統
 
 #### 全域變數 vs. 局部變數
-- **全域變數 (`GlobalStateAsset`)**:
-    - **用途**: 用於儲存需要**長期保留**、**跨場景**或**需要被存檔**的狀態。
-    - **範例**: 玩家對某個陣營的好感度、是否完成了某個關鍵任務。
-- **局部變數 (Local Variables)**:
-    - **用途**: 用於儲存**僅在當前對話中**有意義的臨時狀態。這些變數在對話結束後會被清除。
-    - **範例**: 在一次盤問中，玩家連續選擇了三次「說謊」選項。
-- **使用方法**: 在任何節點的文字欄位中，使用 `{變數名}` 的格式來引用變數。在 `ConditionNode` 中，直接輸入變數名稱即可。
+
+*   **全域變數 (`GlobalStateAsset`)**: 用於儲存需要**長期保留**、**跨場景**或**需要被存檔**的狀態 (如：好感度、任務旗標)。
+*   **局部變數 (Local Variables)**: 用於儲存**僅在當前對話中**有意義的臨時狀態，對話結束後會被清除。
+
+> **使用語法**: 在任何節點的文字欄位中，使用 `{變數名}` 的格式來引用變數。在 `ConditionNode` 中，直接輸入變數名稱即可。
 
 #### 外部變數解析：資料提供者模式
-有時，您需要在對話中顯示不儲存在對話系統內部（`GlobalStateAsset` 或局部變數）的資料，例如玩家名稱、等級或金錢數量。本系統提供了一個基於「資料提供者模式」的框架，讓任何執行時的物件都能向對話系統提供動態變數。
 
-- **運作原理**:
-    1.  **`IVariableDataProvider` 介面**: 一個簡單的合約，任何想提供資料的類別都可以實現它。
-    2.  **資料提供者 (Provider)**: 一個實現了該介面的 `MonoBehaviour`。它內部維護一個 `key -> value` 的字典，並在啟動時向解析器註冊自己。
-    3.  **變數解析器 (Resolver)**: 一個中央樞紐 (`PlayerVariableResolver`)，負責管理所有註冊的資料提供者。當對話系統請求一個變數時，它會廣播這個請求給所有提供者，直到有一個能回應為止。
+有時，您需要在對話中顯示不儲存在對話系統內部的資料（如玩家名稱、等級）。本系統提供了一個「資料提供者模式」的框架來實現此功能。
 
-- **如何實現**:
-
-    **步驟 1: 設定場景**
-    1.  在您的 `DialogueSystem` 物件上，確保掛載了 `DialogueController` 和 `PlayerVariableResolver` 這兩個元件。
-    2.  在場景的其他地方（例如，一個名為 `GameLogic` 的物件上），掛載 `RuntimeDataProvider` 元件。
-    3.  在 `RuntimeDataProvider` 的 Inspector 中，將 `PlayerVariableResolver` 物件拖曳到 `Resolver` 欄位中。
-
-    **步驟 2: 擴充您的資料提供者**
-    打開 `RuntimeDataProvider.cs` 腳本。在 `Awake()` 方法中，您可以自由地新增、修改或刪除任何您想提供的變數。這是擴充自訂變數的**唯一需要修改的地方**。
+1.  **實現 `IVariableDataProvider` 介面**: 讓任何類別都能成為資料來源。
+2.  **註冊資料提供者**: 在 `PlayerVariableResolver` 中註冊您的資料提供者。
+3.  **擴充 `RuntimeDataProvider.cs`**: 這是擴充自訂變數的**唯一需要修改的地方**。在 `Awake()` 方法中，將您的遊戲資料映射到對話系統可以使用的變數名稱。
     ```csharp
     // RuntimeDataProvider.cs
     private void Awake()
     {
-        // ...
         // Key 是在對話中使用的名稱，Value 是一個返回目前值的函式。
         _dataMappings["PlayerName"] = () => PlayerProfile.PlayerName;
         _dataMappings["PlayerLevel"] = () => YourGameManager.Instance.PlayerLevel.ToString();
-        _dataMappings["Gold"] = () => YourGameManager.Instance.Gold.ToString();
-        _dataMappings["GuildName"] = () => YourGameManager.Instance.Guild.Name;
-        // ...
     }
     ```
 
-    **步驟 3: 在對話中使用**
-    現在，您可以在任何對話文字中自由地使用 `{PlayerName}`、`{PlayerLevel}`、`{Gold}` 等您剛剛定義的變數。
+### 4.3 開發者工具
 
-- **優點**: 這個設計將對話系統與您的遊戲 logique **完全解耦**。對話系統不需要知道 `PlayerProfile` 或 `YourGameManager` 的存在，它只與實現了 `IVariableDataProvider` 介面的物件溝通。這使得系統非常乾淨、模組化且易於擴展。
+*   **圖表驗證 (Validate Graph)**: 在「Localization」分頁中，使用「**Validate Graph**」按鈕來找出懸空的連線或無法到達的「孤島」節點。
+*   **執行高亮 (Execution Highlight)**: 在 Play Mode 中，編輯器會即時高亮目前正在執行的節點，便於追蹤和除錯。
+*   **對話模擬器 (Dialogue Simulator)**: 在「**Simulator**」分頁中，無需進入 Play Mode 即可快速預覽和偵錯對話流程，極大地加速開發效率。
 
-### 圖表驗證與執行高亮
-- **圖表驗證**: 在完成一個複雜的對話圖後，請務必使用「Localization」分頁中的「**Validate Graph**」按鈕。這個「一鍵體檢」功能可以為您找出懸空的連線或無法到達的「孤島」節點。
-- **執行高亮**: 當您在 Unity 編輯器中直接執行遊戲時，對話圖編輯器會即時高亮目前正在執行的節點。這對於追蹤和除錯複雜的對話流程非常有幫助。
+### 4.4 第三方整合
 
-### 對話模擬器 (Dialogue Simulator)
-- **用途**: 無需進入遊戲播放模式，直接在編輯器中快速預覽和偵錯您的對話流程。這能極大地加速開發和迭代效率。
-- **如何使用**:
-    1.  在「Graph」分頁中，確保您已經選取了要測試的 `DialogueGraph` 和 `GlobalStateAsset`。
-    2.  切換到新的「**Simulator**」分頁。
-    3.  點擊「**Start Simulation**」按鈕。
-    4.  模擬器將會從 `DialogueGraph` 的 `Start Node` 開始執行。您會在面板上看到對話文字、說話者名稱和動態生成的選項按鈕。
-    5.  點擊「**Next >**」按鈕或選擇選項，來推進對話流程。
-    6.  您可以透過修改 `GlobalStateAsset` 中的變數，來測試 `ConditionNode` 的不同分支。
-    7.  點擊「**Stop Simulation**」按鈕來結束模擬。
-
-### 第三方整合 (Third-Party Integration)
+本系統支援透過 Scripting Define Symbol 來啟用與其他工具的整合。
 
 #### Live2D
-本系統支援透過 Scripting Define Symbol 來啟用 Live2D Cubism SDK 的整合功能。
-- **需求**: 您的專案中必須已經安裝了 Live2D Cubism SDK。
-- **啟用步驟**:
-    1. 前往 `Edit > Project Settings > Player`。
-    2. 在 `Other Settings` 區塊下，找到 `Scripting Define Symbols`。
-    3. 新增 `LIVE2D_KIT_AVAILABLE` 這個符號。
-- **效果**: 新增此符號後，`CharacterActionNode` 中將會出現 `Live2D` 的選項，讓您可以直接控制 Live2D 角色的顯示與動作。
+
+*   **需求**: 您的專案中必須已經安裝了 Live2D Cubism SDK。
+*   **啟用步驟**:
+    1.  前往 `Edit > Project Settings > Player`。
+    2.  在 `Other Settings` 下的 `Scripting Define Symbols` 中，新增 `LIVE2D_KIT_AVAILABLE`。
+*   **效果**: 新增此符號後，`CharacterActionNode` 中將會出現 `Live2D` 的選項，讓您可以直接控制 Live2D 角色的顯示與動作。
+
+#### Spine
+
+_(類似地，您可以在此處新增 Spine 的整合說明)_
