@@ -323,13 +323,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
-
+#if SPINE_KIT_AVAILABLE
             if (_spineConfigBox != null)
             {
                 _spineConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Spine
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
+#endif
 #if LIVE2D_KIT_AVAILABLE
             if (_live2DConfigBox != null)
             {

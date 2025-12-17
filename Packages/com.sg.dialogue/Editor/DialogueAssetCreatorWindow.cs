@@ -15,7 +15,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// <summary>
         /// 開啟對話資源建立器視窗。
         /// </summary>
-        [MenuItem("SG/Dialogue/Create Dialogue Assets...", false, 0)]
+        [MenuItem("SG Framework/Dialogue/Create Dialogue Assets...", false, 0)]
         public static void ShowWindow()
         {
             GetWindow<DialogueAssetCreatorWindow>("Dialogue Asset Creator");

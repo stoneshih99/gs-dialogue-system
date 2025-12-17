@@ -1,3 +1,4 @@
+#if SPINE_KIT_AVAILABLE
 using System.Collections;
 using SG.Dialogue.Animation;
 using Spine.Unity;
@@ -193,3 +194,4 @@ namespace SG.Dialogue.Presentation
         }
     }
 }
+#endif

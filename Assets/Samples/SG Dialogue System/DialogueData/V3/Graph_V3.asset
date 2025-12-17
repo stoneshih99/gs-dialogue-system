@@ -25,6 +25,7 @@ MonoBehaviour:
   - rid: 736264946891620428
   - rid: 736264946891620429
   - rid: 736264991698321481
+  - rid: 736265219027238986
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -44,8 +45,6 @@ MonoBehaviour:
     position: {x: -172.5, y: 424}
   - nodeId: TEXT_1
     position: {x: 91, y: 457}
-  - nodeId: CAM_1
-    position: {x: -113.5, y: 437}
   - nodeId: PARALLEL_1
     position: {x: -1076.5, y: 255.5}
   - nodeId: Anim_1
@@ -82,6 +81,8 @@ MonoBehaviour:
     position: {x: 386, y: 241}
   - nodeId: StageText_1
     position: {x: -506.5, y: 255.5}
+  - nodeId: CAM_1
+    position: {x: -945, y: 559}
   references:
     version: 2
     RefIds:
@@ -107,7 +108,7 @@ MonoBehaviour:
         - Anim_1
         - LOG_2
         - EVENT_2
-        nextNodeId: TEXT_2
+        nextNodeId: CAM_1
     - rid: 736264920620073053
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -435,3 +436,16 @@ MonoBehaviour:
           {Nickname}"
         messageKey: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
         typingSpeed: 0.1
+    - rid: 736265219027238986
+      type: {class: CameraControlNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CAM_1
+        IsEnabled: 1
+        ActionType: 0
+        Duration: 0.5
+        ShakeIntensity: 10
+        ShakeVibrato: 10
+        TargetZoom: 4
+        PanTargetPosition: {x: 0, y: 0}
+        FocusTarget: {fileID: 0}
+        nextNodeId: TEXT_2

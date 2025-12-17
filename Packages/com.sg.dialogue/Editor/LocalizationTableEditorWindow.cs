@@ -41,7 +41,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// <summary>
         /// 在 Unity 編輯器菜單中添加一個項目，用於打開本地化表格編輯器。
         /// </summary>
-        [MenuItem("SG/Dialogue/Localization Table Editor")]
+        [MenuItem("SG Framework/Dialogue/Localization Table Editor")]
         public static void Open()
         {
             var wnd = GetWindow<LocalizationTableEditorWindow>(); // 獲取或創建視窗實例

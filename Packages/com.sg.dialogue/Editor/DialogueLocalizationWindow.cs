@@ -53,7 +53,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// <summary>
         /// 在 Unity 編輯器菜單中添加一個項目，用於打開對話圖與本地化視窗。
         /// </summary>
-        [MenuItem("SG/Dialogue/Graph + Localization Window")]
+        [MenuItem("SG Framework/Dialogue/Graph + Localization Window")]
         public static void ShowWindow()
         {
             var wnd = GetWindow<DialogueLocalizationWindow>(); // 獲取或創建視窗實例
