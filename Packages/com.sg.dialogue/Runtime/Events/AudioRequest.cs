@@ -1,6 +1,4 @@
 using System;
-using SG.Dialogue.Enums;
-using UnityEngine;
 
 namespace SG.Dialogue.Events
 {
@@ -11,25 +9,13 @@ namespace SG.Dialogue.Events
     [Serializable]
     public class AudioRequest : IEventRequest
     {
-        /// <summary>
-        /// 要執行的音訊動作類型（例如：播放BGM、停止BGM、播放SFX）。
-        /// </summary>
-        public AudioActionType ActionType;
+        public string EventName => "AudioEvent";
 
-        /// <summary>
-        /// 要播放的音訊名稱
-        /// </summary>
-        public string EventName { get; set; }
+        public AudioEvent audioEvent;
         
-        /// <summary>
-        /// 是否循環播放（主要用於 BGM）。
-        /// </summary>
-        public bool Loop;
-        
-        /// <summary>
-        /// 淡入或淡出的持續時間（秒）。
-        /// 如果設定為 -1，表示使用音訊管理器的預設值。
-        /// </summary>
-        public float FadeDuration;
+        public AudioRequest(AudioEvent e)
+        {
+            audioEvent = e;
+        }
     }
 }

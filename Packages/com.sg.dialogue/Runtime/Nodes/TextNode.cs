@@ -11,9 +11,9 @@ namespace SG.Dialogue.Nodes
     [Serializable]
     public class TextNode : BaseTextNode
     {
-        [Header("事件通道")]
-        [Tooltip("用於發出音訊請求的事件通道。")]
-        public AudioEvent AudioEvent;
+        // [Header("事件通道")]
+        // [Tooltip("用於發出音訊請求的事件通道。")]
+        // public AudioEvent AudioEvent;
 
         [Tooltip("說話者的名稱。支援使用 {variableName} 的格式來插入變數。")]
         public string speakerName;
@@ -77,7 +77,7 @@ namespace SG.Dialogue.Nodes
 
         public override void ClearUnityReferencesForClipboard()
         {
-            AudioEvent = null;
+            // AudioEvent = null;
             InterruptEvent = null;
         }
     }

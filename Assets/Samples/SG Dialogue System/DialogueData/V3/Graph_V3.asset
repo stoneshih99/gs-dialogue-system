@@ -26,6 +26,7 @@ MonoBehaviour:
   - rid: 736264946891620429
   - rid: 736264991698321481
   - rid: 736265219027238986
+  - rid: 736265379051733065
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -82,7 +83,9 @@ MonoBehaviour:
   - nodeId: StageText_1
     position: {x: -506.5, y: 255.5}
   - nodeId: CAM_1
-    position: {x: -945, y: 559}
+    position: {x: -1076.5, y: 548}
+  - nodeId: AUDIO_1
+    position: {x: -802.5, y: 571}
   references:
     version: 2
     RefIds:
@@ -147,7 +150,6 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: 
         postTypingDelay: 0.3
-        AudioEvent: {fileID: 0}
         speakerName: "\u591C\u53C9\u738B"
         text: "\u5728\u4E00\u500B\u5929\u6C23\u6674\u90CE\u7684\u4E0B\u5348\u4E0D\u77E5\u9053\u8981\u5E79\u561B"
         IsInterruptible: 0
@@ -186,7 +188,6 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: StageText_1
         postTypingDelay: 0.3
-        AudioEvent: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
         speakerName: '{Nickname}'
         text: "\u6211\u5011\u4E00\u8D77\u4F86\u53BB\u73A9\u5FCD\u8C46\u98A8\u96F24\u5427!"
         IsInterruptible: 0
@@ -302,7 +303,6 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: TEXT_5
         postTypingDelay: 0.3
-        AudioEvent: {fileID: 0}
         speakerName: "\u591C\u53C9\u738B"
         text: "\u5148\u9078\u64C7\u4F3A\u670D\u5668"
         IsInterruptible: 0
@@ -325,7 +325,6 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: WAIT_1
         postTypingDelay: 0.3
-        AudioEvent: {fileID: 0}
         speakerName: '{Nickname}'
         text: "\u767B\u5165\u9B3C\u5CF6\u8A0E\u4F10\u60E1\u9B3C\u5427"
         IsInterruptible: 0
@@ -448,4 +447,13 @@ MonoBehaviour:
         TargetZoom: 4
         PanTargetPosition: {x: 0, y: 0}
         FocusTarget: {fileID: 0}
+        nextNodeId: AUDIO_1
+    - rid: 736265379051733065
+      type: {class: PlayAudioNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: AUDIO_1
+        IsEnabled: 1
+        AudioEvent: {fileID: 11400000, guid: d2e6143c319e6476795b100d1099c090, type: 2}
+        request:
+          audioEvent: {fileID: 0}
         nextNodeId: TEXT_2

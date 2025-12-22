@@ -18,9 +18,9 @@ namespace SG.Dialogue.Nodes
         [Tooltip("用於發出音訊請求的事件通道。場景中的 DialogueAudioManager 或 DialogueAudioBridge 會監聽此事件。")]
         public AudioEvent AudioEvent;
 
-        [Header("音訊請求")]
-        [Tooltip("要發送的音訊請求的詳細設定，包括音訊片段、操作類型（播放/停止）、淡入淡出時間等。")]
-        public AudioRequest request;
+        // [Header("音訊請求")]
+        // [Tooltip("要發送的音訊請求的詳細設定，包括音訊片段、操作類型（播放/停止）、淡入淡出時間等。")]
+        // public AudioRequest request;
 
         [Header("流程控制")]
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
@@ -37,23 +37,24 @@ namespace SG.Dialogue.Nodes
             if (AudioEvent != null)
             {
                 // 觸發事件，將音訊請求發送出去
-                AudioEvent.Raise(request);
+                AudioEvent.Raise(new AudioRequest(AudioEvent));
             }
             else
             {
                 Debug.LogWarning($"音訊播放節點 '{nodeId}' 缺少 AudioEvent 的引用。");
             }
 
-            // 如果是 BGM/BGS 且設定了淡入淡出效果，則等待淡入淡出完成，以獲得更好的流程體驗
-            if (request.ActionType != AudioActionType.PlaySFX && request.FadeDuration > 0)
-            {
-                yield return new WaitForSeconds(request.FadeDuration);
-            }
-            else
-            {
-                // 對於音效 (SFX) 或不需要等待的操作，僅等待一幀即可繼續，以避免阻塞流程
-                yield return null;
-            }
+            // // 如果是 BGM/BGS 且設定了淡入淡出效果，則等待淡入淡出完成，以獲得更好的流程體驗
+            // if (request.ActionType != AudioActionType.PlaySFX && request.FadeDuration > 0)
+            // {
+            //     yield return new WaitForSeconds(request.FadeDuration);
+            // }
+            // else
+            // {
+            //     // 對於音效 (SFX) 或不需要等待的操作，僅等待一幀即可繼續，以避免阻塞流程
+            //     yield return null;
+            // }
+            yield return null;
         }
 
         /// <summary>

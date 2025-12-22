@@ -1,6 +1,6 @@
-using UnityEngine;
-using SG.Dialogue.Events;
 using SG.Dialogue.Enums;
+using SG.Dialogue.Events;
+using UnityEngine;
 
 namespace SG.Dialogue
 {
@@ -13,31 +13,28 @@ namespace SG.Dialogue
     /// </summary>
     public class DialogueAudioBridge : MonoBehaviour
     {
-        [Tooltip("要監聽的對話音訊事件通道。")]
-        [SerializeField] private AudioEvent dialogueAudioEvent;
-
-        // 提示：您應該在這裡引用您專案中實際的音訊管理器。
-        // 例如：public YourProjectAudioManager projectAudioManager;
-        // 為了演示目的，我們將直接使用 AudioSource 元件。
-        [Header("音訊來源 (僅供演示)")]
-        [Tooltip("用於播放背景音樂 (BGM) 的 AudioSource。")]
-        [SerializeField] private AudioSource bgmSource;
-        [Tooltip("用於播放音效 (SFX) 的 AudioSource。")]
-        [SerializeField] private AudioSource sfxSource;
+        [Tooltip("要監聽的對話音訊事件通道。")] [SerializeField]
+        private AudioEvent[] allAudioEvents;
 
         private void OnEnable()
         {
-            if (dialogueAudioEvent != null)
+            foreach (var audioEvent in allAudioEvents)
             {
-                dialogueAudioEvent.RegisterListener(OnDialogueAudioRequested);
+                if (audioEvent != null)
+                {
+                    audioEvent.RegisterListener(OnDialogueAudioRequested);
+                }
             }
         }
 
         private void OnDisable()
         {
-            if (dialogueAudioEvent != null)
+            foreach (var audioEvent in allAudioEvents)
             {
-                dialogueAudioEvent.UnregisterListener(OnDialogueAudioRequested);
+                if (audioEvent != null)
+                {
+                    audioEvent.UnregisterListener(OnDialogueAudioRequested);
+                }
             }
         }
 
@@ -47,33 +44,24 @@ namespace SG.Dialogue
         /// <param name="request">包含音訊播放資料的請求。</param>
         private void OnDialogueAudioRequested(AudioRequest request)
         {
-            // 根據請求的類型，呼叫您專案的音訊管理器的方法。
-            // 以下是使用 AudioSource 的範例實作。
-            // switch (request.ActionType)
-            // {
-            //     case AudioActionType.PlayBGM:
-            //         if (bgmSource != null)
-            //         {
-            //             bgmSource.clip = request.Clip;
-            //             bgmSource.loop = request.Loop;
-            //             bgmSource.Play();
-            //             // 您可以在這裡添加淡入 (Fade In) 的邏輯
-            //         }
-            //         break;
-            //     case AudioActionType.StopBGM:
-            //         if (bgmSource != null)
-            //         {
-            //             bgmSource.Stop();
-            //             // 您可以在這裡添加淡出 (Fade Out) 的邏輯
-            //         }
-            //         break;
-            //     case AudioActionType.PlaySFX:
-            //         if (sfxSource != null && request.Clip != null)
-            //         {
-            //             sfxSource.PlayOneShot(request.Clip);
-            //         }
-            //         break;
-            // }
+            // validate
+            if (string.IsNullOrEmpty(request.audioEvent.soundName))
+            {
+                Debug.LogErrorFormat("DialogueAudioBridge: 收到無效的音訊請求，音訊名稱為空。");
+                return;
+            }
+            Debug.LogFormat("DialogueAudioBridge: 收到音訊請求，動作類型：{0}，音訊名稱：{1}",
+                request.audioEvent.actionType, request.audioEvent.soundName);
+            
+            switch (request.audioEvent.actionType)
+            {
+                case AudioActionType.PlayBGM:
+                    break;
+                case AudioActionType.StopBGM:
+                    break;
+                case AudioActionType.PlaySFX:
+                    break;
+            }
         }
     }
 }

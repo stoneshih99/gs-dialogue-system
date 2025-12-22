@@ -50,7 +50,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             mainContainer.Add(mainFoldout);
 
             BuildInterruptSettings(mainFoldout);
-            BuildAudioSettings(mainFoldout);
+            // BuildAudioSettings(mainFoldout);
             BuildCuesSettings(mainFoldout);
             BuildAutoAdvanceSettings(mainFoldout); // 此方法也將使用手動建立
             BuildEventSummary(mainFoldout);
@@ -111,13 +111,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             container.Add(interruptFold);
         }
 
-        private void BuildAudioSettings(VisualElement container)
-        {
-            // 還原為手動建立 ObjectField
-            var audioField = new ObjectField("Audio Event") { objectType = typeof(AudioEvent), allowSceneObjects = false, value = _data.AudioEvent };
-            audioField.RegisterValueChangedCallback(evt => { _data.AudioEvent = evt.newValue as AudioEvent; _onChanged?.Invoke(); });
-            container.Add(audioField);
-        }
+        // private void BuildAudioSettings(VisualElement container)
+        // {
+        //     // 還原為手動建立 ObjectField
+        //     var audioField = new ObjectField("Audio Event") { objectType = typeof(AudioEvent), allowSceneObjects = false, value = _data.AudioEvent };
+        //     audioField.RegisterValueChangedCallback(evt => { _data.AudioEvent = evt.newValue as AudioEvent; _onChanged?.Invoke(); });
+        //     container.Add(audioField);
+        // }
 
         private void BuildCuesSettings(VisualElement container)
         {
