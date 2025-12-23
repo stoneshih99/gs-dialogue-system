@@ -9,17 +9,24 @@ public class GameRequestDrawer : PropertyDrawer
 {
     public override VisualElement CreatePropertyGUI(SerializedProperty property)
     {
-        // 創建一個根容器
         var container = new VisualElement();
 
-        // // 為每個子屬性創建帶有標籤的 PropertyField
-        // var eventField = new PropertyField(property.FindPropertyRelative("EventName"), "Event Name");
-        //
-        // // 將子屬性欄位加入到容器中
-        // container.Add(eventField);
+        var eventNameProp = property.FindPropertyRelative("EventName");
+        var parametersProp = property.FindPropertyRelative("Parameters");
+
+        if (eventNameProp != null)
+        {
+            var eventNameField = new PropertyField(eventNameProp, "Event Name");
+            container.Add(eventNameField);
+        }
+
+        if (parametersProp != null)
+        {
+            var parametersField = new PropertyField(parametersProp, "Parameters");
+            container.Add(parametersField);
+        }
         
         return container;
-        
     }
 }
 #endif
