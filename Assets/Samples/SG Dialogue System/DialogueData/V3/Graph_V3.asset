@@ -454,6 +454,4 @@ MonoBehaviour:
         nodeId: AUDIO_1
         IsEnabled: 1
         AudioEvent: {fileID: 11400000, guid: d2e6143c319e6476795b100d1099c090, type: 2}
-        request:
-          audioEvent: {fileID: 0}
         nextNodeId: TEXT_2

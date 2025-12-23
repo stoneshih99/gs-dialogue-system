@@ -37,7 +37,7 @@ namespace SG.Dialogue.Nodes
             if (AudioEvent != null)
             {
                 // 觸發事件，將音訊請求發送出去
-                AudioEvent.Raise(new AudioRequest(AudioEvent));
+                // AudioEvent.Raise(new AudioRequest(AudioEvent));
             }
             else
             {

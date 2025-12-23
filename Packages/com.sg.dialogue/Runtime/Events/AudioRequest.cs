@@ -1,4 +1,6 @@
 using System;
+using SG.Dialogue.Enums;
+using UnityEngine;
 
 namespace SG.Dialogue.Events
 {
@@ -11,11 +13,20 @@ namespace SG.Dialogue.Events
     {
         public string EventName => "AudioEvent";
 
-        public AudioEvent audioEvent;
+        /// <summary>
+        /// 要執行的音訊動作類型（例如：播放BGM、停止BGM、播放SFX）。
+        /// </summary>
+        [Header("音訊動作類型")]
+        public AudioActionType actionType;
         
-        public AudioRequest(AudioEvent e)
-        {
-            audioEvent = e;
-        }
+        [Header("音訊名稱")]
+        public string soundName;
+        
+        [Header("是否循環播放")]
+        public bool loop;
+        
+        [Header("淡入或淡出持續時間（秒）")]
+        [Tooltip("如果設定為 -1，表示使用音訊管理器的預設值。")]
+        public float fadeDuration = -1f;
     }
 }

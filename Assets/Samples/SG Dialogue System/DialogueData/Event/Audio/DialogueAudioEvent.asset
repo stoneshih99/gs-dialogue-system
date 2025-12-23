@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65289949f963c4dd98e4fbf0410d4cec, type: 3}
   m_Name: DialogueAudioEvent
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Events.AudioEvent
-  actionType: 0
-  soundName: BG1
-  loop: 1
-  fadeDuration: 0
+  request:
+    actionType: 0
+    soundName: BG1
+    loop: 0
+    fadeDuration: -1

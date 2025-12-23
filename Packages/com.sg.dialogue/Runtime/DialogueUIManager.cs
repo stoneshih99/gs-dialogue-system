@@ -372,8 +372,7 @@ namespace SG.Dialogue.UI
         {
             if (enableTypewriterSound && typewriterAudioEvent != null)
             {
-                var request = new AudioRequest(typewriterAudioEvent);
-                typewriterAudioEvent.Raise(request);
+                typewriterAudioEvent.Raise(typewriterAudioEvent.request);
             }
         }
 

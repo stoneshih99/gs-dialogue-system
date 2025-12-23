@@ -45,15 +45,15 @@ namespace SG.Dialogue
         private void OnDialogueAudioRequested(AudioRequest request)
         {
             // validate
-            if (string.IsNullOrEmpty(request.audioEvent.soundName))
+            if (string.IsNullOrEmpty(request.soundName))
             {
                 Debug.LogErrorFormat("DialogueAudioBridge: 收到無效的音訊請求，音訊名稱為空。");
                 return;
             }
             Debug.LogFormat("DialogueAudioBridge: 收到音訊請求，動作類型：{0}，音訊名稱：{1}",
-                request.audioEvent.actionType, request.audioEvent.soundName);
+                request.actionType, request.soundName);
             
-            switch (request.audioEvent.actionType)
+            switch (request.actionType)
             {
                 case AudioActionType.PlayBGM:
                     break;
