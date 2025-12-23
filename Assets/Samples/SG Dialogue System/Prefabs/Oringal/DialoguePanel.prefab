@@ -1656,8 +1656,8 @@ MonoBehaviour:
   enableTypewriter: 1
   enableTypewriterSound: 1
   soundInterval: 3
-  typewriterAudioEvent: {fileID: 11400000, guid: 524e64bb83fa541509208492f7413f51, type: 2}
-  typewriterEventName: Typewriter
+  typewriterAudioEvent: {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
+  typewriterSoundName: TypewriterKey
   hideRootWithCanvasGroup: 1
   clickAnywhereToAdvance: 1
 --- !u!114 &2990892720674022122

@@ -51,7 +51,9 @@ namespace SG.Dialogue.UI
         [SerializeField] private int soundInterval = 3;
         [Tooltip("用於觸發打字音效的事件通道")]
         [SerializeField] private AudioEvent typewriterAudioEvent;
-
+        [Tooltip("打字機音效的名稱")]
+        [SerializeField] private string typewriterSoundName = "TypewriterKey";
+        
         [Header("行為")]
         [Tooltip("是否使用 CanvasGroup 來隱藏/顯示根面板（影響互動性）")]
         [SerializeField] private bool hideRootWithCanvasGroup = true;
@@ -89,6 +91,9 @@ namespace SG.Dialogue.UI
         /// 當前是否正在進行打字機效果。
         /// </summary>
         public bool IsTyping => _isTyping;
+        
+        
+        private AudioRequest _typewriterAudioRequest;
 
         private void Awake()
         {
@@ -105,6 +110,7 @@ namespace SG.Dialogue.UI
             if (skipButton != null) skipButton.onClick.AddListener(() => OnSkipRequested?.Invoke());
             if (fullscreenAdvanceButton != null) fullscreenAdvanceButton.onClick.AddListener(HandleFullscreenClick);
             SetPanelVisibility(false); // 初始隱藏面板
+            _typewriterAudioRequest = new AudioRequest(AudioActionType.PlaySFX, typewriterSoundName, false, 0f);
         }
 
         /// <summary>
@@ -372,7 +378,7 @@ namespace SG.Dialogue.UI
         {
             if (enableTypewriterSound && typewriterAudioEvent != null)
             {
-                typewriterAudioEvent.Raise(typewriterAudioEvent.request);
+                typewriterAudioEvent.Raise(_typewriterAudioRequest);
             }
         }
 

@@ -3,15 +3,13 @@ using UnityEngine;
 namespace SG.Dialogue.Events
 {
     /// <summary>
-    /// GameEvent 是一個基於 ScriptableObject 的事件系統。
-    /// 它允許不同遊戲物件之間進行通信，而無需直接引用彼此，從而降低耦合度。
+    /// GameEvent 是一個純粹的事件通道。
+    /// 具體的事件請求資料 (GameRequest) 由發送者 (GameEventNode) 決定並傳遞。
     /// </summary>
     [CreateAssetMenu(fileName = "NewGameEvent", menuName = "SG/Dialogue/Events/Game Event")]
     public class GameEvent : BaseEventChannel<GameRequest>
     {
-        [Header("註解說明")]
+        [TextArea]
         public string description;
-        [Header("遊戲請求資訊")]
-        public GameRequest request;
     }
 }

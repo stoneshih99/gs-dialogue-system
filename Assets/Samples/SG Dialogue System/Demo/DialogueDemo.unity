@@ -165,8 +165,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueAudioBridge
   allAudioEvents:
   - {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
-  - {fileID: 11400000, guid: 524e64bb83fa541509208492f7413f51, type: 2}
-  - {fileID: 11400000, guid: d2e6143c319e6476795b100d1099c090, type: 2}
 --- !u!1 &309917281
 GameObject:
   m_ObjectHideFlags: 0
@@ -855,6 +853,14 @@ PrefabInstance:
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 348571787}
+    - target: {fileID: 553416336841010890, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: eventMappings.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 553416336841010890, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: eventMappings.Array.data[0].EventName
+      value: AudioEvent
+      objectReference: {fileID: 0}
     - target: {fileID: 974399659758379551, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -939,10 +945,6 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2282023720654894417, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: typingAudioEvent
-      value: 
-      objectReference: {fileID: 11400000, guid: 524e64bb83fa541509208492f7413f51, type: 2}
     - target: {fileID: 2990892720674022122, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: leftPortraitStage
       value: 
