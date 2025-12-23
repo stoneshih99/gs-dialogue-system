@@ -119,6 +119,54 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &215151562
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 215151563}
+  - component: {fileID: 215151564}
+  m_Layer: 0
+  m_Name: DialogueAudioBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &215151563
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 215151562}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 358.8914, y: 356.41003, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &215151564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 215151562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af20884029c5248a4a240de658b55ed4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueAudioBridge
+  allAudioEvents:
+  - {fileID: 11400000, guid: 10907f3e54f6b4da2979e213332cda2f, type: 2}
+  - {fileID: 11400000, guid: 524e64bb83fa541509208492f7413f51, type: 2}
+  - {fileID: 11400000, guid: d2e6143c319e6476795b100d1099c090, type: 2}
 --- !u!1 &309917281
 GameObject:
   m_ObjectHideFlags: 0
@@ -749,6 +797,52 @@ Transform:
   - {fileID: 1700648877}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1937225589
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1937225591}
+  - component: {fileID: 1937225590}
+  m_Layer: 0
+  m_Name: DialogueEventBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1937225590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937225589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b799ec54113e4caca908b61f9a0f84b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.DialogueEventBridge
+  gameEvents:
+  - {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
+--- !u!4 &1937225591
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1937225589}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 357.9997, y: 356.8527, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &5377336985893285145
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -845,6 +939,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2282023720654894417, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: typingAudioEvent
+      value: 
+      objectReference: {fileID: 11400000, guid: 524e64bb83fa541509208492f7413f51, type: 2}
     - target: {fileID: 2990892720674022122, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: leftPortraitStage
       value: 
@@ -876,3 +974,5 @@ SceneRoots:
   - {fileID: 1833721332}
   - {fileID: 1125954177}
   - {fileID: 670104842}
+  - {fileID: 215151563}
+  - {fileID: 1937225591}

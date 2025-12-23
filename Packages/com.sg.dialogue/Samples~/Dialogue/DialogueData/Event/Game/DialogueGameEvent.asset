@@ -12,3 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 165baba2c389a4fcf8b80f76e99cf0af, type: 3}
   m_Name: DialogueGameEvent
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Events.GameEvent
+  request:
+    EventName: Test1
+    Parameters: []

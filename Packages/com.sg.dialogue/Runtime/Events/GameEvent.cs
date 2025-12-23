@@ -9,6 +9,8 @@ namespace SG.Dialogue.Events
     [CreateAssetMenu(fileName = "NewGameEvent", menuName = "SG/Dialogue/Events/Game Event")]
     public class GameEvent : BaseEventChannel<GameRequest>
     {
+        [Header("註解說明")]
+        public string description;
         [Header("遊戲請求資訊")]
         public GameRequest request;
     }
