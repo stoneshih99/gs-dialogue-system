@@ -12,6 +12,16 @@ namespace SG.Dialogue.Animation
     [RequireComponent(typeof(TMP_Text))]
     public class DialogueTextAnimator : MonoBehaviour
     {
+        
+        /// <summary>
+        /// 震動效果的振幅和頻率設定。 
+        /// </summary>
+        private const float ShakeAmplitude = 2f;
+        /// <summary>
+        /// 震動效果的頻率設定。 
+        /// </summary>
+        private const float ShakeFrequency = 25f;
+        
         /// <summary>
         /// 內部結構，用於儲存動畫效果的類型和作用範圍。
         /// </summary>
@@ -120,13 +130,13 @@ namespace SG.Dialogue.Animation
 
             // 獲取第一個網格的頂點數據
             // 注意：對於多個網格的文本，可能需要遍歷所有 meshInfo
-            var vertices = textInfo.meshInfo[0].vertices;
+            // var vertices = textInfo.meshInfo[0].vertices;
 
             foreach (var effect in _effects)
             {
                 if (effect.Type == "shake")
                 {
-                    ApplyShakeEffect(vertices, effect.StartIndex, effect.EndIndex); // 應用震動效果
+                    ApplyShakeEffect(textInfo, effect.StartIndex, effect.EndIndex); // 應用震動效果
                 }
                 // 在這裡可以添加其他效果的處理，例如 wave, rainbow 等
             }
@@ -143,25 +153,43 @@ namespace SG.Dialogue.Animation
         }
 
         /// <summary>
-        /// 對指定範圍內的字元應用震動效果。
+        /// 對指定範圍內的字元應用震動效果。 
         /// </summary>
-        /// <param name="vertices">文本網格的頂點數據。</param>
-        /// <param name="startIndex">效果開始的字元索引。</param>
-        /// <param name="endIndex">效果結束的字元索引。</param>
-        private void ApplyShakeEffect(Vector3[] vertices, int startIndex, int endIndex)
+        /// <param name="textInfo"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="endIndex"></param>
+        private void ApplyShakeEffect(TMP_TextInfo textInfo, int startIndex, int endIndex)
         {
-            for (int i = startIndex; i < endIndex; i++)
+            if (_textMeshPro == null) return;
+            if (textInfo == null) return;
+
+            int characterCount = textInfo.characterCount;
+            if (characterCount == 0) return;
+
+            int clampedStart = Mathf.Clamp(startIndex, 0, characterCount);
+            int clampedEnd = Mathf.Clamp(endIndex, clampedStart, characterCount);
+
+            float t = Time.unscaledTime * ShakeFrequency;
+
+            for (int i = clampedStart; i < clampedEnd; i++)
             {
-                if (i >= _textMeshPro.textInfo.characterCount) continue; // 檢查索引是否越界
+                var charInfo = textInfo.characterInfo[i];
+                if (!charInfo.isVisible) continue;
 
-                var charInfo = _textMeshPro.textInfo.characterInfo[i];
-                if (!charInfo.isVisible) continue; // 如果字元不可見，則跳過
+                int materialIndex = charInfo.materialReferenceIndex;
+                if (materialIndex < 0 || materialIndex >= textInfo.meshInfo.Length) continue;
 
-                int vertexIndex = charInfo.vertexIndex; // 獲取字元頂點的起始索引
-                // 生成一個隨機偏移量作為震動效果
-                Vector3 offset = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0) * 2f; // 震動強度
+                var vertices = textInfo.meshInfo[materialIndex].vertices;
+                if (vertices == null || vertices.Length == 0) continue;
 
-                // 將偏移量應用到字元的四個頂點
+                int vertexIndex = charInfo.vertexIndex;
+                if (vertexIndex < 0 || vertexIndex + 3 >= vertices.Length) continue;
+
+                float seed = i * 0.37f;
+                float x = (Mathf.PerlinNoise(seed, t) - 0.5f) * 2f;
+                float y = (Mathf.PerlinNoise(seed + 19.1f, t) - 0.5f) * 2f;
+                Vector3 offset = new Vector3(x, y, 0f) * ShakeAmplitude;
+
                 vertices[vertexIndex + 0] += offset;
                 vertices[vertexIndex + 1] += offset;
                 vertices[vertexIndex + 2] += offset;
