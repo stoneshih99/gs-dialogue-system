@@ -189,7 +189,7 @@ MonoBehaviour:
         nextNodeId: StageText_1
         postTypingDelay: 0.3
         speakerName: '{Nickname}'
-        text: "\u6211\u5011\u4E00\u8D77\u4F86\u53BB\u73A9\u5FCD\u8C46\u98A8\u96F24\u5427!"
+        text: "\u6211\u5011\u4E00\u8D77\u4F86\u53BB\u73A9{shake}\u5FCD\u8C46\u98A8\u96F24\u5427!"
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
