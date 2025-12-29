@@ -11,6 +11,7 @@
 *   **DialogueGraph (對話圖)**: 一個 `ScriptableObject` 資產，是所有對話的藍圖。它作用類似於「演出時間軸」，包含一系列定義了對話流程與事件的節點。
 *   **DialogueController (對話控制器)**: 場景中的一個 `MonoBehaviour`，扮演「導演」的角色。它會讀取一個 `DialogueGraph` 並逐一執行其中的節點，同時協調各個管理器（如 UI、視覺、音訊）。
 *   **Nodes (節點)**: 每一個節點都是序列中的一個獨立、具體的動作（例如：顯示文字、讓角色登場、播放音樂）。透過連接這些節點，您可以創造出一場複雜的演出。
+*   **事件通道 (Event Channels)**: 系統的核心設計模式之一。節點（如 `PlayAudioNode`）不直接呼叫管理器，而是透過 `ScriptableObject` 事件通道發送請求。這使得對話系統與遊戲的其他部分完全解耦。
 
 ---
 
@@ -31,8 +32,8 @@
 ### 步驟 3: 編排對話流
 
 1.  **建立節點**: 在灰色的網格上點擊右鍵，開啟快捷選單。
-    *   選擇 `Add Character Action Node`。
-    *   選擇 `Add Text Node`。
+    *   選擇 `Visual > Character Action`。
+    *   選擇 `Text & Narrative > Text Node`。
 2.  **設定節點**:
     *   **CharacterActionNode**: 將 `Action Type` 設為 `Enter`，`Position` 設為 `Center`，並指定一個角色圖片。
     *   **TextNode**: 將 `Speaker Name` 設為「英雄」，`Text` 設為「哈囉，世界！」。
@@ -70,7 +71,7 @@
 *   **功能**: 顯示一段對話文字。這是最核心的節點。
 *   **屬性**:
     *   `Speaker Name`: 說話者的名字。
-    *   `Text`: 要顯示的對話內容，支援使用 `{變數名}` 來動態插入變數。
+    *   `Text`: 要顯示的對話內容。支援使用 `{變數名}` 來動態插入變數，以及使用動畫標籤（詳見「文字動畫」章節）。
     *   `Auto Advance`: 是否在顯示完畢後自動前進到下一個節點。
 
 #### Choice Node
@@ -108,15 +109,16 @@
 #### Character Action Node
 *   **功能**: 控制角色的所有視覺表現，是演出的核心。
 *   **屬性**:
-    *   `Action Type`: 執行的動作，如 `Enter` (登場), `Exit` (退場), `Move` (移動), `Change Sprite` (更換表情/服裝)。
-    *   `Render Mode`: 渲染模式，支援 `Sprite`, `Live2D`, `Spine` 等。
-    *   其他屬性會根據 `Action Type` 動態變化。
+    *   `Action Type`: 執行的動作，如 `Enter` (登場), `Exit` (退場)。
+    *   `Render Mode`: 渲染模式，支援 `Sprite`, `Live2D`, `Spine`, `SpriteSheet`。
+    *   `Duration`: 淡入/淡出持續時間。
+    *   其他屬性會根據 `Render Mode` 動態變化。
 
 #### Animation Node
-*   **功能**: 播放指定物件 (不一定是角色) 的 Animator 動畫。
+*   **功能**: 播放指定物件 (不一定是角色) 的 LitMotion 動畫。
 *   **屬性**:
     *   `Target`: 要播放動畫的 GameObject。
-    *   `Animation Clip`: 要播放的動畫片段。
+    *   `Motions`: 動畫資料列表。
 
 #### Set Background Node
 *   **功能**: 更換場景的背景圖片。
@@ -132,6 +134,15 @@
     *   `Action Type`: 執行的動作，如 `Move To` (移動到目標), `Zoom` (縮放), `Shake` (震動), `Follow` (跟隨目標)。
     *   其他屬性會根據 `Action Type` 動態變化。
 
+#### Particle Node
+*   **功能**: 播放或停止粒子特效。
+*   **屬性**:
+    *   `Event Channel`: 指定用於發送請求的 `ParticleEvent` 通道。
+    *   `Action Type`: `Play` (播放) 或 `Stop` (停止)。
+    *   `ParticleID`: 用於識別和停止特定粒子的唯一 ID。
+    *   `ParticlePrefab`: 要播放的粒子 Prefab (僅 Play 模式)。
+    *   `Position`: 粒子在世界空間中的位置。可透過 "Edit Position in Scene" 按鈕在場景中視覺化編輯。
+
 #### Screen Effect Node
 *   **功能**: 觸發一個通用的螢幕後期處理特效。
 
@@ -146,14 +157,15 @@
 #### Game Event Node
 *   **功能**: 觸發一個在遊戲邏輯中定義的全域事件。這是實現對話系統與遊戲玩法解耦的關鍵。
 *   **屬性**:
-    *   `Event Name`: 要觸發的事件名稱字串。
+    *   `Event Channel`: 指定用於發送請求的 `GameEvent` 通道。
+    *   `Request`: 包含 `EventName` 和 `Parameters` 的事件請求資料。
 
 #### Play Audio Node
 *   **功能**: 播放背景音樂 (BGM) 或音效 (SFX)。
 *   **屬性**:
-    *   `Audio Type`: BGM 或 SFX。
-    *   `Audio Clip`: 要播放的音訊片段。
-    *   `Action`: 播放、暫停或停止。
+    *   `Event Channel`: 指定用於發送請求的 `AudioEvent` 通道。
+    *   `Action Type`: `PlayBGM`, `StopBGM`, `PlaySFX`。
+    *   `SoundName`: 要播放的音訊名稱 (Key)。
 
 ### 3.6 除錯 (Debugging)
 
@@ -166,17 +178,34 @@
 
 ## 4. 進階主題與最佳實踐
 
-### 4.1 事件驅動架構
+### 4.1 事件通道架構 (Event Channel Architecture)
 
-`GameEventNode` 和 `PlayAudioNode` 是將對話與遊戲玩法深度整合的關鍵。請盡可能地使用它們，而不是在對話系統的程式碼中硬式編寫遊戲邏輯。
+`GameEventNode`, `PlayAudioNode`, `ParticleNode` 是將對話與遊戲玩法深度整合的關鍵。它們都採用了「事件通道」設計模式。
 
-*   **優點**: **解耦**。您的敘事團隊可以專心編寫故事，而不需要知道程式設計師是如何實現「開門」或「播放特定音樂」的。他們只需要在正確的時機，觸發正確的 `EventName` 即可。
+*   **優點**: **解耦**。您的敘事團隊可以專心編寫故事，而不需要知道程式設計師是如何實現「開門」、「播放特定音樂」或「觸發下雨特效」的。他們只需要在正確的時機，透過正確的通道，發送正確的請求即可。
 *   **設定方法**:
-    1.  在場景中建立一個掛載 `GameEventManager` 或 `DialogueAudioEventManager` 的物件。
-    2.  在 Manager 上設定 `Event Channel` 和 `Event Mappings`。
-    3.  在對話圖中，使用 `GameEventNode` 或 `PlayAudioNode`，並在其 `Event Name` 欄位中輸入您設定的名稱。
+    1.  在 Project 視窗中，建立一個事件通道資產 (如 `AudioChannel`, `GameEventChannel`)。
+    2.  在場景中，建立一個對應的管理器 (如 `DialogueAudioManager`, `DialogueParticleManager`)，並將通道資產指派給它。
+    3.  在對話圖中，將同一個通道資產指派給對應的節點 (如 `PlayAudioNode`, `ParticleNode`)。
 
-### 4.2 變數系統
+### 4.2 文字動畫 (Text Animator)
+
+本系統內建一個 `DialogueTextAnimator`，可以為 TextMeshPro 文字添加即時頂點動畫。
+
+*   **使用方法**:
+    1.  確保您的對話 UI 文字物件上掛載了 `DialogueTextAnimator` 組件。
+    2.  在 `TextNode` 的文字中，使用自定義標籤來包裹要產生動畫的文字。
+*   **支援標籤**:
+    *   `&lt;shake&gt;...&lt;/shake&gt;`: 使文字產生震動效果。
+*   **範例**: `"這太&lt;shake&gt;不可思議&lt;/shake&gt;了！"`
+
+### 4.3 視覺化編輯 (Visual Editing)
+
+為了提升編輯效率，部分節點支援在 Scene View 中進行視覺化編輯。
+
+*   **ParticleNode**: 當 `Action Type` 為 `Play` 時，節點上會出現一個 **"Edit Position in Scene"** 按鈕。點擊後，場景中會出現一個可供拖曳的 Dummy 物件，其位置會即時同步回節點的 `Position` 欄位。
+
+### 4.4 變數系統
 
 #### 全域變數 vs. 局部變數
 
@@ -202,13 +231,13 @@
     }
     ```
 
-### 4.3 開發者工具
+### 4.5 開發者工具
 
 *   **圖表驗證 (Validate Graph)**: 在「Localization」分頁中，使用「**Validate Graph**」按鈕來找出懸空的連線或無法到達的「孤島」節點。
 *   **執行高亮 (Execution Highlight)**: 在 Play Mode 中，編輯器會即時高亮目前正在執行的節點，便於追蹤和除錯。
 *   **對話模擬器 (Dialogue Simulator)**: 在「**Simulator**」分頁中，無需進入 Play Mode 即可快速預覽和偵錯對話流程，極大地加速開發效率。
 
-### 4.4 第三方整合
+### 4.6 第三方整合
 
 本系統支援透過 Scripting Define Symbol 來啟用與其他工具的整合。
 
@@ -222,4 +251,8 @@
 
 #### Spine
 
-_(類似地，您可以在此處新增 Spine 的整合說明)_
+*   **需求**: 您的專案中必須已經安裝了 Spine-Unity Runtime。
+*   **啟用步驟**:
+    1.  前往 `Edit > Project Settings > Player`。
+    2.  在 `Other Settings` 下的 `Scripting Define Symbols` 中，新增 `SPINE_KIT_AVAILABLE`。
+*   **效果**: 新增此符號後，`CharacterActionNode` 中將會出現 `Spine` 的選項，讓您可以直接控制 Spine 角色的顯示與動作。

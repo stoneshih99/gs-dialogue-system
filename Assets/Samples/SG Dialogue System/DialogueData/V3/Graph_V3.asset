@@ -27,6 +27,7 @@ MonoBehaviour:
   - rid: 736264991698321481
   - rid: 736265219027238986
   - rid: 736265379051733065
+  - rid: 736265535392055370
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -47,13 +48,13 @@ MonoBehaviour:
   - nodeId: TEXT_1
     position: {x: 91, y: 457}
   - nodeId: PARALLEL_1
-    position: {x: -1076.5, y: 255.5}
+    position: {x: -1214.5, y: 255.5}
   - nodeId: Anim_1
     position: {x: 513.5, y: 409}
   - nodeId: TEXT_2
     position: {x: -850, y: 255.5}
   - nodeId: CharAct_2
-    position: {x: -1386.5, y: 235.5}
+    position: {x: -1488.5, y: 235.5}
   - nodeId: LOG_1
     position: {x: -594.5, y: 393}
   - nodeId: LOG_2
@@ -77,7 +78,7 @@ MonoBehaviour:
   - nodeId: EVENT_2
     position: {x: 229.5, y: 776}
   - nodeId: SetBG_1
-    position: {x: -1700, y: 235.5}
+    position: {x: -1815, y: 235.5}
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
   - nodeId: StageText_1
@@ -86,6 +87,8 @@ MonoBehaviour:
     position: {x: -1076.5, y: 548}
   - nodeId: AUDIO_1
     position: {x: -850, y: 548}
+  - nodeId: CharAct_5
+    position: {x: -1318.5, y: 584.5}
   references:
     version: 2
     RefIds:
@@ -111,7 +114,7 @@ MonoBehaviour:
         - Anim_1
         - LOG_2
         - EVENT_2
-        nextNodeId: CAM_1
+        nextNodeId: CharAct_5
     - rid: 736264920620073053
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -189,7 +192,7 @@ MonoBehaviour:
         nextNodeId: StageText_1
         postTypingDelay: 0.3
         speakerName: '{Nickname}'
-        text: "\u6211\u5011\u4E00\u8D77\u4F86\u53BB\u73A9{shake}\u5FCD\u8C46\u98A8\u96F24\u5427!"
+        text: "\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002"
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -445,7 +448,7 @@ MonoBehaviour:
       type: {class: CameraControlNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: CAM_1
-        IsEnabled: 1
+        IsEnabled: 0
         ActionType: 0
         Duration: 0.5
         ShakeIntensity: 10
@@ -465,3 +468,34 @@ MonoBehaviour:
         Loop: 0
         FadeDuration: 1
         nextNodeId: TEXT_2
+    - rid: 736265535392055370
+      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: CharAct_5
+        IsEnabled: 1
+        nextNodeId: CAM_1
+        ActionType: 1
+        TargetPosition: 0
+        portraitRenderMode: 0
+        speakerName: 
+        characterSprite: {fileID: 0}
+        spinePortraitConfig:
+          modelPrefab: {fileID: 0}
+          skin: 
+          enterAnimation: idle
+          loop: 1
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          scaleX: 1
+        live2DModelPrefab: {fileID: 0}
+        live2DPortraitConfig:
+          enterAnimation: 
+          loop: 0
+          queuedAnimation: 
+          queuedAnimationDelay: 0
+          expression: 
+          scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
+        ClearAllOnExit: 0
+        Duration: 0.3
