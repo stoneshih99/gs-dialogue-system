@@ -37,12 +37,10 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             // 還原為手動建立 UI 元素
             var nameField = new TextField("Speaker") { value = data.speakerName , tooltip = "Supports {variableName} format for variable insertion."};
-            nameField.style.maxWidth = MaxWidth;
             nameField.RegisterValueChangedCallback(e => { _data.speakerName = e.newValue; _onChanged?.Invoke(); });
             mainContainer.Add(nameField);
 
             var textField = new TextField("Text") { value = data.text, multiline = true };
-            textField.style.maxWidth = MaxWidth;
             textField.RegisterValueChangedCallback(e => { _data.text = e.newValue; _onChanged?.Invoke(); });
             mainContainer.Add(textField);
 

@@ -12,7 +12,6 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
 {
     public abstract class DialogueNodeElement : Node
     {
-        protected const int MaxWidth = 250;
         public string NodeId { get; private set; }
         public Port InputPort { get; protected set; }
         public Action OnDelete;
@@ -30,6 +29,9 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
 
             // 儲存節點的預設背景顏色，以便之後恢復
             _defaultBackgroundColor = style.backgroundColor.value;
+            
+            // 設定節點的最大寬度
+            style.maxWidth = 300;
         }
 
         public void Initialize(DialogueGraphView graphView, SerializedProperty nodeSerializedProperty)

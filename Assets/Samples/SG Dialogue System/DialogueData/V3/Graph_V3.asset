@@ -27,7 +27,6 @@ MonoBehaviour:
   - rid: 736264991698321481
   - rid: 736265219027238986
   - rid: 736265379051733065
-  - rid: 736265535392055370
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -82,13 +81,11 @@ MonoBehaviour:
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
   - nodeId: StageText_1
-    position: {x: -506.5, y: 255.5}
+    position: {x: -465, y: 255.5}
   - nodeId: CAM_1
     position: {x: -1076.5, y: 548}
   - nodeId: AUDIO_1
     position: {x: -850, y: 548}
-  - nodeId: CharAct_5
-    position: {x: -1318.5, y: 584.5}
   references:
     version: 2
     RefIds:
@@ -114,7 +111,7 @@ MonoBehaviour:
         - Anim_1
         - LOG_2
         - EVENT_2
-        nextNodeId: CharAct_5
+        nextNodeId: CAM_1
     - rid: 736264920620073053
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -260,7 +257,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: SetBG_2
         ActionType: 1
-        TargetPosition: 0
+        TargetPosition: 1
         portraitRenderMode: 2
         speakerName: NPC
         characterSprite: {fileID: 0}
@@ -283,7 +280,7 @@ MonoBehaviour:
         spriteSheetPresenter: {fileID: 0}
         spriteSheetAnimationName: 
         ClearAllOnExit: 0
-        Duration: 0.3
+        Duration: 3
     - rid: 736264920620073073
       type: {class: SequenceNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -357,7 +354,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: LOG_3
         ActionType: 0
-        TargetPosition: 2
+        TargetPosition: 1
         portraitRenderMode: 2
         speakerName: 
         characterSprite: {fileID: 0}
@@ -441,6 +438,11 @@ MonoBehaviour:
         nextNodeId: CharAct_3
         postTypingDelay: 0.3
         message: "\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
+          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
+          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
+          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
+          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
+          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
           {Nickname}"
         messageKey: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
         typingSpeed: 0.1
@@ -468,34 +470,3 @@ MonoBehaviour:
         Loop: 0
         FadeDuration: 1
         nextNodeId: TEXT_2
-    - rid: 736265535392055370
-      type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
-      data:
-        nodeId: CharAct_5
-        IsEnabled: 1
-        nextNodeId: CAM_1
-        ActionType: 1
-        TargetPosition: 0
-        portraitRenderMode: 0
-        speakerName: 
-        characterSprite: {fileID: 0}
-        spinePortraitConfig:
-          modelPrefab: {fileID: 0}
-          skin: 
-          enterAnimation: idle
-          loop: 1
-          queuedAnimation: 
-          queuedAnimationDelay: 0
-          scaleX: 1
-        live2DModelPrefab: {fileID: 0}
-        live2DPortraitConfig:
-          enterAnimation: 
-          loop: 0
-          queuedAnimation: 
-          queuedAnimationDelay: 0
-          expression: 
-          scaleX: 1
-        spriteSheetPresenter: {fileID: 0}
-        spriteSheetAnimationName: 
-        ClearAllOnExit: 0
-        Duration: 0.3
