@@ -20,6 +20,7 @@ namespace SG.Dialogue.Presentation
         [SerializeField] private List<SpriteSheetStateConfig> stateAnimations;
         
         private Coroutine _animationCoroutine;
+        private Coroutine _fadeRoutine;
 
         private void Awake()
         {
@@ -27,47 +28,78 @@ namespace SG.Dialogue.Presentation
             {
                 _portraitSprite = GetComponent<SpriteRenderer>();
             }
-            _portraitSprite.enabled = false; // 初始時隱藏
+            // 確保初始狀態正確
+            if (_portraitSprite != null)
+            {
+                _portraitSprite.enabled = false;
+                var c = _portraitSprite.color;
+                c.a = 0f;
+                _portraitSprite.color = c;
+            }
         }
 
         public void ShowSprite(Sprite sprite, float fadeDuration)
         {
             StopAnimation();
+            if (_portraitSprite == null) return;
+            
             _portraitSprite.sprite = sprite;
             _portraitSprite.enabled = true;
-            // 可以在這裡加入淡入效果
+            
+            // 啟動淡入
+            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
+            _fadeRoutine = StartCoroutine(FadeTo(1f, fadeDuration));
         }
 
         public void ShowSpine(SpinePortraitConfig config, float fadeDuration)
         {
-            // 這個 Presenter 不支援 Spine，所以忽略。
             Debug.LogWarning("SpriteSheetDialoguePortraitPresenter does not support Spine.");
+            HideImmediate();
         }
 
         public void ShowSpriteSheet(string spriteSheetAnimationName, float fadeDuration)
         {
-            if (string.IsNullOrEmpty(spriteSheetAnimationName))
-            {
-                return;
-            }
+            if (string.IsNullOrEmpty(spriteSheetAnimationName)) return;
+            
             StopAnimation();
+            if (_portraitSprite == null) return;
+
             _portraitSprite.enabled = true;
             var config = FindAnimationByName(spriteSheetAnimationName);
             _animationCoroutine = StartCoroutine(PlaySpriteSheetAnimation(config));
-            // 可以在這裡加入淡入效果
+            
+            // 啟動淡入
+            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
+            // 如果是剛開始顯示，確保 Alpha 為 0
+            if (!_portraitSprite.gameObject.activeSelf || _portraitSprite.color.a == 0)
+            {
+                var c = _portraitSprite.color;
+                c.a = 0f;
+                _portraitSprite.color = c;
+            }
+            _fadeRoutine = StartCoroutine(FadeTo(1f, fadeDuration));
         }
 
         public void Hide(float fadeDuration)
         {
-            StopAnimation();
-            // 可以在這裡加入淡出效果
-            _portraitSprite.enabled = false;
+            // 保持動畫播放直到完全消失，這樣看起來更自然
+            // StopAnimation(); 
+            
+            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
+            _fadeRoutine = StartCoroutine(FadeTo(0f, fadeDuration));
         }
 
         public void HideImmediate()
         {
             StopAnimation();
-            _portraitSprite.enabled = false;
+            if (_fadeRoutine != null) { StopCoroutine(_fadeRoutine); _fadeRoutine = null; }
+            if (_portraitSprite != null)
+            {
+                _portraitSprite.enabled = false;
+                var c = _portraitSprite.color;
+                c.a = 0f;
+                _portraitSprite.color = c;
+            }
         }
 
         public void PlayMotion(MotionData data)
@@ -77,16 +109,26 @@ namespace SG.Dialogue.Presentation
 
         public void SetHighlight(bool isHighlighted)
         {
-            _portraitSprite.color = isHighlighted ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
+            if (_portraitSprite == null) return;
+            
+            // 這裡需要注意：直接設定顏色會覆蓋 Alpha。
+            // 我們應該只改變 RGB，保留當前的 Alpha。
+            Color targetColor = isHighlighted ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+            Color currentColor = _portraitSprite.color;
+            targetColor.a = currentColor.a; // 保留當前 Alpha
+            _portraitSprite.color = targetColor;
         }
 
         public IEnumerator Flicker(float duration, float frequency, float minAlpha)
         {
-            // 實作閃爍效果
+            if (_portraitSprite == null) yield break;
+
             float time = 0;
+            float originalAlpha = _portraitSprite.color.a;
+
             while (time < duration)
             {
-                float alpha = Mathf.Lerp(minAlpha, 1f, Mathf.Abs(Mathf.Sin(time * frequency * Mathf.PI * 2)));
+                float alpha = Mathf.Lerp(minAlpha, originalAlpha, Mathf.Abs(Mathf.Sin(time * frequency * Mathf.PI * 2)));
                 var color = _portraitSprite.color;
                 color.a = alpha;
                 _portraitSprite.color = color;
@@ -94,7 +136,7 @@ namespace SG.Dialogue.Presentation
                 yield return null;
             }
             var finalColor = _portraitSprite.color;
-            finalColor.a = 1f;
+            finalColor.a = originalAlpha;
             _portraitSprite.color = finalColor;
         }
 
@@ -140,6 +182,47 @@ namespace SG.Dialogue.Presentation
                 StopCoroutine(_animationCoroutine);
                 _animationCoroutine = null;
             }
+        }
+
+        private IEnumerator FadeTo(float targetAlpha, float duration)
+        {
+            if (_portraitSprite == null) yield break;
+
+            float startAlpha = _portraitSprite.color.a;
+            float startTime = Time.unscaledTime;
+
+            if (duration <= 0f)
+            {
+                Color c = _portraitSprite.color;
+                c.a = targetAlpha;
+                _portraitSprite.color = c;
+            }
+            else
+            {
+                while (Time.unscaledTime < startTime + duration)
+                {
+                    float t = (Time.unscaledTime - startTime) / duration;
+                    float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, Mathf.SmoothStep(0f, 1f, t));
+                    
+                    Color c = _portraitSprite.color;
+                    c.a = newAlpha;
+                    _portraitSprite.color = c;
+                    
+                    yield return null;
+                }
+                
+                Color finalColor = _portraitSprite.color;
+                finalColor.a = targetAlpha;
+                _portraitSprite.color = finalColor;
+            }
+
+            if (Mathf.Approximately(targetAlpha, 0f))
+            {
+                StopAnimation();
+                _portraitSprite.enabled = false;
+            }
+            
+            _fadeRoutine = null;
         }
     }
 }

@@ -19,7 +19,6 @@ namespace SG.Dialogue.Presentation
         private class CharacterState
         {
             public GameObject Instance { get; }
-            public Coroutine FadeRoutine { get; set; }
             public string SpeakerName { get; set; }
             public IDialoguePortraitPresenter Presenter { get; }
 
@@ -45,7 +44,6 @@ namespace SG.Dialogue.Presentation
 
         [Header("背景")]
         [SerializeField] private List<Image> backgroundImages;
-        // [SerializeField] private float backgroundFadeDuration = 0.3f;
 
         /// <summary>
         /// 角色位置到舞台 Transform 的查找表。
@@ -69,88 +67,51 @@ namespace SG.Dialogue.Presentation
             }
         }
         
-        /// <summary>
-        /// 顯示中央舞台文字。
-        /// </summary>
-        /// <param name="message">要顯示的最終文字訊息。</param>
-        /// <param name="speed"></param>
         public void ShowStageText(string message, float speed)
         {
-            if (stageTextPresenter != null)
-            {
-                stageTextPresenter.ShowMessage(message, speed);
-            }
+            if (stageTextPresenter != null) stageTextPresenter.ShowMessage(message, speed);
         }
 
-        /// <summary>
-        /// 隱藏中央舞台文字。
-        /// </summary>
         public void HideStageText()
         {
-            if (stageTextPresenter != null)
-            {
-                stageTextPresenter.Hide();
-            }
+            if (stageTextPresenter != null) stageTextPresenter.Hide();
         }
 
-        /// <summary>
-        /// 查詢中央舞台文字的打字機效果是否正在進行中。
-        /// </summary>
-        /// <returns>如果正在打字，則為 true；否則為 false。</returns>
         public bool IsStageTextTyping()
         {
             return stageTextPresenter != null && stageTextPresenter.IsTyping;
         }
 
-        /// <summary>
-        /// 根據文本節點更新視覺效果，主要是設定角色高光。
-        /// </summary>
-        /// <param name="node">當前的文本節點。</param>
         public void UpdateFromTextNode(TextNode node)
         {
             SetCharacterHighlights(node.speakerName);
         }
 
-        /// <summary>
-        /// 播放動畫節點中定義的動畫。
-        /// </summary>
-        /// <param name="node">包含動畫數據的節點。</param>
         public IEnumerator PlayAnimations(AnimationNode node)
         {
-            if (node.motions == null || node.motions.Count == 0)
-            {
-                yield break;
-            }
+            if (node.motions == null || node.motions.Count == 0) yield break;
 
             if (_activeCharacters.TryGetValue(node.targetAnimationPosition, out var activeCharacter))
             {
-                var motionPlayer = activeCharacter.Instance.GetComponent<LitMotionPlayer>();
-                if (motionPlayer != null)
+                if (activeCharacter.Presenter != null)
                 {
                     foreach (var motionData in node.motions)
                     {
-                        motionPlayer.Play(motionData);
+                        activeCharacter.Presenter.PlayMotion(motionData);
                     }
+                    
                     float maxDuration = 0;
                     foreach (var motionData in node.motions)
                     {
                         maxDuration = Mathf.Max(maxDuration, motionData.Duration + motionData.Delay);
                     }
-                    if (maxDuration > 0)
-                    {
-                        yield return new WaitForSeconds(maxDuration);
-                    }
+                    if (maxDuration > 0) yield return new WaitForSeconds(maxDuration);
                 }
             }
         }
 
-        /// <summary>
-        /// 根據角色動作節點更新場景，處理角色的進入和退出。
-        /// </summary>
-        /// <param name="node">包含角色動作指令的節點。</param>
         public IEnumerator UpdateFromCharacterActionNode(CharacterActionNode node)
         {
-            // float duration = node.OverrideDuration ? node.Duration : portraitFadeDuration;
             var duration = node.Duration;
             
             switch (node.ActionType)
@@ -167,14 +128,9 @@ namespace SG.Dialogue.Presentation
             if (duration > 0) yield return new WaitForSeconds(duration);
         }
 
-        /// <summary>
-        /// 根據設定背景節點更新背景圖片。
-        /// </summary>
-        /// <param name="node">包含背景設定資訊的節點。</param>
         public IEnumerator UpdateFromSetBackgroundNode(SetBackgroundNode node)
         {
             float bgFadeTime = node.backgroundFadeOverride;
-            // int layerIndex = 0;
             var layerIndex = node.spriteIndex;
             if (node.useBlackScreen && backgroundImages.Count > layerIndex && backgroundImages[layerIndex] != null)
             {
@@ -187,10 +143,6 @@ namespace SG.Dialogue.Presentation
             yield return UpdateBackground(layerIndex, node.backgroundSprite, node.clearBackground, bgFadeTime);
         }
 
-        /// <summary>
-        /// 執行閃爍效果。
-        /// </summary>
-        /// <param name="node">包含閃爍效果參數的節點。</param>
         public IEnumerator ExecuteFlickerEffect(FlickerEffectNode node)
         {
             if (node.target == FlickerEffectNode.TargetType.Background)
@@ -209,9 +161,6 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        /// <summary>
-        /// 處理角色的進入動作。
-        /// </summary>
         private void ProcessEnterAction(CharacterActionNode node, float duration)
         {
             if (_activeCharacters.TryGetValue(node.TargetPosition, out var existingState))
@@ -225,13 +174,12 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        /// <summary>
-        /// 實例化一個新的角色肖像。
-        /// </summary>
         private void InstantiateNewCharacter(CharacterActionNode node, float duration)
         {
             if (!_stageLookup.TryGetValue(node.TargetPosition, out var stage) || stage == null) return;
 
+            // 如果該位置已有角色，先清除（這裡設為 0 秒是因為我們馬上要放新角色，或者你可以選擇淡出舊的再放新的）
+            // 但為了流暢性，通常直接替換或快速淡出
             ClearCharacterAt(node.TargetPosition, 0);
 
             GameObject characterInstance = null;
@@ -274,7 +222,7 @@ namespace SG.Dialogue.Presentation
             {
                 characterInstance.transform.SetParent(stage, false);
                 var newState = new CharacterState(characterInstance, node.speakerName, presenter);
-                newState.FadeRoutine = FadeCharacter(newState, true, duration, false);
+                // 注意：這裡不再呼叫 FadeCharacter，因為 Presenter.ShowXXX 已經處理了淡入
                 _activeCharacters[node.TargetPosition] = newState;
             }
             else if (characterInstance != null)
@@ -283,42 +231,24 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        /// <summary>
-        /// 更新已存在的角色肖像。
-        /// </summary>
         private void UpdateExistingCharacter(CharacterState existingState, CharacterActionNode node)
         {
+            if (existingState.Presenter == null) return;
+
             if (node.portraitRenderMode == PortraitRenderMode.SpriteSheet)
-            {
-                var spriteSheetPresenter = existingState.Instance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
-                if (spriteSheetPresenter != null)
-                    spriteSheetPresenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
-            }
+                existingState.Presenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
 #if LIVE2D_KIT_AVAILABLE
-            else if (node.portraitRenderMode == PortraitRenderMode.Live2D)
-            {
-                var live2DPresenter = existingState.Instance.GetComponent<Live2DDialoguePortraitPresenter>();
-                if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
-            }
+            else if (node.portraitRenderMode == PortraitRenderMode.Live2D && existingState.Presenter is Live2DDialoguePortraitPresenter live2DPresenter)
+                live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
 #endif
 #if SPINE_KIT_AVAILABLE
-            else if (node.portraitRenderMode == PortraitRenderMode.Spine)
-            {
-                var spinePresenter = existingState.Instance.GetComponent<SpineDialoguePortraitPresenter>();
-                if (spinePresenter != null) spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
-            }
+            else if (node.portraitRenderMode == PortraitRenderMode.Spine && existingState.Presenter is SpineDialoguePortraitPresenter spinePresenter)
+                spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
 #endif
-            else if (node.portraitRenderMode == PortraitRenderMode.Sprite)
-            {
-                var imagePresenter = existingState.Instance.GetComponent<ImageDialoguePortraitPresenter>();
-                if (imagePresenter != null) imagePresenter.ShowSprite(node.characterSprite, 0f);
-            }
+            else if (node.portraitRenderMode == PortraitRenderMode.Sprite && existingState.Presenter is ImageDialoguePortraitPresenter imagePresenter)
+                imagePresenter.ShowSprite(node.characterSprite, 0f);
         }
         
-        /// <summary>
-        /// 根據當前說話者設定角色的高光狀態。
-        /// </summary>
-        /// <param name="currentSpeakerName">當前說話者的名字。</param>
         private void SetCharacterHighlights(string currentSpeakerName)
         {
             bool hasSpeaker = !string.IsNullOrEmpty(currentSpeakerName);
@@ -338,24 +268,22 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        /// <summary>
-        /// 清除指定位置的角色。
-        /// </summary>
-        /// <param name="position">要清除的角色位置。</param>
-        /// <param name="duration">淡出持續時間。</param>
         private void ClearCharacterAt(CharacterPosition position, float duration)
         {
             if (_activeCharacters.TryGetValue(position, out var activeCharacter))
             {
-                FadeCharacter(activeCharacter, false, duration, true);
+                if (activeCharacter.Presenter != null)
+                {
+                    activeCharacter.Presenter.Hide(duration);
+                }
+                
+                // 啟動協程等待淡出完成後銷毀物件
+                StartCoroutine(WaitAndDestroy(duration, activeCharacter.Instance));
+                
                 _activeCharacters.Remove(position);
             }
         }
 
-        /// <summary>
-        /// 清除所有角色。
-        /// </summary>
-        /// <param name="duration">淡出持續時間。</param>
         private void ClearAllCharacters(float duration)
         {
             var positions = new List<CharacterPosition>(_activeCharacters.Keys);
@@ -363,44 +291,21 @@ namespace SG.Dialogue.Presentation
         }
 
         /// <summary>
-        /// 對角色進行淡入或淡出。
+        /// 等待指定時間後銷毀物件。
         /// </summary>
-        private Coroutine FadeCharacter(CharacterState character, bool fadeIn, float duration, bool destroyOnComplete)
+        private IEnumerator WaitAndDestroy(float duration, GameObject target)
         {
-            if (character.FadeRoutine != null) StopCoroutine(character.FadeRoutine);
-            var cg = character.Instance.GetComponent<CanvasGroup>();
-            if (cg == null) cg = character.Instance.AddComponent<CanvasGroup>();
-            if(fadeIn) cg.alpha = 0f;
-            var newRoutine = StartCoroutine(FadeRoutine(cg, fadeIn ? 1f : 0f, duration, destroyOnComplete ? character.Instance : null));
-            character.FadeRoutine = newRoutine;
-            return newRoutine;
+            if (duration > 0)
+            {
+                // 使用 unscaledTime 確保暫停時也能銷毀
+                yield return new WaitForSecondsRealtime(duration);
+            }
+            
+            if (target != null) Destroy(target);
         }
 
-        /// <summary>
-        /// CanvasGroup 的淡入淡出協程。
-        /// </summary>
-        private IEnumerator FadeRoutine(CanvasGroup cg, float targetAlpha, float duration, GameObject destroyTarget)
-        {
-            if (cg == null) { if(destroyTarget != null) Destroy(destroyTarget); yield break; }
-            float startAlpha = cg.alpha;
-            if (duration <= 0f) { cg.alpha = targetAlpha; }
-            else
-            {
-                float t = 0f;
-                while (t < duration)
-                {
-                    t += Time.deltaTime;
-                    cg.alpha = Mathf.Lerp(startAlpha, targetAlpha, t / duration);
-                    yield return null;
-                }
-                cg.alpha = targetAlpha;
-            }
-            if (destroyTarget != null && Mathf.Approximately(targetAlpha, 0f)) Destroy(destroyTarget);
-        }
-        
-        /// <summary>
-        /// 更新背景圖片。
-        /// </summary>
+        // --- 背景相關方法保持不變 ---
+
         private IEnumerator UpdateBackground(int layerIndex, Sprite sprite, bool clear, float duration)
         {
             if (layerIndex < 0 || layerIndex >= backgroundImages.Count || backgroundImages[layerIndex] == null) yield break;
@@ -424,9 +329,6 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        /// <summary>
-        /// Image 的淡入淡出協程。
-        /// </summary>
         private IEnumerator FadeImageRoutine(Image image, Sprite targetSprite, bool enable, float duration)
         {
             if (image == null) yield break;
@@ -449,12 +351,13 @@ namespace SG.Dialogue.Presentation
                 image.color = c;
                 image.enabled = true;
             }
-            float t = 0f;
-            while (t < duration)
+            
+            float startTime = Time.unscaledTime;
+            while (Time.unscaledTime < startTime + duration)
             {
-                c.a = Mathf.Lerp(startAlpha, endAlpha, t / duration);
+                float t = (Time.unscaledTime - startTime) / duration;
+                c.a = Mathf.Lerp(startAlpha, endAlpha, Mathf.SmoothStep(0f, 1f, t));
                 image.color = c;
-                t += Time.deltaTime;
                 yield return null;
             }
             c.a = endAlpha;
@@ -462,9 +365,6 @@ namespace SG.Dialogue.Presentation
             if (!enable || targetSprite == null) image.enabled = false;
         }
         
-        /// <summary>
-        /// 對 Image 執行閃爍效果。
-        /// </summary>
         private IEnumerator FlickerImage(Image image, float duration, float frequency, float minAlpha)
         {
             if (image == null) yield break;
@@ -473,9 +373,6 @@ namespace SG.Dialogue.Presentation
             yield return FlickerCanvasGroup(cg, duration, frequency, minAlpha);
         }
 
-        /// <summary>
-        /// 對 CanvasGroup 執行閃爍效果。
-        /// </summary>
         private IEnumerator FlickerCanvasGroup(CanvasGroup cg, float duration, float frequency, float minAlpha)
         {
             if (cg == null) yield break;
@@ -491,9 +388,6 @@ namespace SG.Dialogue.Presentation
             cg.alpha = originalAlpha;
         }
 
-        /// <summary>
-        /// 建立角色舞台位置的查找表。
-        /// </summary>
         private void BuildStageLookup()
         {
             _stageLookup.Clear();
