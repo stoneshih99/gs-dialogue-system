@@ -60,7 +60,20 @@ namespace SG.Dialogue.Nodes
             
             controller.VisualManager.UpdateFromTextNode(displayNode); 
             
-            yield return controller.UiManager.ShowText(displayNode, formattedText);
+            // 1. 呼叫 ShowText (它會立即返回)
+            controller.UiManager.ShowText(this, formattedText);
+
+            // 2. 如果正在打字，則等待完成
+            if (controller.UiManager.IsTyping)
+            {
+                bool typingCompleted = false;
+                Action onComplete = () => typingCompleted = true;
+                controller.UiManager.OnTypingCompleted += onComplete;
+
+                yield return new WaitUntil(() => typingCompleted || !controller.UiManager.IsTyping);
+
+                controller.UiManager.OnTypingCompleted -= onComplete;
+            }
         }
 
         public override void OnExit(DialogueController controller)

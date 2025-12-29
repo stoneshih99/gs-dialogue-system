@@ -437,13 +437,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: CharAct_3
         postTypingDelay: 0.3
-        message: "\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
-          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
-          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
-          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
-          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
-          {Nickname}\u9019\u662F\u4E00\u500B Stage Text \u7F6E\u4E2D\u5728\u821E\u53F0\u6587\u5B57\u6548\u679C
-          {Nickname}"
+        message: "\u9019\u662F\u4E00\u6BB5 Stage \u6587\u5B57\uFF0C\\n \u65B7\u884C\u6E2C\u8A66"
         messageKey: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"
         typingSpeed: 0.1
     - rid: 736265219027238986

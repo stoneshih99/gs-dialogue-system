@@ -42,6 +42,9 @@ namespace SG.Dialogue.Nodes
             
             controller.VisualManager.ShowStageText(formattedText, typingSpeed);
 
+            // 等待一幀，確保打字機協程已經啟動並且 IsTyping 狀態已更新
+            yield return null;
+
             while (controller.VisualManager.IsStageTextTyping())
             {
                 // 這裡使用 WaitForEndOfFrame 可能比 WaitForSeconds 更可靠，以避免與 typingSpeed 產生競爭條件

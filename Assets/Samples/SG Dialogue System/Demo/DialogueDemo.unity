@@ -446,6 +446,38 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 974399659758379551, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
   m_PrefabInstance: {fileID: 5377336985893285145}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &593516129 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5505764904447970633, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+  m_PrefabInstance: {fileID: 5377336985893285145}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!1 &595417084 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1968061415542642229, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+  m_PrefabInstance: {fileID: 5377336985893285145}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &595417087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 595417084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d2017d7311894b71abd79729d9588a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Presentation.BackgroundManager
+  backgroundImages:
+  - {fileID: 593516129}
+  - {fileID: 2072696813}
+  - {fileID: 2107891799}
 --- !u!114 &663312735 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1633427897146674813, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
@@ -820,6 +852,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1833721332}
+  - component: {fileID: 1833721333}
   m_Layer: 0
   m_Name: CharacterStage
   m_TagString: Untagged
@@ -846,6 +879,21 @@ Transform:
   - {fileID: 1697796647}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1833721333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1833721331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b3695e806b6f4f41bc7d46e22185c6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Presentation.PortraitManager
+  leftPortraitStage: {fileID: 689713467}
+  centerPortraitStage: {fileID: 309917282}
+  rightPortraitStage: {fileID: 1700648877}
 --- !u!1 &1937225589
 GameObject:
   m_ObjectHideFlags: 0
@@ -892,6 +940,28 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2072696813 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7411562390445394857, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+  m_PrefabInstance: {fileID: 5377336985893285145}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &2107891799 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4620058404871257794, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+  m_PrefabInstance: {fileID: 5377336985893285145}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1001 &5377336985893285145
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -904,34 +974,6 @@ PrefabInstance:
       propertyPath: cameraController
       value: 
       objectReference: {fileID: 348571787}
-    - target: {fileID: 538131960732218131, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_text
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 538131960732218131, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_TextWrappingMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 538131960732218131, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_enableAutoSizing
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 538131960732218131, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
-    - target: {fileID: 538131960732218131, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_HorizontalAlignment
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 553416336841010890, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: eventMappings.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 553416336841010890, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: eventMappings.Array.data[0].EventName
-      value: AudioEvent
-      objectReference: {fileID: 0}
     - target: {fileID: 974399659758379551, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1017,6 +1059,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2990892720674022122, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: portraitManager
+      value: 
+      objectReference: {fileID: 1833721333}
+    - target: {fileID: 2990892720674022122, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      propertyPath: backgroundManager
+      value: 
+      objectReference: {fileID: 595417087}
+    - target: {fileID: 2990892720674022122, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: leftPortraitStage
       value: 
       objectReference: {fileID: 689713467}
@@ -1028,38 +1078,6 @@ PrefabInstance:
       propertyPath: centerPortraitStage
       value: 
       objectReference: {fileID: 309917282}
-    - target: {fileID: 6474081022075219171, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_Pivot.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6474081022075219171, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_Pivot.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6474081022075219171, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6474081022075219171, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6474081022075219171, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6474081022075219171, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7282111598628947537, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_Pivot.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7282111598628947537, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -59.999996
-      objectReference: {fileID: 0}
     - target: {fileID: 7639811759149525801, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: m_Name
       value: DialoguePanel
@@ -1067,7 +1085,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1968061415542642229, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 595417087}
   m_SourcePrefab: {fileID: 100100000, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
