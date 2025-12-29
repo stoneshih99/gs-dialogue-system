@@ -18,10 +18,10 @@
 /[Rr]ecordings/
 
 # Ignore all packages by default
-/[Pp]ackages/
+# /[Pp]ackages/  <-- REMOVED THIS LINE
 
 # But DO NOT ignore the local package that is part of this repository
-!/[Pp]ackages/com.sg.dialogue/
+# !/[Pp]ackages/com.sg.dialogue/ <-- REMOVED THIS LINE (No longer needed if parent is not ignored)
 
 # A global .gitignore might ignore files ending with ~, so we must explicitly un-ignore Samples~
 !/[Pp]ackages/com.sg.dialogue/Samples~/
@@ -90,3 +90,4 @@ HybridCLRData/
 DLL/
 ServerData/
 Assets/SceneDependencyCache
+Packages/com.sg.dialogue/Samples~
