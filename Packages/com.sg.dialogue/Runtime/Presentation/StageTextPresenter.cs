@@ -6,6 +6,7 @@ namespace SG.Dialogue.Presentation
 {
     /// <summary>
     /// 在舞台中央顯示打字機效果文字的獨立呈現器。
+    /// <para><b>重要設定：</b>為了讓文字置中並從中間向兩側展開，請在 TextMeshProUGUI 元件的 Inspector 中將 Alignment 設為 Center。</para>
     /// </summary>
     public class StageTextPresenter : MonoBehaviour
     {
@@ -42,7 +43,7 @@ namespace SG.Dialogue.Presentation
         /// 以打字機效果顯示一條訊息。
         /// </summary>
         /// <param name="message">要顯示的最終文字內容。</param>
-        /// <param name="speed"></param>
+        /// <param name="speed">每個字出現的間隔時間（秒）。</param>
         public void ShowMessage(string message, float speed)
         {
             _typingSpeed = speed;
@@ -70,20 +71,33 @@ namespace SG.Dialogue.Presentation
                 StopCoroutine(_typewriterCoroutine);
                 _typewriterCoroutine = null;
             }
-            container.SetActive(false);
+            if (container != null)
+            {
+                container.SetActive(false);
+            }
         }
 
         /// <summary>
         /// 執行打字機效果的協程。
+        /// 使用 maxVisibleCharacters 屬性來實現從中間展開的打字效果。
         /// </summary>
         private IEnumerator TypewriterCoroutine(string message)
         {
-            textLabel.text = "";
-            foreach (char letter in message)
+            // 1. 先設定好完整文字
+            textLabel.text = message;
+            // 2. 強制更新幾何，確保 textInfo 是最新的
+            textLabel.ForceMeshUpdate();
+            
+            int totalVisibleCharacters = textLabel.textInfo.characterCount;
+            int visibleCount = 0;
+
+            while (visibleCount <= totalVisibleCharacters)
             {
-                textLabel.text += letter;
+                textLabel.maxVisibleCharacters = visibleCount;
+                visibleCount++;
                 yield return new WaitForSeconds(_typingSpeed);
             }
+
             _typewriterCoroutine = null;
         }
     }
