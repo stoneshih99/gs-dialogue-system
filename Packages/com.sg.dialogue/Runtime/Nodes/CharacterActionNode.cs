@@ -1,4 +1,5 @@
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Presentation;
@@ -59,10 +60,10 @@ namespace SG.Dialogue.Nodes
             return nextNodeId;
         }
 
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 呼叫 DialogueVisualManager 的方法，並等待其完成
-            yield return controller.VisualManager.UpdateFromCharacterActionNode(this);
+            await controller.VisualManager.UpdateFromCharacterActionNode(this);
         }
 
         public override void ClearConnectionsForClipboard()

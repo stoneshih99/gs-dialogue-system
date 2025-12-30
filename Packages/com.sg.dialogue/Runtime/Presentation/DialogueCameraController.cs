@@ -1,4 +1,5 @@
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Nodes;
 using UnityEngine;
@@ -30,26 +31,26 @@ namespace SG.Dialogue.Presentation
         /// 執行攝影機控制節點指定的動作。
         /// </summary>
         /// <param name="node">CameraControlNode 實例。</param>
-        /// <returns>協程。</returns>
-        public IEnumerator Execute(CameraControlNode node)
+        /// <returns>UniTask。</returns>
+        public async UniTask Execute(CameraControlNode node)
         {
             switch (node.ActionType)
             {
                 case CameraActionType.Shake:
-                    yield return Shake(node.Duration, node.ShakeIntensity); // 執行震動
+                    await Shake(node.Duration, node.ShakeIntensity); // 執行震動
                     break;
                 case CameraActionType.Zoom:
-                    yield return Zoom(node.TargetZoom, node.Duration); // 執行縮放
+                    await Zoom(node.TargetZoom, node.Duration); // 執行縮放
                     break;
                 case CameraActionType.Pan:
-                    yield return Pan(node.PanTargetPosition, node.Duration); // 執行平移
+                    await Pan(node.PanTargetPosition, node.Duration); // 執行平移
                     break;
                 case CameraActionType.FocusOnTarget:
                     if (node.FocusTarget != null) // 如果有指定聚焦目標
                     {
                         // 計算目標位置（保持 Z 軸不變）
                         Vector3 targetPos = new Vector3(node.FocusTarget.position.x, node.FocusTarget.position.y, transform.position.z);
-                        yield return Pan(targetPos, node.Duration); // 平移到目標位置
+                        await Pan(targetPos, node.Duration); // 平移到目標位置
                     }
                     break;
             }
@@ -60,8 +61,8 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="duration">震動持續時間。</param>
         /// <param name="intensity">震動強度。</param>
-        /// <returns>協程。</returns>
-        private IEnumerator Shake(float duration, float intensity)
+        /// <returns>UniTask。</returns>
+        private async UniTask Shake(float duration, float intensity)
         {
             float elapsed = 0f;
             Vector3 startPosition = transform.position; // 儲存震動前的起始位置
@@ -73,7 +74,7 @@ namespace SG.Dialogue.Presentation
                 float y = startPosition.y + (Mathf.PerlinNoise(0, Time.time * 20f) * 2 - 1) * intensity;
                 transform.position = new Vector3(x, y, startPosition.z); // 更新攝影機位置
                 elapsed += Time.deltaTime;
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update);
             }
 
             transform.position = startPosition; // 震動結束後恢復到起始位置
@@ -84,13 +85,13 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="targetOrthoSize">目標正交大小。</param>
         /// <param name="duration">縮放持續時間。</param>
-        /// <returns>協程。</returns>
-        private IEnumerator Zoom(float targetOrthoSize, float duration)
+        /// <returns>UniTask。</returns>
+        private async UniTask Zoom(float targetOrthoSize, float duration)
         {
             if (!_camera.orthographic) // 如果不是正交攝影機，則發出警告
             {
                 Debug.LogWarning("Camera is not orthographic. Zoom action has no effect.");
-                yield break;
+                return;
             }
 
             float startSize = _camera.orthographicSize; // 縮放前的起始大小
@@ -100,7 +101,7 @@ namespace SG.Dialogue.Presentation
             {
                 _camera.orthographicSize = Mathf.Lerp(startSize, targetOrthoSize, elapsed / duration); // 漸變正交大小
                 elapsed += Time.deltaTime;
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update);
             }
 
             _camera.orthographicSize = targetOrthoSize; // 確保最終大小正確
@@ -111,8 +112,8 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="targetPosition">目標世界坐標位置。</param>
         /// <param name="duration">平移持續時間。</param>
-        /// <returns>協程。</returns>
-        private IEnumerator Pan(Vector2 targetPosition, float duration)
+        /// <returns>UniTask。</returns>
+        private async UniTask Pan(Vector2 targetPosition, float duration)
         {
             Vector3 startPosition = transform.position; // 平移前的起始位置
             Vector3 endPosition = new Vector3(targetPosition.x, targetPosition.y, startPosition.z); // 目標位置（保持 Z 軸不變）
@@ -121,14 +122,14 @@ namespace SG.Dialogue.Presentation
             if (duration <= 0) // 如果持續時間為 0，則立即設定位置
             {
                 transform.position = endPosition;
-                yield break;
+                return;
             }
 
             while (elapsed < duration)
             {
                 transform.position = Vector3.Lerp(startPosition, endPosition, elapsed / duration); // 漸變位置
                 elapsed += Time.deltaTime;
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update);
             }
 
             transform.position = endPosition; // 確保最終位置正確
@@ -141,7 +142,7 @@ namespace SG.Dialogue.Presentation
         [ContextMenu("DoShake")]
         public void DoShake()
         {
-            StartCoroutine(Shake(1f, 0.3f));
+            Shake(1f, 0.3f).Forget();
         }
 
     }

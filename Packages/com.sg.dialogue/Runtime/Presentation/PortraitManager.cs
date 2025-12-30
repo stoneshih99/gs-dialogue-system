@@ -1,5 +1,6 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Nodes;
 using UnityEngine;
@@ -38,16 +39,16 @@ namespace SG.Dialogue.Presentation
             BuildStageLookup();
         }
 
-        public void ProcessCharacterAction(CharacterActionNode node, float duration)
+        public async UniTask ProcessCharacterAction(CharacterActionNode node, float duration)
         {
             switch (node.ActionType)
             {
                 case CharacterActionType.Enter:
-                    ProcessEnterAction(node, duration);
+                    await ProcessEnterAction(node, duration);
                     break;
                 case CharacterActionType.Exit:
-                    if (node.ClearAllOnExit) ClearAllCharacters(duration);
-                    else ClearCharacterAt(node.TargetPosition, duration);
+                    if (node.ClearAllOnExit) await ClearAllCharacters(duration);
+                    else await ClearCharacterAt(node.TargetPosition, duration);
                     break;
             }
         }
@@ -62,24 +63,24 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        private void ProcessEnterAction(CharacterActionNode node, float duration)
+        private async UniTask ProcessEnterAction(CharacterActionNode node, float duration)
         {
             if (_activeCharacters.TryGetValue(node.TargetPosition, out var existingState))
             {
-                UpdateExistingCharacter(existingState, node);
+                await UpdateExistingCharacter(existingState, node);
                 existingState.SpeakerName = node.speakerName;
             }
             else
             {
-                InstantiateNewCharacter(node, duration);
+                await InstantiateNewCharacter(node, duration);
             }
         }
 
-        private void InstantiateNewCharacter(CharacterActionNode node, float duration)
+        private async UniTask InstantiateNewCharacter(CharacterActionNode node, float duration)
         {
             if (!_stageLookup.TryGetValue(node.TargetPosition, out var stage) || stage == null) return;
 
-            ClearCharacterAt(node.TargetPosition, 0);
+            await ClearCharacterAt(node.TargetPosition, 0);
 
             GameObject characterInstance = null;
             IDialoguePortraitPresenter presenter = null;
@@ -89,15 +90,14 @@ namespace SG.Dialogue.Presentation
                 case PortraitRenderMode.Sprite:
                     characterInstance = new GameObject("SpritePortrait");
                     var imagePresenter = characterInstance.AddComponent<ImageDialoguePortraitPresenter>();
-                    imagePresenter.ShowSprite(node.characterSprite, duration);
                     presenter = imagePresenter;
+                    // 先初始化，稍後顯示
                     break;
 #if SPINE_KIT_AVAILABLE
                 case PortraitRenderMode.Spine:
                     characterInstance = Instantiate(node.spinePortraitConfig.modelPrefab);
                     var spinePresenter = characterInstance.GetComponent<SpineDialoguePortraitPresenter>();
                     if (spinePresenter == null) spinePresenter = characterInstance.AddComponent<SpineDialoguePortraitPresenter>();
-                    spinePresenter.ShowSpine(node.spinePortraitConfig, duration);
                     presenter = spinePresenter;
                     break;
 #endif
@@ -105,14 +105,12 @@ namespace SG.Dialogue.Presentation
                 case PortraitRenderMode.Live2D:
                     characterInstance = Instantiate(node.live2DModelPrefab);
                     var live2DPresenter = characterInstance.GetComponent<Live2DDialoguePortraitPresenter>();
-                    if (live2DPresenter != null) live2DPresenter.ShowLive2D(node.live2DPortraitConfig, duration);
                     presenter = live2DPresenter;
                     break;
 #endif
                 case PortraitRenderMode.SpriteSheet:
                     characterInstance = Instantiate(node.spriteSheetPresenter);
                     var spriteSheetPresenter = characterInstance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
-                    if(spriteSheetPresenter != null) spriteSheetPresenter.ShowSpriteSheet(node.spriteSheetAnimationName, duration);
                     presenter = spriteSheetPresenter;
                     break;
             }
@@ -122,6 +120,28 @@ namespace SG.Dialogue.Presentation
                 characterInstance.transform.SetParent(stage, false);
                 var newState = new CharacterState(characterInstance, node.speakerName, presenter);
                 _activeCharacters[node.TargetPosition] = newState;
+
+                // 執行顯示動畫
+                switch (node.portraitRenderMode)
+                {
+                    case PortraitRenderMode.Sprite:
+                        await presenter.ShowSprite(node.characterSprite, duration);
+                        break;
+#if SPINE_KIT_AVAILABLE
+                    case PortraitRenderMode.Spine:
+                        await presenter.ShowSpine(node.spinePortraitConfig, duration);
+                        break;
+#endif
+#if LIVE2D_KIT_AVAILABLE
+                    case PortraitRenderMode.Live2D:
+                        if (presenter is Live2DDialoguePortraitPresenter l2d)
+                            await l2d.ShowLive2D(node.live2DPortraitConfig, duration);
+                        break;
+#endif
+                    case PortraitRenderMode.SpriteSheet:
+                        await presenter.ShowSpriteSheet(node.spriteSheetAnimationName, duration);
+                        break;
+                }
             }
             else if (characterInstance != null)
             {
@@ -129,48 +149,53 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        private void UpdateExistingCharacter(CharacterState existingState, CharacterActionNode node)
+        private async UniTask UpdateExistingCharacter(CharacterState existingState, CharacterActionNode node)
         {
             if (existingState.Presenter == null) return;
 
             if (node.portraitRenderMode == PortraitRenderMode.SpriteSheet)
-                existingState.Presenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
+                await existingState.Presenter.ShowSpriteSheet(node.spriteSheetAnimationName, 0f);
 #if LIVE2D_KIT_AVAILABLE
             else if (node.portraitRenderMode == PortraitRenderMode.Live2D && existingState.Presenter is Live2DDialoguePortraitPresenter live2DPresenter)
-                live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
+                await live2DPresenter.ShowLive2D(node.live2DPortraitConfig, 0f);
 #endif
 #if SPINE_KIT_AVAILABLE
             else if (node.portraitRenderMode == PortraitRenderMode.Spine && existingState.Presenter is SpineDialoguePortraitPresenter spinePresenter)
-                spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
+                await spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
 #endif
             else if (node.portraitRenderMode == PortraitRenderMode.Sprite && existingState.Presenter is ImageDialoguePortraitPresenter imagePresenter)
-                imagePresenter.ShowSprite(node.characterSprite, 0f);
+                await imagePresenter.ShowSprite(node.characterSprite, 0f);
         }
 
-        private void ClearCharacterAt(CharacterPosition position, float duration)
+        private async UniTask ClearCharacterAt(CharacterPosition position, float duration)
         {
             if (_activeCharacters.TryGetValue(position, out var activeCharacter))
             {
                 if (activeCharacter.Presenter != null)
                 {
-                    activeCharacter.Presenter.Hide(duration);
+                    await activeCharacter.Presenter.Hide(duration);
                 }
-                StartCoroutine(WaitAndDestroy(duration, activeCharacter.Instance));
+                WaitAndDestroy(duration, activeCharacter.Instance).Forget();
                 _activeCharacters.Remove(position);
             }
         }
 
-        private void ClearAllCharacters(float duration)
+        private async UniTask ClearAllCharacters(float duration)
         {
             var positions = new List<CharacterPosition>(_activeCharacters.Keys);
-            foreach (var position in positions) ClearCharacterAt(position, duration);
+            var tasks = new List<UniTask>();
+            foreach (var position in positions)
+            {
+                tasks.Add(ClearCharacterAt(position, duration));
+            }
+            await UniTask.WhenAll(tasks);
         }
 
-        private IEnumerator WaitAndDestroy(float duration, GameObject target)
+        private async UniTaskVoid WaitAndDestroy(float duration, GameObject target)
         {
             if (duration > 0)
             {
-                yield return new WaitForSecondsRealtime(duration);
+                await UniTask.Delay(TimeSpan.FromSeconds(duration), ignoreTimeScale: true);
             }
             if (target != null) Destroy(target);
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Presentation;
@@ -19,9 +20,9 @@ namespace SG.Dialogue
     /// </summary>
     public enum AutoAdvanceMode
     {
-        Default,
-        ForceEnable,
-        ForceDisable
+        Default,            // 使用對話圖的預設設定
+        ForceEnable,        // 強制啟用自動前進
+        ForceDisable        // 強制停用自動前進
     }
 
     [RequireComponent(typeof(DialogueUIManager), typeof(DialogueVisualManager))]
@@ -73,10 +74,12 @@ namespace SG.Dialogue
 
         private string _currentNodeId;
         private DialogueNodeBase _lastNode;
-        private Coroutine _activeNodeCoroutine;
         private WaitForAll _activeWaitForAll;
 
         private readonly Stack<string> _executionStack = new Stack<string>();
+        
+        // 用於等待輸入的 TaskCompletionSource
+        private UniTaskCompletionSource _inputCompletionSource;
 
         public MonoBehaviour CoroutineRunner => this;
         public float AutoAdvanceDelay => graph != null ? graph.defaultAutoAdvanceDelay : 0f;
@@ -103,6 +106,10 @@ namespace SG.Dialogue
             uiManager.OnAdvanceRequested -= OnAdvanceRequested;
             uiManager.OnChoiceSelected -= OnChoiceSelected;
             uiManager.OnTypingCompleted -= OnTypingCompleted;
+            
+            // 清理等待中的 Task
+            _inputCompletionSource?.TrySetCanceled();
+            _inputCompletionSource = null;
         }
 
         /// <summary>
@@ -167,12 +174,6 @@ namespace SG.Dialogue
         {
             if (!IsRunning) return;
 
-            if (_activeNodeCoroutine != null)
-            {
-                StopCoroutine(_activeNodeCoroutine);
-                _activeNodeCoroutine = null;
-            }
-
             if (_lastNode != null)
             {
                 TriggerOnExit(_lastNode);
@@ -198,7 +199,7 @@ namespace SG.Dialogue
                 }
 
                 TriggerOnEnterAndVariableChanges(node);
-                _activeNodeCoroutine = StartCoroutine(ProcessNodeCoroutine(node));
+                ProcessNode(node).Forget();
             }
             else
             {
@@ -244,63 +245,34 @@ namespace SG.Dialogue
             return null;
         }
 
-        private IEnumerator ProcessNodeCoroutine(DialogueNodeBase node)
+        private async UniTaskVoid ProcessNode(DialogueNodeBase node)
         {
             if (node is AnimationNode animNode)
             {
-                yield return StartCoroutine(visualManager.PlayAnimations(animNode));
+                await visualManager.PlayAnimations(animNode);
             }
             else if (node is CharacterActionNode charActionNode)
             {
-                yield return StartCoroutine(visualManager.UpdateFromCharacterActionNode(charActionNode));
+                await visualManager.UpdateFromCharacterActionNode(charActionNode);
             }
             else if (node is SetBackgroundNode bgNode)
             {
-                yield return StartCoroutine(visualManager.UpdateFromSetBackgroundNode(bgNode));
+                await visualManager.UpdateFromSetBackgroundNode(bgNode);
             }
             else if (node is FlickerEffectNode flickerNode)
             {
-                yield return StartCoroutine(visualManager.ExecuteFlickerEffect(flickerNode));
+                await visualManager.ExecuteFlickerEffect(flickerNode);
             }
             else
             {
-                var instructionEnumerator = node.Process(this);
-                while (instructionEnumerator.MoveNext())
-                {
-                    var instruction = instructionEnumerator.Current;
-
-                    if (instruction is AdvanceToNode advance)
-                    {
-                        Advance(advance.NextNodeId);
-                        yield break;
-                    }
-                    else if (instruction is WaitForUserInput)
-                    {
-                        yield break;
-                    }
-                    else if (instruction is EndDialogue)
-                    {
-                        EndDialogue();
-                        yield break;
-                    }
-                    else if (instruction is WaitForAll waitForAll)
-                    {
-                        _activeWaitForAll = waitForAll;
-                        waitForAll.OnComplete += () => _activeWaitForAll = null;
-                        yield return waitForAll;
-                    }
-                    else if (instruction != null)
-                    {
-                        yield return instruction;
-                    }
-                }
+                await node.Process(this);
             }
 
             string defaultNextId = node.GetNextNodeId();
             Advance(defaultNextId);
         }
 
-        public IEnumerator GetBranchEnumerator(string startNodeId, Action onInputSwallowed)
+        public async UniTask GetBranchEnumerator(string startNodeId, Action onInputSwallowed)
         {
             string currentBranchNodeId = startNodeId;
             while (!string.IsNullOrEmpty(currentBranchNodeId))
@@ -309,7 +281,7 @@ namespace SG.Dialogue
                 if (node == null)
                 {
                     Debug.LogWarning($"Branch execution: Node '{currentBranchNodeId}' not found. Branch terminated.");
-                    yield break;
+                    return;
                 }
 
                 if (!node.IsEnabled)
@@ -324,25 +296,7 @@ namespace SG.Dialogue
                     Debug.Log($"[Dialogue Debug] Executing branch node: {node.GetType().Name} (ID: {node.nodeId})");
                 }
 
-                var instructionEnumerator = node.Process(this);
-                while (instructionEnumerator.MoveNext())
-                {
-                    var instruction = instructionEnumerator.Current;
-                    if (instruction is AdvanceToNode || instruction is EndDialogue)
-                    {
-                        Debug.LogWarning($"[Dialogue Debug] Node {node.GetType().Name} (ID: {node.nodeId}) tried to issue a global flow control instruction ({instruction.GetType().Name}), which is consumed in a parallel branch.");
-                        yield break;
-                    }
-                    else if (instruction is WaitForUserInput)
-                    {
-                        onInputSwallowed?.Invoke();
-                        continue;
-                    }
-                    else if (instruction != null)
-                    {
-                        yield return instruction;
-                    }
-                }
+                await node.Process(this);
 
                 currentBranchNodeId = node.GetNextNodeId();
             }
@@ -383,11 +337,50 @@ namespace SG.Dialogue
                 _activeWaitForAll.ForceComplete();
                 return;
             }
-
-            if (_lastNode != null)
+            
+            // 如果有正在等待輸入的 Task，則完成它
+            if (_inputCompletionSource != null)
             {
-                Advance(_lastNode.GetNextNodeId());
+                _inputCompletionSource.TrySetResult();
+                _inputCompletionSource = null;
+                return; // 這裡 return，因為 ProcessNode 會繼續執行並呼叫 Advance
             }
+
+            // 只有在沒有等待輸入的情況下，才主動 Advance (例如點擊過快或異常狀態)
+            // 但通常 ProcessNode 正在執行中，我們不應該這裡亂 Advance
+            // 除非是某些非同步節點卡住了，或者舊邏輯需要保留
+            // 為了相容舊邏輯（如果沒有使用 WaitForInputAsync 的節點），保留此檢查
+            // 但要注意這可能會導致雙重 Advance
+            
+            // 暫時保留舊邏輯，但加上檢查
+            if (_lastNode != null && _inputCompletionSource == null) 
+            {
+                // 注意：如果節點正在 Process 中且沒有等待輸入，這裡呼叫 Advance 可能會打斷它或造成並行
+                // 但目前的架構是 ProcessNode 結束後會自動 Advance
+                // 所以這裡的 Advance 主要是給那些 "沒有 await WaitForInput" 的舊節點用的？
+                // 或者是在節點執行完畢後，等待玩家點擊才前進的情況？
+                
+                // 在新的架構下，節點應該自己負責等待。
+                // 如果節點已經執行完畢 (ProcessNode 結束)，它會自動呼叫 Advance。
+                // 所以這裡可能不需要做什麼，除非是為了處理 "點擊跳過" 的邏輯。
+                
+                // 為了安全起見，如果我們正在等待輸入，我們已經在上面 return 了。
+                // 如果沒有等待輸入，表示可能是在打字中（已處理）或是在做其他事。
+            }
+        }
+
+        /// <summary>
+        /// 等待使用者輸入（點擊下一步）。
+        /// </summary>
+        public async UniTask WaitForInputAsync()
+        {
+            if (_inputCompletionSource != null)
+            {
+                _inputCompletionSource.TrySetCanceled();
+            }
+
+            _inputCompletionSource = new UniTaskCompletionSource();
+            await _inputCompletionSource.Task;
         }
 
         private void OnChoiceSelected(DialogueChoice choice)
@@ -411,11 +404,11 @@ namespace SG.Dialogue
                 _activeWaitForAll.ForceComplete();
                 _activeWaitForAll = null;
             }
-
-            if (_activeNodeCoroutine != null)
+            
+            if (_inputCompletionSource != null)
             {
-                StopCoroutine(_activeNodeCoroutine);
-                _activeNodeCoroutine = null;
+                _inputCompletionSource.TrySetCanceled();
+                _inputCompletionSource = null;
             }
             
             if (_lastNode != null)

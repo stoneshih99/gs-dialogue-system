@@ -1,5 +1,5 @@
 using System;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 
@@ -25,15 +25,15 @@ namespace SG.Dialogue
 
         /// <summary>
         /// 處理節點的核心邏輯。每個具體的節點類型都必須覆寫此方法以執行其特定行為。
-        /// 這個方法是一個協程，可以 yield return 各種指令來控制對話流程。
+        /// 這個方法是一個非同步任務，可以 await 各種指令來控制對話流程。
         /// 例如：
-        /// - yield return new WaitForUserInput(); // 等待玩家點擊
-        /// - yield return new AdvanceToNode("otherNodeId"); // 直接跳轉到另一個節點
-        /// - yield return new WaitForSeconds(1.0f); // 等待一段時間
+        /// - await new WaitForUserInput(); // 等待玩家點擊
+        /// - await new AdvanceToNode("otherNodeId"); // 直接跳轉到另一個節點
+        /// - await UniTask.Delay(1000); // 等待一段時間
         /// </summary>
         /// <param name="controller">對話總控制器，提供對 UI、視覺、狀態等管理器的存取。</param>
-        /// <returns>一個迭代器，用於協程執行。</returns>
-        public abstract IEnumerator Process(DialogueController controller);
+        /// <returns>一個 UniTask，用於非同步執行。</returns>
+        public abstract UniTask Process(DialogueController controller);
 
         /// <summary>
         /// 當對話流程離開此節點時，由 DialogueController 呼叫。

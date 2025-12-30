@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 
@@ -40,7 +41,7 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             Debug.Log($"[對話] 進入序列: {sequenceName}"); // 調整回使用 sequenceName
 
@@ -49,7 +50,7 @@ namespace SG.Dialogue.Nodes
             controller.PushToExecutionStack(nextNodeId);
 
             // 2. 返回一個指令，告訴控制器立即前進到此序列內部的起始節點。
-            yield return new AdvanceToNode(startNodeId);
+            await new AdvanceToNode(startNodeId);
         }
 
         /// <summary>

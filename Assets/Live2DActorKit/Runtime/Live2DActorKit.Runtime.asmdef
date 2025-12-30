@@ -2,7 +2,8 @@
     "name": "Live2DActorKit.Runtime",
     "rootNamespace": "",
     "references": [
-        "GUID:b2b60b59554a33b41b16ef821fecbac2"
+        "GUID:b2b60b59554a33b41b16ef821fecbac2",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個空的協程迭代器。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             string formattedMessage = controller.FormatString(message); // 使用控制器內建的格式化方法
 
@@ -48,7 +49,7 @@ namespace SG.Dialogue.Nodes
             }
 
             // 此節點是立即執行的，不需等待。
-            yield break;
+            await UniTask.CompletedTask;
         }
 
         /// <summary>

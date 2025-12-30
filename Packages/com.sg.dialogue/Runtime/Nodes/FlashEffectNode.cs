@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Presentation;
 using UnityEngine;
 
@@ -33,17 +34,17 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個協程迭代器，用於等待特效完成。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             var effectController = UnityEngine.Object.FindObjectOfType<ScreenEffectController>();
             if (effectController == null)
             {
                 Debug.LogWarning("場景中找不到 ScreenEffectController，無法執行畫面閃爍特效。");
-                yield break;
+                return;
             }
 
             // 呼叫 ScreenEffectController 來執行閃爍效果，並等待其完成
-            yield return effectController.ExecuteFlash(Duration, FlashColor, Intensity);
+            await effectController.ExecuteFlash(Duration, FlashColor, Intensity);
         }
 
         /// <summary>

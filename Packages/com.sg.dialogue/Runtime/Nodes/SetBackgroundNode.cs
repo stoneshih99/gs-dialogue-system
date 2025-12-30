@@ -1,4 +1,5 @@
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace SG.Dialogue.Nodes
@@ -33,10 +34,10 @@ namespace SG.Dialogue.Nodes
             return nextNodeId;
         }
 
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 主要邏輯由 DialogueController 處理
-            yield break;
+            await UniTask.CompletedTask;
         }
 
         public override void ClearConnectionsForClipboard()

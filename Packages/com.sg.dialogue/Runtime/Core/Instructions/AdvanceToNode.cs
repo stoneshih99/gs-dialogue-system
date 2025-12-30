@@ -1,3 +1,5 @@
+using Cysharp.Threading.Tasks;
+
 namespace SG.Dialogue.Core.Instructions
 {
     /// <summary>
@@ -18,6 +20,11 @@ namespace SG.Dialogue.Core.Instructions
         public AdvanceToNode(string nextNodeId)
         {
             NextNodeId = nextNodeId;
+        }
+        
+        public UniTask.Awaiter GetAwaiter()
+        {
+            return UniTask.CompletedTask.GetAwaiter();
         }
     }
 }

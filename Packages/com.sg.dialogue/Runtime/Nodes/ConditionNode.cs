@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Conditions;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 檢查條件是否滿足
             bool result = Condition.Check(controller);
@@ -41,13 +42,13 @@ namespace SG.Dialogue.Nodes
             // 如果有有效的下一個節點，則返回一個 AdvanceToNode 指令來跳轉
             if (!string.IsNullOrEmpty(nextNodeId))
             {
-                yield return new AdvanceToNode(nextNodeId);
+                await new AdvanceToNode(nextNodeId);
             }
             else
             {
                 // 如果對應的分支沒有設定下一個節點，則警告並結束對話，以避免流程卡住
                 Debug.LogWarning($"條件節點 '{nodeId}' 的結果為 {result}，但對應的下一個節點 ID 為空。對話將結束。");
-                yield return new EndDialogue();
+                await new EndDialogue();
             }
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,7 +30,7 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 指示 UI 管理器顯示選項。
             // 我們傳遞一個 Lambda 函數 `(condition) => condition.Check(controller)` 給 UiManager，
@@ -37,7 +38,7 @@ namespace SG.Dialogue.Nodes
             controller.UiManager.ShowChoices(this, (condition) => condition.Check(controller));
             
             // 返回指令，告訴控制器在此暫停，等待使用者從 UI 上選擇一個選項。
-            yield return new WaitForUserInput();
+            await new WaitForUserInput();
         }
 
         public override void OnExit(DialogueController controller)

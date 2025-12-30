@@ -1,6 +1,7 @@
 using System;
-using System.Collections;
 using System.Text.RegularExpressions;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using TMPro;
 using UnityEngine;
@@ -8,7 +9,7 @@ using UnityEngine;
 namespace SG.Dialogue.Presentation
 {
     /// <summary>
-    /// 文字呈現器的基底類別，封裝了通用的打字機效果邏輯。
+    /// 文字呈現器的基底類別，封裝了通用的打字機效果邏輯 (UniTask 版本)。
     /// </summary>
     public abstract class BaseTextPresenter : MonoBehaviour
     {
@@ -28,8 +29,10 @@ namespace SG.Dialogue.Presentation
         public event Action OnTypingCompleted;
 
         protected DialogueTextAnimator textAnimator;
-        protected Coroutine typingRoutine;
         protected bool isTyping;
+        
+        // 用於取消打字機任務
+        protected CancellationTokenSource _typingCts;
         
         // 打字機狀態
         protected int visibleCharIndex;
@@ -52,6 +55,11 @@ namespace SG.Dialogue.Presentation
             }
         }
 
+        protected virtual void OnDestroy()
+        {
+            CancelTyping();
+        }
+
         /// <summary>
         /// 顯示文字。
         /// </summary>
@@ -61,7 +69,7 @@ namespace SG.Dialogue.Presentation
         {
             if (textLabel == null) return;
 
-            if (typingRoutine != null) StopCoroutine(typingRoutine);
+            CancelTyping();
 
             // 處理文字動畫
             if (textAnimator != null)
@@ -77,7 +85,8 @@ namespace SG.Dialogue.Presentation
 
             if (enableTypewriter && gameObject.activeInHierarchy && speed > 0)
             {
-                typingRoutine = StartCoroutine(TypewriterRoutine(textLabel.text, speed));
+                _typingCts = new CancellationTokenSource();
+                TypewriterRoutine(textLabel.text, speed, _typingCts.Token).Forget();
             }
             else
             {
@@ -93,10 +102,10 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         public virtual void SkipTypewriter()
         {
-            if (!isTyping && typingRoutine == null) return;
+            if (!isTyping) return;
 
+            CancelTyping();
             isTyping = false;
-            if (typingRoutine != null) { StopCoroutine(typingRoutine); typingRoutine = null; }
 
             if (textLabel != null)
             {
@@ -109,23 +118,33 @@ namespace SG.Dialogue.Presentation
         {
             if (textLabel != null) textLabel.text = "";
             isTyping = false;
-            if (typingRoutine != null) { StopCoroutine(typingRoutine); typingRoutine = null; }
+            CancelTyping();
         }
 
-        protected virtual IEnumerator TypewriterRoutine(string originalText, float speed)
+        protected void CancelTyping()
+        {
+            if (_typingCts != null)
+            {
+                _typingCts.Cancel();
+                _typingCts.Dispose();
+                _typingCts = null;
+            }
+        }
+
+        protected virtual async UniTaskVoid TypewriterRoutine(string originalText, float speed, CancellationToken token)
         {
             isTyping = true;
             textLabel.maxVisibleCharacters = 0;
             visibleCharIndex = 0;
 
-            yield return null; // 等待一幀以確保 TMPro 更新
+            await UniTask.Yield(PlayerLoopTiming.Update, token); // 等待一幀以確保 TMPro 更新
 
             float baseDelay = 1f / speed;
             float currentDelay = baseDelay;
 
             for (int i = 0; i < originalText.Length; i++)
             {
-                if (!isTyping) yield break;
+                if (token.IsCancellationRequested) return;
 
                 // 處理 Rich Text 標籤 (包含 <speed>)
                 if (originalText[i] == '<')
@@ -140,7 +159,7 @@ namespace SG.Dialogue.Presentation
 
                         for (int j = 0; j < content.Length; j++)
                         {
-                            yield return ProcessCharacter(content[j], currentDelay);
+                            await ProcessCharacter(content[j], currentDelay, token);
                         }
                         
                         currentDelay = baseDelay;
@@ -157,15 +176,15 @@ namespace SG.Dialogue.Presentation
                     }
                 }
 
-                yield return ProcessCharacter(originalText[i], currentDelay);
+                await ProcessCharacter(originalText[i], currentDelay, token);
             }
 
             isTyping = false;
-            typingRoutine = null;
+            _typingCts = null; // 任務自然結束，不需要 Cancel
             OnTypingCompleteInternal();
         }
 
-        protected virtual IEnumerator ProcessCharacter(char character, float delay)
+        protected virtual async UniTask ProcessCharacter(char character, float delay, CancellationToken token)
         {
             textLabel.maxVisibleCharacters = visibleCharIndex + 1;
             
@@ -173,7 +192,11 @@ namespace SG.Dialogue.Presentation
             OnCharacterTyped(character, visibleCharIndex);
 
             visibleCharIndex++;
-            if (delay > 0f) yield return new WaitForSeconds(delay);
+            if (delay > 0f)
+            {
+                // 使用 Delay，並傳入 cancellationToken
+                await UniTask.Delay(TimeSpan.FromSeconds(delay), ignoreTimeScale: false, cancellationToken: token);
+            }
         }
 
         /// <summary>

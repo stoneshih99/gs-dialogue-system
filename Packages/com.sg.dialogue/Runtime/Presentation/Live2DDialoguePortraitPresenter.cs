@@ -1,6 +1,8 @@
 #if LIVE2D_KIT_AVAILABLE
 using Live2DActorKit.Core;
 using System.Collections;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using UnityEngine;
 
@@ -18,7 +20,7 @@ namespace SG.Dialogue.Presentation
 
         private ILive2DActor _live2DActor;
         private LitMotionPlayer _motionPlayer;
-        private Coroutine _fadeRoutine;
+        private CancellationTokenSource _fadeCts;
 
         private void Awake()
         {
@@ -33,22 +35,30 @@ namespace SG.Dialogue.Presentation
             _motionPlayer = GetComponent<LitMotionPlayer>();
         }
 
-        public void ShowSprite(Sprite sprite, float fadeDuration)
+        private void OnDestroy()
+        {
+            CancelFade();
+        }
+
+        public UniTask ShowSprite(Sprite sprite, float fadeDuration)
         {
             Debug.LogWarning("Live2DDialoguePortraitPresenter does not support Sprites. Hiding portrait.");
             HideImmediate();
+            return UniTask.CompletedTask;
         }
 
-        public void ShowSpine(SpinePortraitConfig config, float fadeDuration)
+        public UniTask ShowSpine(SpinePortraitConfig config, float fadeDuration)
         {
             Debug.LogWarning("Live2DDialoguePortraitPresenter does not support Spine. Hiding portrait.");
             HideImmediate();
+            return UniTask.CompletedTask;
         }
 
-        public void ShowSpriteSheet(string animationName, float fadeDuration)
+        public UniTask ShowSpriteSheet(string animationName, float fadeDuration)
         {
             Debug.LogWarning("Live2DDialoguePortraitPresenter does not support Sprite Sheets. Hiding portrait.");
             HideImmediate();
+            return UniTask.CompletedTask;
         }
 
         /// <summary>
@@ -56,10 +66,10 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="config">Live2D 立繪的設定。</param>
         /// <param name="fadeDuration">淡入持續時間（秒）。</param>
-        public void ShowLive2D(Live2DPortraitConfig config, float fadeDuration)
+        public UniTask ShowLive2D(Live2DPortraitConfig config, float fadeDuration)
         {
-            if (config == null) { HideImmediate(); return; }
-            if (_live2DActor == null) { Debug.LogWarning("Live2DActor 未設定，無法顯示 Live2D 立繪。"); return; }
+            if (config == null) { HideImmediate(); return UniTask.CompletedTask; }
+            if (_live2DActor == null) { Debug.LogWarning("Live2DActor 未設定，無法顯示 Live2D 立繪。"); return UniTask.CompletedTask; }
 
             transform.localScale = new Vector3(config.scaleX, 1, 1);
 
@@ -75,21 +85,24 @@ namespace SG.Dialogue.Presentation
 
             // Live2D does not have a direct equivalent of queued animation, so we will ignore it for now.
 
-            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
+            CancelFade();
             gameObject.SetActive(true);
             _live2DActor.SetOpacity(0f);
-            _fadeRoutine = StartCoroutine(FadeTo(1f, fadeDuration));
+            
+            _fadeCts = new CancellationTokenSource();
+            return FadeTo(1f, fadeDuration, _fadeCts.Token);
         }
 
-        public void Hide(float fadeDuration)
+        public UniTask Hide(float fadeDuration)
         {
-            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
-            _fadeRoutine = StartCoroutine(FadeTo(0f, fadeDuration));
+            CancelFade();
+            _fadeCts = new CancellationTokenSource();
+            return FadeTo(0f, fadeDuration, _fadeCts.Token);
         }
 
         public void HideImmediate()
         {
-            if (_fadeRoutine != null) { StopCoroutine(_fadeRoutine); _fadeRoutine = null; }
+            CancelFade();
             if (_live2DActor != null)
             {
                 _live2DActor.SetOpacity(0f);
@@ -117,27 +130,40 @@ namespace SG.Dialogue.Presentation
             _live2DActor.SetColor(targetColor);
         }
 
-        public IEnumerator Flicker(float duration, float frequency, float minAlpha)
+        public async UniTask Flicker(float duration, float frequency, float minAlpha)
         {
-            if (_live2DActor == null) yield break;
+            if (_live2DActor == null) return;
 
+            var token = this.GetCancellationTokenOnDestroy();
             float time = 0;
             float originalAlpha = _live2DActor.GetOpacity();
 
             while (time < duration)
             {
+                if (token.IsCancellationRequested) return;
+                
                 float alpha = Mathf.Lerp(minAlpha, originalAlpha, Mathf.Abs(Mathf.Sin(time * frequency * Mathf.PI)));
                 _live2DActor.SetOpacity(alpha);
                 time += Time.deltaTime;
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
 
             _live2DActor.SetOpacity(originalAlpha);
         }
 
-        private IEnumerator FadeTo(float targetAlpha, float duration)
+        private void CancelFade()
         {
-            if (_live2DActor == null) yield break;
+            if (_fadeCts != null)
+            {
+                _fadeCts.Cancel();
+                _fadeCts.Dispose();
+                _fadeCts = null;
+            }
+        }
+
+        private async UniTask FadeTo(float targetAlpha, float duration, CancellationToken token)
+        {
+            if (_live2DActor == null) return;
 
             gameObject.SetActive(true);
             float startAlpha = _live2DActor.GetOpacity();
@@ -146,21 +172,21 @@ namespace SG.Dialogue.Presentation
             {
                 _live2DActor.SetOpacity(targetAlpha);
                 if (Mathf.Approximately(targetAlpha, 0f)) gameObject.SetActive(false);
-                _fadeRoutine = null;
-                yield break;
+                return;
             }
 
             float t = 0f;
             while (t < duration)
             {
+                if (token.IsCancellationRequested) return;
+                
                 t += Time.deltaTime;
                 _live2DActor.SetOpacity(Mathf.Lerp(startAlpha, targetAlpha, t / duration));
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
 
             _live2DActor.SetOpacity(targetAlpha);
             if (Mathf.Approximately(targetAlpha, 0f)) gameObject.SetActive(false);
-            _fadeRoutine = null;
         }
     }
 }

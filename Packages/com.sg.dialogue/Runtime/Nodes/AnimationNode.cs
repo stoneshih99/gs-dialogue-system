@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Enums;
 using UnityEngine;
@@ -34,12 +35,12 @@ namespace SG.Dialogue.Nodes
         /// 處理節點的邏輯。對於 AnimationNode，主要邏輯由 DialogueController 特殊處理，
         /// 此處僅為滿足抽象類別的要求。
         /// </summary>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // AnimationNode 的主要邏輯在 DialogueController.ProcessNodeCoroutine 中處理，
             // 以便直接控制協程的執行流程。
             // 此處返回 null 或空的迭代器。
-            yield break;
+            await UniTask.CompletedTask;
         }
 
         public override void ClearConnectionsForClipboard()

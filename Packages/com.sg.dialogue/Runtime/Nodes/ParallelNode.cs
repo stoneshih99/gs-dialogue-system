@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 
@@ -27,32 +28,32 @@ namespace SG.Dialogue.Nodes
         [Tooltip("當所有並行分支都執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             if (branchStartNodeIds == null || branchStartNodeIds.Count == 0)
             {
                 Debug.LogWarning($"[Dialogue] ParallelNode '{nodeId}' has no branches to execute.");
-                yield break;
+                return;
             }
 
             bool wasInputSwallowed = false;
-            var branchEnumerators = new List<IEnumerator>();
+            var tasks = new List<UniTask>();
             foreach (var startNodeId in branchStartNodeIds)
             {
                 if (!string.IsNullOrEmpty(startNodeId))
                 {
-                    branchEnumerators.Add(controller.GetBranchEnumerator(startNodeId, () => wasInputSwallowed = true));
+                    tasks.Add(controller.GetBranchEnumerator(startNodeId, () => wasInputSwallowed = true));
                 }
             }
 
-            if (branchEnumerators.Count > 0)
+            if (tasks.Count > 0)
             {
-                yield return new WaitForAll(controller.CoroutineRunner, branchEnumerators);
+                await UniTask.WhenAll(tasks);
             }
             
             if (wasInputSwallowed)
             {
-                yield return new WaitForUserInput();
+                await new WaitForUserInput();
             }
         }
 

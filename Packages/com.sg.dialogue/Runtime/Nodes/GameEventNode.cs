@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Events;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace SG.Dialogue.Nodes
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             if (GameEvent != null)
             {
@@ -32,7 +33,7 @@ namespace SG.Dialogue.Nodes
             {
                 Debug.LogWarning($"遊戲事件節點 '{nodeId}' 沒有指派任何 GameEvent。");
             }
-            yield break;
+            await UniTask.CompletedTask;
         }
 
         public override string GetNextNodeId()

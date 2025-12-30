@@ -1,4 +1,5 @@
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,52 +53,52 @@ namespace SG.Dialogue.Presentation
         /// <summary>
         /// 啟用灰階效果。
         /// </summary>
-        public IEnumerator EnableGrayscale(float duration)
+        public async UniTask EnableGrayscale(float duration)
         {
-            if (grayscaleMask == null) yield break;
-            yield return FadeMaskRoutine(grayscaleMask, grayscaleMask.color, targetGrayscaleAlpha, duration);
+            if (grayscaleMask == null) return;
+            await FadeMaskRoutine(grayscaleMask, grayscaleMask.color, targetGrayscaleAlpha, duration);
         }
 
         /// <summary>
         /// 禁用灰階效果。
         /// </summary>
-        public IEnumerator DisableGrayscale(float duration)
+        public async UniTask DisableGrayscale(float duration)
         {
-            if (grayscaleMask == null) yield break;
-            yield return FadeMaskRoutine(grayscaleMask, grayscaleMask.color, 0f, duration);
+            if (grayscaleMask == null) return;
+            await FadeMaskRoutine(grayscaleMask, grayscaleMask.color, 0f, duration);
         }
 
         /// <summary>
         /// 執行畫面閃爍效果。
         /// </summary>
-        public IEnumerator ExecuteFlash(float duration, Color color, float intensity)
+        public async UniTask ExecuteFlash(float duration, Color color, float intensity)
         {
-            if (flashMask == null) yield break;
+            if (flashMask == null) return;
             float fadeInDuration = duration * 0.5f;
             float fadeOutDuration = duration * 0.5f;
-            yield return FadeMaskRoutine(flashMask, color, intensity, fadeInDuration);
-            yield return FadeMaskRoutine(flashMask, color, 0f, fadeOutDuration);
+            await FadeMaskRoutine(flashMask, color, intensity, fadeInDuration);
+            await FadeMaskRoutine(flashMask, color, 0f, fadeOutDuration);
         }
 
         /// <summary>
         /// 啟用背景模糊效果。
         /// </summary>
-        public IEnumerator EnableBlur(float duration, float blurAmount)
+        public async UniTask EnableBlur(float duration, float blurAmount)
         {
-            if (_blurMaterialInstance == null) yield break;
-            yield return FadeBlurRoutine(blurAmount, duration);
+            if (_blurMaterialInstance == null) return;
+            await FadeBlurRoutine(blurAmount, duration);
         }
 
         /// <summary>
         /// 禁用背景模糊效果。
         /// </summary>
-        public IEnumerator DisableBlur(float duration)
+        public async UniTask DisableBlur(float duration)
         {
-            if (_blurMaterialInstance == null) yield break;
-            yield return FadeBlurRoutine(0f, duration);
+            if (_blurMaterialInstance == null) return;
+            await FadeBlurRoutine(0f, duration);
         }
 
-        private IEnumerator FadeMaskRoutine(Image mask, Color baseColor, float targetAlpha, float duration)
+        private async UniTask FadeMaskRoutine(Image mask, Color baseColor, float targetAlpha, float duration)
         {
             float startAlpha = mask.color.a;
             float time = 0;
@@ -107,13 +108,13 @@ namespace SG.Dialogue.Presentation
                 float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
                 baseColor.a = newAlpha;
                 mask.color = baseColor;
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update);
             }
             baseColor.a = targetAlpha;
             mask.color = baseColor;
         }
 
-        private IEnumerator FadeBlurRoutine(float targetBlur, float duration)
+        private async UniTask FadeBlurRoutine(float targetBlur, float duration)
         {
             float startBlur = _blurMaterialInstance.GetFloat("_BlurSize");
             float time = 0;
@@ -122,7 +123,7 @@ namespace SG.Dialogue.Presentation
                 time += Time.deltaTime;
                 float newBlur = Mathf.Lerp(startBlur, targetBlur, time / duration);
                 _blurMaterialInstance.SetFloat("_BlurSize", newBlur);
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update);
             }
             _blurMaterialInstance.SetFloat("_BlurSize", targetBlur);
         }

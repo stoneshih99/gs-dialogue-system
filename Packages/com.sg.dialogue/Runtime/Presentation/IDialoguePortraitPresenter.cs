@@ -1,4 +1,5 @@
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="sprite">要顯示的 Sprite。</param>
         /// <param name="fadeDuration">淡入持續時間（秒）。</param>
-        void ShowSprite(Sprite sprite, float fadeDuration);
+        UniTask ShowSprite(Sprite sprite, float fadeDuration);
 
         /// <summary>
         /// 根據指定的淡入時間顯示一個 Spine 立繪。
@@ -24,7 +25,7 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="config">Spine 立繪的設定。</param>
         /// <param name="fadeDuration">淡入持續時間（秒）。</param>
-        void ShowSpine(SpinePortraitConfig config, float fadeDuration);
+        UniTask ShowSpine(SpinePortraitConfig config, float fadeDuration);
 
         /// <summary>
         /// 根據指定的淡入時間顯示一個 Sprite Sheet 動畫立繪。
@@ -32,13 +33,13 @@ namespace SG.Dialogue.Presentation
         /// </summary>
         /// <param name="animationName">動畫名稱。</param>
         /// <param name="fadeDuration">淡入持續時間（秒）。</param>
-        void ShowSpriteSheet(string animationName, float fadeDuration);
+        UniTask ShowSpriteSheet(string animationName, float fadeDuration);
 
         /// <summary>
         /// 根據指定的淡出時間隱藏當前顯示的立繪。
         /// </summary>
         /// <param name="fadeDuration">淡出持續時間（秒）。</param>
-        void Hide(float fadeDuration);
+        UniTask Hide(float fadeDuration);
 
         /// <summary>
         /// 立即清除並隱藏立繪，沒有淡出效果。
@@ -66,6 +67,6 @@ namespace SG.Dialogue.Presentation
         /// <param name="frequency">閃爍頻率。</param>
         /// <param name="minAlpha">閃爍時的最低透明度。</param>
         /// <returns>一個協程，用於等待閃爍效果完成。</returns>
-        IEnumerator Flicker(float duration, float frequency, float minAlpha);
+        UniTask Flicker(float duration, float frequency, float minAlpha);
     }
 }

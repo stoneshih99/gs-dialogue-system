@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
 
@@ -25,11 +26,11 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器（在此節點中未使用）。</param>
         /// <returns>一個 WaitForSeconds 實例。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 返回一個 WaitForSeconds 指令，DialogueController 會 yield return 這個指令，
             // 從而使對話流程暫停指定的時間。
-            yield return new WaitForSeconds(WaitTime);
+            await UniTask.Delay(TimeSpan.FromSeconds(WaitTime), ignoreTimeScale: false);
         }
 
         /// <summary>

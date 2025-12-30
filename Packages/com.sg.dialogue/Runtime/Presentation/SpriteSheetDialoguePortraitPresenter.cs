@@ -1,5 +1,7 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using UnityEngine;
 
@@ -19,8 +21,8 @@ namespace SG.Dialogue.Presentation
 
         [SerializeField] private List<SpriteSheetStateConfig> stateAnimations;
         
-        private Coroutine _animationCoroutine;
-        private Coroutine _fadeRoutine;
+        private CancellationTokenSource _animationCts;
+        private CancellationTokenSource _fadeCts;
 
         private void Awake()
         {
@@ -28,7 +30,6 @@ namespace SG.Dialogue.Presentation
             {
                 _portraitSprite = GetComponent<SpriteRenderer>();
             }
-            // 確保初始狀態正確
             if (_portraitSprite != null)
             {
                 _portraitSprite.enabled = false;
@@ -38,61 +39,67 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        public void ShowSprite(Sprite sprite, float fadeDuration)
+        private void OnDestroy()
+        {
+            CancelFade();
+            StopAnimation();
+        }
+
+        public UniTask ShowSprite(Sprite sprite, float fadeDuration)
         {
             StopAnimation();
-            if (_portraitSprite == null) return;
+            if (_portraitSprite == null) return UniTask.CompletedTask;
             
             _portraitSprite.sprite = sprite;
             _portraitSprite.enabled = true;
             
-            // 啟動淡入
-            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
-            _fadeRoutine = StartCoroutine(FadeTo(1f, fadeDuration));
+            CancelFade();
+            _fadeCts = new CancellationTokenSource();
+            return FadeTo(1f, fadeDuration, _fadeCts.Token);
         }
 
-        public void ShowSpine(SpinePortraitConfig config, float fadeDuration)
+        public UniTask ShowSpine(SpinePortraitConfig config, float fadeDuration)
         {
             Debug.LogWarning("SpriteSheetDialoguePortraitPresenter does not support Spine.");
             HideImmediate();
+            return UniTask.CompletedTask;
         }
 
-        public void ShowSpriteSheet(string spriteSheetAnimationName, float fadeDuration)
+        public UniTask ShowSpriteSheet(string spriteSheetAnimationName, float fadeDuration)
         {
-            if (string.IsNullOrEmpty(spriteSheetAnimationName)) return;
+            if (string.IsNullOrEmpty(spriteSheetAnimationName)) return UniTask.CompletedTask;
             
             StopAnimation();
-            if (_portraitSprite == null) return;
+            if (_portraitSprite == null) return UniTask.CompletedTask;
 
             _portraitSprite.enabled = true;
             var config = FindAnimationByName(spriteSheetAnimationName);
-            _animationCoroutine = StartCoroutine(PlaySpriteSheetAnimation(config));
             
-            // 啟動淡入
-            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
-            // 如果是剛開始顯示，確保 Alpha 為 0
+            _animationCts = new CancellationTokenSource();
+            PlaySpriteSheetAnimation(config, _animationCts.Token).Forget();
+            
+            CancelFade();
+            _fadeCts = new CancellationTokenSource();
             if (!_portraitSprite.gameObject.activeSelf || _portraitSprite.color.a == 0)
             {
                 var c = _portraitSprite.color;
                 c.a = 0f;
                 _portraitSprite.color = c;
             }
-            _fadeRoutine = StartCoroutine(FadeTo(1f, fadeDuration));
+            return FadeTo(1f, fadeDuration, _fadeCts.Token);
         }
 
-        public void Hide(float fadeDuration)
+        public UniTask Hide(float fadeDuration)
         {
-            // 保持動畫播放直到完全消失，這樣看起來更自然
-            // StopAnimation(); 
-            
-            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
-            _fadeRoutine = StartCoroutine(FadeTo(0f, fadeDuration));
+            CancelFade();
+            _fadeCts = new CancellationTokenSource();
+            return FadeTo(0f, fadeDuration, _fadeCts.Token);
         }
 
         public void HideImmediate()
         {
             StopAnimation();
-            if (_fadeRoutine != null) { StopCoroutine(_fadeRoutine); _fadeRoutine = null; }
+            CancelFade();
             if (_portraitSprite != null)
             {
                 _portraitSprite.enabled = false;
@@ -111,40 +118,41 @@ namespace SG.Dialogue.Presentation
         {
             if (_portraitSprite == null) return;
             
-            // 這裡需要注意：直接設定顏色會覆蓋 Alpha。
-            // 我們應該只改變 RGB，保留當前的 Alpha。
             Color targetColor = isHighlighted ? Color.white : new Color(0.5f, 0.5f, 0.5f);
             Color currentColor = _portraitSprite.color;
-            targetColor.a = currentColor.a; // 保留當前 Alpha
+            targetColor.a = currentColor.a;
             _portraitSprite.color = targetColor;
         }
 
-        public IEnumerator Flicker(float duration, float frequency, float minAlpha)
+        public async UniTask Flicker(float duration, float frequency, float minAlpha)
         {
-            if (_portraitSprite == null) yield break;
+            if (_portraitSprite == null) return;
 
+            var token = this.GetCancellationTokenOnDestroy();
             float time = 0;
             float originalAlpha = _portraitSprite.color.a;
 
             while (time < duration)
             {
+                if (token.IsCancellationRequested) return;
+                
                 float alpha = Mathf.Lerp(minAlpha, originalAlpha, Mathf.Abs(Mathf.Sin(time * frequency * Mathf.PI * 2)));
                 var color = _portraitSprite.color;
                 color.a = alpha;
                 _portraitSprite.color = color;
                 time += Time.deltaTime;
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
             var finalColor = _portraitSprite.color;
             finalColor.a = originalAlpha;
             _portraitSprite.color = finalColor;
         }
 
-        private IEnumerator PlaySpriteSheetAnimation(SpriteSheetStateConfig config)
+        private async UniTaskVoid PlaySpriteSheetAnimation(SpriteSheetStateConfig config, CancellationToken token)
         {
             if (config == null || config.frames == null || config.frames.Length == 0)
             {
-                yield break;
+                return;
             }
 
             float frameDuration = 1f / fps;
@@ -152,8 +160,10 @@ namespace SG.Dialogue.Presentation
 
             while (true)
             {
+                if (token.IsCancellationRequested) return;
+                
                 _portraitSprite.sprite = config.frames[frameIndex];
-                yield return new WaitForSeconds(frameDuration);
+                await UniTask.Delay(TimeSpan.FromSeconds(frameDuration), cancellationToken: token);
 
                 frameIndex++;
                 if (frameIndex >= config.frames.Length)
@@ -164,7 +174,7 @@ namespace SG.Dialogue.Presentation
                     }
                     else
                     {
-                        yield break; // 動畫結束
+                        return;
                     }
                 }
             }
@@ -177,16 +187,27 @@ namespace SG.Dialogue.Presentation
 
         private void StopAnimation()
         {
-            if (_animationCoroutine != null)
+            if (_animationCts != null)
             {
-                StopCoroutine(_animationCoroutine);
-                _animationCoroutine = null;
+                _animationCts.Cancel();
+                _animationCts.Dispose();
+                _animationCts = null;
             }
         }
 
-        private IEnumerator FadeTo(float targetAlpha, float duration)
+        private void CancelFade()
         {
-            if (_portraitSprite == null) yield break;
+            if (_fadeCts != null)
+            {
+                _fadeCts.Cancel();
+                _fadeCts.Dispose();
+                _fadeCts = null;
+            }
+        }
+
+        private async UniTask FadeTo(float targetAlpha, float duration, CancellationToken token)
+        {
+            if (_portraitSprite == null) return;
 
             float startAlpha = _portraitSprite.color.a;
             float startTime = Time.unscaledTime;
@@ -201,6 +222,8 @@ namespace SG.Dialogue.Presentation
             {
                 while (Time.unscaledTime < startTime + duration)
                 {
+                    if (token.IsCancellationRequested) return;
+                    
                     float t = (Time.unscaledTime - startTime) / duration;
                     float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, Mathf.SmoothStep(0f, 1f, t));
                     
@@ -208,7 +231,7 @@ namespace SG.Dialogue.Presentation
                     c.a = newAlpha;
                     _portraitSprite.color = c;
                     
-                    yield return null;
+                    await UniTask.Yield(PlayerLoopTiming.Update, token);
                 }
                 
                 Color finalColor = _portraitSprite.color;
@@ -221,8 +244,6 @@ namespace SG.Dialogue.Presentation
                 StopAnimation();
                 _portraitSprite.enabled = false;
             }
-            
-            _fadeRoutine = null;
         }
     }
 }

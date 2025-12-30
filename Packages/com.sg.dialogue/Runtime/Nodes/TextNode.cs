@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Events;
 using SG.Dialogue.Variables;
 using UnityEngine;
@@ -51,7 +52,7 @@ namespace SG.Dialogue.Nodes
         protected override string Text => text;
         protected override string TextKey => textKey;
 
-        protected override IEnumerator DoShowText(DialogueController controller, string formattedText)
+        protected override async UniTask DoShowText(DialogueController controller, string formattedText)
         {
             string formattedSpeaker = controller.FormatString(speakerName);
 
@@ -70,7 +71,7 @@ namespace SG.Dialogue.Nodes
                 Action onComplete = () => typingCompleted = true;
                 controller.UiManager.OnTypingCompleted += onComplete;
 
-                yield return new WaitUntil(() => typingCompleted || !controller.UiManager.IsTyping);
+                await UniTask.WaitUntil(() => typingCompleted || !controller.UiManager.IsTyping);
 
                 controller.UiManager.OnTypingCompleted -= onComplete;
             }

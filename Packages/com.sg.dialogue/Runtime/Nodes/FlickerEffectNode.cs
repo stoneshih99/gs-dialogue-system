@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Enums;
 using UnityEngine;
 
@@ -42,10 +43,10 @@ namespace SG.Dialogue.Nodes
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 主要邏輯由 DialogueController 處理
-            yield break;
+            await UniTask.CompletedTask;
         }
 
         public override string GetNextNodeId()

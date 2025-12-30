@@ -1,3 +1,5 @@
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace Live2DActorKit.Breath
@@ -46,7 +48,7 @@ namespace Live2DActorKit.Breath
         [SerializeField] private string currentState = "Idle";
 
         private Live2DBreathController _breath;
-        private Coroutine _transitionRoutine;
+        private CancellationTokenSource _cts;
 
         private void Awake()
         {
@@ -59,6 +61,15 @@ namespace Live2DActorKit.Breath
         private void Start()
         {
             SetBreathState(currentState, instant: true);
+        }
+
+        private void OnDestroy()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+            }
         }
         
 #if UNITY_EDITOR
@@ -98,15 +109,28 @@ namespace Live2DActorKit.Breath
 
             if (instant)
             {
+                // 取消任何正在進行的過渡
+                if (_cts != null)
+                {
+                    _cts.Cancel();
+                    _cts.Dispose();
+                    _cts = null;
+                }
+                
                 _breath.SetBpm(state.targetBpm);
                 _breath.SetStrength(state.targetStrength);
                 return;
             }
 
-            if (_transitionRoutine != null)
-                StopCoroutine(_transitionRoutine);
+            // 取消上一個過渡
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+            }
+            _cts = new CancellationTokenSource();
 
-            _transitionRoutine = StartCoroutine(TransitionToState(state));
+            TransitionToState(state, _cts.Token).Forget();
         }
 
         private BreathState FindState(string name)
@@ -117,7 +141,7 @@ namespace Live2DActorKit.Breath
             return null;
         }
 
-        private System.Collections.IEnumerator TransitionToState(BreathState state)
+        private async UniTaskVoid TransitionToState(BreathState state, CancellationToken token)
         {
             float startBpm = _breath.CurrentBpm > 0 ? _breath.CurrentBpm : state.targetBpm;
             float startStrength = _breath.CurrentStrength > 0 ? _breath.CurrentStrength : state.targetStrength;
@@ -127,6 +151,8 @@ namespace Live2DActorKit.Breath
 
             while (t < 1f)
             {
+                if (token.IsCancellationRequested) return;
+
                 t += Time.deltaTime / duration;
                 float bpm = Mathf.Lerp(startBpm, state.targetBpm, t);
                 float strength = Mathf.Lerp(startStrength, state.targetStrength, t);
@@ -134,7 +160,7 @@ namespace Live2DActorKit.Breath
                 _breath.SetBpm(bpm);
                 _breath.SetStrength(strength);
 
-                yield return null;
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
 
             _breath.SetBpm(state.targetBpm);

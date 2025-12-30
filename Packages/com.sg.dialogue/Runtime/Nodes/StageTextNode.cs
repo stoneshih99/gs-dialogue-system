@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace SG.Dialogue.Nodes
@@ -26,29 +27,28 @@ namespace SG.Dialogue.Nodes
         protected override string Text => message;
         protected override string TextKey => messageKey;
 
-        protected override IEnumerator DoShowText(DialogueController controller, string formattedText)
+        protected override async UniTask DoShowText(DialogueController controller, string formattedText)
         {
             if (string.IsNullOrEmpty(formattedText))
             {
                 Debug.LogWarning("StageTextNode: 格式化後文字為空，將不顯示任何舞台文字。");
-                yield break;
+                return;
             }
             
             if (controller.VisualManager == null)
             {
                 Debug.LogError("StageTextNode: VisualManager 為 null，無法顯示舞台文字。");
-                yield break;
+                return;
             }
             
             controller.VisualManager.ShowStageText(formattedText, typingSpeed);
 
             // 等待一幀，確保打字機協程已經啟動並且 IsTyping 狀態已更新
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update);
 
             while (controller.VisualManager.IsStageTextTyping())
             {
-                // 這裡使用 WaitForEndOfFrame 可能比 WaitForSeconds 更可靠，以避免與 typingSpeed 產生競爭條件
-                yield return new WaitForEndOfFrame();
+                await UniTask.Yield(PlayerLoopTiming.Update);
             }
         }
 

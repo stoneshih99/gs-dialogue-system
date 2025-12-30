@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Presentation;
 using UnityEngine;
 
@@ -38,22 +39,22 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個協程迭代器，用於等待特效動畫完成。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             var effectController = UnityEngine.Object.FindObjectOfType<ScreenEffectController>();
             if (effectController == null)
             {
                 Debug.LogWarning("場景中找不到 ScreenEffectController，無法執行背景模糊特效。");
-                yield break;
+                return;
             }
 
             if (Action == ActionType.Enable)
             {
-                yield return effectController.EnableBlur(Duration, BlurAmount);
+                await effectController.EnableBlur(Duration, BlurAmount);
             }
             else
             {
-                yield return effectController.DisableBlur(Duration);
+                await effectController.DisableBlur(Duration);
             }
         }
 

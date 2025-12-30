@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Enums;
 using UnityEngine;
@@ -49,13 +50,13 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個協程迭代器，用於等待攝影機動作完成。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             // 檢查 DialogueController 上是否有指定的攝影機控制器
             if (controller.CameraController != null)
             {
                 // 呼叫攝影機控制器來執行這個動作，並等待其完成
-                yield return controller.CameraController.Execute(this);
+                await controller.CameraController.Execute(this);
             }
             else
             {

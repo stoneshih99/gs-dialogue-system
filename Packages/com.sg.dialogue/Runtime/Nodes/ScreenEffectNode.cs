@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Presentation;
 using UnityEngine;
 
@@ -33,13 +34,13 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個協程迭代器，用於等待特效動畫完成。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             var effectController = UnityEngine.Object.FindObjectOfType<ScreenEffectController>();
             if (effectController == null)
             {
                 Debug.LogWarning("場景中找不到 ScreenEffectController，無法執行螢幕特效。");
-                yield break;
+                return;
             }
 
             // 根據動作類型，呼叫 ScreenEffectController 的方法
@@ -47,11 +48,11 @@ namespace SG.Dialogue.Nodes
             // 若要擴充，可以考慮在此節點新增一個 EffectType 枚舉，並在 Process 中根據類型呼叫不同的方法。
             if (Action == ActionType.Enable)
             {
-                yield return effectController.EnableGrayscale(Duration);
+                await effectController.EnableGrayscale(Duration);
             }
             else
             {
-                yield return effectController.DisableGrayscale(Duration);
+                await effectController.DisableGrayscale(Duration);
             }
         }
 

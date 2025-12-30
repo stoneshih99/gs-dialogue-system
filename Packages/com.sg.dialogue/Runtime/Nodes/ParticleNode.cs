@@ -1,5 +1,6 @@
 using System;
-using System.Collections;
+using Cysharp.Threading.Tasks;
+using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Events;
 using UnityEngine;
@@ -28,9 +29,11 @@ namespace SG.Dialogue.Nodes
         public Vector3 Scale = Vector3.one;
 
         [Header("流程控制")]
+        [Tooltip("是否等待使用者輸入才進入下一個節點")]
+        public bool WaitForInput = false;
         public string nextNodeId;
 
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             if (ParticleEvent != null)
             {
@@ -42,7 +45,14 @@ namespace SG.Dialogue.Nodes
                 Debug.LogWarning($"ParticleNode '{nodeId}' 缺少 ParticleEvent 引用。");
             }
 
-            yield return null;
+            if (WaitForInput)
+            {
+                await controller.WaitForInputAsync();
+            }
+            else
+            {
+                await UniTask.Yield();
+            }
         }
 
         public override string GetNextNodeId() => nextNodeId;

@@ -1,5 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Utils;
 using UnityEngine;
@@ -15,32 +16,46 @@ namespace SG.Dialogue.Presentation
         [Header("背景")]
         [SerializeField] private List<Image> backgroundImages;
 
-        private readonly List<Coroutine> _backgroundFadeRoutines = new List<Coroutine>();
+        private readonly List<CancellationTokenSource> _backgroundFadeCts = new List<CancellationTokenSource>();
 
         private void Awake()
         {
             for (int i = 0; i < backgroundImages.Count; i++)
             {
-                _backgroundFadeRoutines.Add(null);
+                _backgroundFadeCts.Add(null);
             }
         }
 
-        public IEnumerator ProcessSetBackground(SetBackgroundNode node)
+        private void OnDestroy()
+        {
+            foreach (var cts in _backgroundFadeCts)
+            {
+                cts?.Cancel();
+                cts?.Dispose();
+            }
+            _backgroundFadeCts.Clear();
+        }
+
+        public async UniTask ProcessSetBackground(SetBackgroundNode node)
         {
             float bgFadeTime = node.backgroundFadeOverride;
             var layerIndex = node.spriteIndex;
+            
             if (node.useBlackScreen && backgroundImages.Count > layerIndex && backgroundImages[layerIndex] != null)
             {
-                if (_backgroundFadeRoutines[layerIndex] != null) StopCoroutine(_backgroundFadeRoutines[layerIndex]);
+                CancelFade(layerIndex);
+                var cts = new CancellationTokenSource();
+                _backgroundFadeCts[layerIndex] = cts;
+
+                await UIAnimationUtils.FadeImage(backgroundImages[layerIndex], 0f, bgFadeTime, cts.Token);
                 
-                var fadeOutRoutine = StartCoroutine(UIAnimationUtils.FadeImage(backgroundImages[layerIndex], 0f, bgFadeTime));
-                _backgroundFadeRoutines[layerIndex] = fadeOutRoutine;
-                yield return fadeOutRoutine;
-                
-                if (node.blackScreenDuration > 0) yield return new WaitForSeconds(node.blackScreenDuration);
+                if (node.blackScreenDuration > 0)
+                {
+                    await UniTask.Delay(System.TimeSpan.FromSeconds(node.blackScreenDuration), ignoreTimeScale: false, cancellationToken: this.GetCancellationTokenOnDestroy());
+                }
             }
 
-            yield return UpdateBackground(layerIndex, node.backgroundSprite, node.clearBackground, bgFadeTime);
+            await UpdateBackground(layerIndex, node.backgroundSprite, node.clearBackground, bgFadeTime);
         }
 
         public Image GetBackgroundImage(int layerIndex)
@@ -52,28 +67,41 @@ namespace SG.Dialogue.Presentation
             return null;
         }
 
-        private IEnumerator UpdateBackground(int layerIndex, Sprite sprite, bool clear, float duration)
+        private async UniTask UpdateBackground(int layerIndex, Sprite sprite, bool clear, float duration)
         {
-            if (layerIndex < 0 || layerIndex >= backgroundImages.Count || backgroundImages[layerIndex] == null) yield break;
+            if (layerIndex < 0 || layerIndex >= backgroundImages.Count || backgroundImages[layerIndex] == null) return;
+            
             Image targetImage = backgroundImages[layerIndex];
             if (!targetImage.gameObject.activeSelf)
             {
                 targetImage.gameObject.SetActive(true);
             }
-            if (layerIndex < _backgroundFadeRoutines.Count && _backgroundFadeRoutines[layerIndex] != null) StopCoroutine(_backgroundFadeRoutines[layerIndex]);
             
+            CancelFade(layerIndex);
+            var cts = new CancellationTokenSource();
+            _backgroundFadeCts[layerIndex] = cts;
+
             if (clear)
             {
-                var routine = StartCoroutine(UIAnimationUtils.FadeImage(targetImage, 0f, duration));
-                if(layerIndex < _backgroundFadeRoutines.Count) _backgroundFadeRoutines[layerIndex] = routine;
-                yield return routine;
+                await UIAnimationUtils.FadeImage(targetImage, 0f, duration, cts.Token);
             }
             if (sprite != null)
             {
                 targetImage.sprite = sprite;
-                var routine = StartCoroutine(UIAnimationUtils.FadeImage(targetImage, 1f, duration));
-                if(layerIndex < _backgroundFadeRoutines.Count) _backgroundFadeRoutines[layerIndex] = routine;
-                yield return routine;
+                await UIAnimationUtils.FadeImage(targetImage, 1f, duration, cts.Token);
+            }
+        }
+
+        private void CancelFade(int layerIndex)
+        {
+            if (layerIndex >= 0 && layerIndex < _backgroundFadeCts.Count)
+            {
+                if (_backgroundFadeCts[layerIndex] != null)
+                {
+                    _backgroundFadeCts[layerIndex].Cancel();
+                    _backgroundFadeCts[layerIndex].Dispose();
+                    _backgroundFadeCts[layerIndex] = null;
+                }
             }
         }
     }

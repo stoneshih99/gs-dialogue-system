@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Events;
 using UnityEngine;
@@ -40,7 +41,7 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個協程迭代器。</returns>
-        public override IEnumerator Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller)
         {
             if (AudioEvent != null)
             {
@@ -53,7 +54,7 @@ namespace SG.Dialogue.Nodes
                 Debug.LogWarning($"PlayAudioNode '{nodeId}' 缺少 AudioEvent 引用。");
             }
 
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update);
         }
 
         /// <summary>

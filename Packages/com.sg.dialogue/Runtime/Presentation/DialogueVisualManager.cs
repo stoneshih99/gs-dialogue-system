@@ -1,4 +1,5 @@
-using System.Collections;
+using System;
+using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Utils;
@@ -49,17 +50,17 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        public IEnumerator PlayAnimations(AnimationNode node)
+        public async UniTask PlayAnimations(AnimationNode node)
         {
             // 動畫播放邏輯目前還沒有專門的 Manager，暫時保留在這裡或移到 PortraitManager
             // 考慮到 AnimationNode 可能針對非角色物件，這裡暫時保留為空，或者需要一個 AnimationManager
             // 目前先假設 AnimationNode 主要針對角色，所以委派給 PortraitManager 處理會比較好
             // 但 PortraitManager 目前沒有 PlayAnimations 方法。
             // 為了保持重構的純粹性，我們暫時不實作這個方法的具體邏輯，等待 AnimationManager 的建立。
-            yield break; 
+            await UniTask.CompletedTask;
         }
 
-        public IEnumerator UpdateFromCharacterActionNode(CharacterActionNode node)
+        public async UniTask UpdateFromCharacterActionNode(CharacterActionNode node)
         {
             var duration = node.Duration;
             
@@ -68,18 +69,21 @@ namespace SG.Dialogue.Presentation
                 portraitManager.ProcessCharacterAction(node, duration);
             }
             
-            if (duration > 0) yield return new WaitForSecondsRealtime(duration);
-        }
-
-        public IEnumerator UpdateFromSetBackgroundNode(SetBackgroundNode node)
-        {
-            if (backgroundManager != null)
+            if (duration > 0)
             {
-                yield return backgroundManager.ProcessSetBackground(node);
+                await UniTask.Delay(TimeSpan.FromSeconds(duration), ignoreTimeScale: true);
             }
         }
 
-        public IEnumerator ExecuteFlickerEffect(FlickerEffectNode node)
+        public async UniTask UpdateFromSetBackgroundNode(SetBackgroundNode node)
+        {
+            if (backgroundManager != null)
+            {
+                await backgroundManager.ProcessSetBackground(node);
+            }
+        }
+
+        public async UniTask ExecuteFlickerEffect(FlickerEffectNode node)
         {
             if (node.target == FlickerEffectNode.TargetType.Background)
             {
@@ -89,7 +93,7 @@ namespace SG.Dialogue.Presentation
                     if (image != null)
                     {
                         var cg = image.GetComponent<CanvasGroup>() ?? image.gameObject.AddComponent<CanvasGroup>();
-                        yield return UIAnimationUtils.Flicker(cg, node.duration, node.frequency, node.minAlpha);
+                        await UIAnimationUtils.Flicker(cg, node.duration, node.frequency, node.minAlpha);
                     }
                 }
             }
@@ -98,6 +102,7 @@ namespace SG.Dialogue.Presentation
                 // 這部分邏輯需要 PortraitManager 支援獲取角色 Presenter
                 // 目前 PortraitManager 封裝了 _activeCharacters，我們需要暴露一個方法來執行 Flicker
                 // 為了簡單起見，我們暫時略過這裡，或者在 PortraitManager 中添加 FlickerCharacter 方法
+                await UniTask.CompletedTask;
             }
         }
     }
