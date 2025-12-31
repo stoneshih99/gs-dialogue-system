@@ -1,6 +1,71 @@
-# SG Dialogue System - 使用手冊
+# SG Dialogue System (com.sg.dialogue) 使用手冊
 
-歡迎使用 SG Dialogue System！本文件將引導您了解系統的核心概念、使用方法與進階技巧。
+歡迎使用 SG Dialogue System！本文件將引導您了解系統的核心概念、安裝與設定、使用方法，以及進階整合技巧。
+
+本系統是一個為 Unity 設計的、基於節點且具「時間軸式演出」概念的對話系統。其核心設計重點是：**以事件通道 (Event Channels) 解耦對話與遊戲系統**，讓敘事工作流能在低耦合、高擴充的前提下穩定成長。
+
+---
+
+## 🔗 快速連結 (Quick Links)
+
+*   **快速入門**：跳到「[快速入門](#2-快速入門你的第一個對話)」
+*   **節點參考**：跳到「[節點參考](#3-節點參考手冊)」
+*   **第三方整合**：跳到「[第三方整合](#46-第三方整合)」
+*   **疑難排解**：跳到「[疑難排解](#6-疑難排解-troubleshooting)」
+
+---
+
+## ✅ 環境需求 (Requirements)
+
+*   **Unity**：2022.3+
+*   **TextMeshPro**：本系統的文字顯示與文字動畫功能依賴 TMP。
+*   **相依套件 (Required Dependencies)**：請先在專案中安裝（通常透過 UPM Git URL）：
+    *   LitMotion
+    *   LitMotion.Animation
+    *   Unity-Editor-Toolbox
+    *   NuGetForUnity
+
+### 可選整合 (Optional Integrations)
+
+*   **Live2D**：安裝 Live2D Cubism SDK，並加入 Scripting Define Symbol：`LIVE2D_KIT_AVAILABLE`
+*   **Spine**：安裝 Spine-Unity Runtime，並加入 Scripting Define Symbol：`SPINE_KIT_AVAILABLE`
+
+> 若缺少可選整合的 SDK 或 define symbol，系統仍可正常運作；對應 Render Mode / 功能只是不會顯示。
+
+---
+
+## 🧩 安裝與基本設定 (Installation & Setup)
+
+### 安裝方式
+
+*   透過 UPM 安裝 package 後，建議先讓 Unity 重新編譯並確認 Console 無錯誤。
+*   若此 package 是以範例專案/子模組形式存在於你的專案中，可略過安裝步驟。
+
+### 匯入範例 (推薦)
+
+你可以從 Package Manager 匯入範例來最快上手（名稱可能因版本略有不同）：
+
+*   `Window > Package Manager` → 選取 **SG Dialogue System** → `Samples` → Import
+
+### 最小運作配置（概念）
+
+至少會需要：
+
+1.  一個 `DialogueGraph`（對話內容資產）
+2.  一個全域狀態資產（用於跨對話的變數/旗標）
+3.  場景內一個 `DialogueController` 用來執行對話圖
+
+此外，若你要讓 Audio / Particle / GameEvent 等節點真的「產生效果」，場景中也必須有**對應的 Manager/Receiver 訂閱相同的事件通道資產**（詳見「[事件通道架構](#41-事件通道架構-event-channel-architecture)」）。
+
+---
+
+## 📚 名詞對照 (Terminology)
+
+*   **DialogueGraph（對話圖）**：`ScriptableObject` 資產，描述節點與流程。
+*   **DialogueController（對話控制器）**：場景中的 `MonoBehaviour`，負責讀取 Graph 並逐一執行節點。
+*   **Node（節點）**：流程中的一個具體動作（顯示文字、播放音效、角色動作等）。
+*   **Port（連接埠）**：節點之間的流程連線入口/出口（例如 `In`, `Next`, `If`, `Else`）。
+*   **Event Channel（事件通道）**：用 `ScriptableObject` 承載的事件發布/訂閱管道，實現與遊戲系統解耦。
 
 ---
 
@@ -48,7 +113,7 @@
     *   將您的 `CH1_Intro_Graph` 和 `Global_GameState` 拖曳到 `DialogueController` 對應的欄位。
 2.  **觸發對話**: 要開始對話，您需要在某個腳本中取得 `DialogueController` 的引用，並呼叫 `controller.StartDialogue()`。
 
-> **快速測試**: 您可以建立一個簡單的觸發腳本來立即開始對話：
+> **最小觸發範例 (Minimal Trigger)**：您可以建立一個簡單的觸發腳本來立即開始對話：
 > ```csharp
 > public class DialogueTrigger : MonoBehaviour
 > {
@@ -197,7 +262,7 @@
     2.  在 `TextNode` 的文字中，使用自定義標籤來包裹要產生動畫的文字。
 *   **支援標籤**:
     *   `&lt;shake&gt;...&lt;/shake&gt;`: 使文字產生震動效果。
-*   **範例**: `"這太&lt;shake&gt;不可思議&lt;/shake&gt;了！"`
+*   **範例**: "這太&lt;shake&gt;不可思議&lt;/shake&gt;了！"
 
 ### 4.3 視覺化編輯 (Visual Editing)
 
@@ -256,3 +321,29 @@
     1.  前往 `Edit > Project Settings > Player`。
     2.  在 `Other Settings` 下的 `Scripting Define Symbols` 中，新增 `SPINE_KIT_AVAILABLE`。
 *   **效果**: 新增此符號後，`CharacterActionNode` 中將會出現 `Spine` 的選項，讓您可以直接控制 Spine 角色的顯示與動作。
+
+---
+
+## 6. 疑難排解 (Troubleshooting)
+
+*   **打開編輯器視窗後沒有任何內容 / 選單不存在**
+    *   可能原因：Editor 腳本未成功編譯（通常是相依套件缺失或 Console 有 error）。
+    *   解法：先確認 Unity Console 無任何紅色錯誤；再檢查相依套件是否已安裝完成。
+
+*   **節點有在執行，但音效/粒子/遊戲事件完全沒反應**
+    *   可能原因：場景中沒有對應的 Manager/Receiver 訂閱該 Event Channel，或節點與 Manager 指派了不同的通道資產。
+    *   解法：確認「節點」與「接收端 Manager」使用的是**同一個**事件通道資產。
+
+*   **`CharacterActionNode` 看不到 Live2D / Spine 選項**
+    *   可能原因：缺少對應 SDK、或沒有加入 Scripting Define Symbol。
+    *   解法：安裝 SDK，並在 `Edit > Project Settings > Player > Other Settings > Scripting Define Symbols` 加入：
+        *   Live2D：`LIVE2D_KIT_AVAILABLE`
+        *   Spine：`SPINE_KIT_AVAILABLE`
+
+*   **對話文字中的 `<shake>` 直接被顯示出來，沒有效果**
+    *   可能原因：對話 UI 的 TMP 文字物件上沒有掛 `DialogueTextAnimator`。
+    *   解法：把 `DialogueTextAnimator` 加到顯示文字的 TMP 物件上，並確認 TMP 已安裝。
+
+*   **`{變數名}` 沒有被替換（顯示原樣）**
+    *   可能原因：資料提供者未註冊 / `RuntimeDataProvider` 沒有對應 mapping。
+    *   解法：確認 `RuntimeDataProvider` 的 `_dataMappings` 已加入對應 key，且場景中確實存在並有執行。
