@@ -165,3 +165,18 @@
 -   修復了 `SpineUiDialoguePortraitPresenter` 中因大小寫錯誤 (`skeleton` vs `Skeleton`) 導致的 Bug。
 -   修復了 `DialogueSimulatorEngine` 中對 `isTerminal` 的殘留依賴。
 -   修復了 `DialogueUIManager` 中因缺少 `using` 引用導致的編譯錯誤。
+-   修復了 `SequenceNode` 在非同步架構下無法正確進入子序列的問題。
+-   修復了 `SequenceNode` 結束後無法正確返回上層節點的問題。
+
+---
+
+## 4. 非同步架構重構 (UniTask)
+
+### 4.1. 核心邏輯重構
+-   **全面導入 UniTask**：將 `DialogueController`、`DialogueNodeBase` 及所有節點的執行邏輯從 Unity Coroutine (`IEnumerator`) 遷移至 `UniTask` (`async/await`)。
+-   **效能提升**：減少了協程產生的 GC Alloc，並提供更精確的非同步控制。
+-   **等待邏輯修正**：修正了 `WaitForInput` 與自動前進的衝突，現在節點可以更精確地控制何時等待玩家輸入。
+
+### 4.2. 節點行為變更
+-   **SequenceNode**：修正了 `GetNextNodeId` 的行為，現在會正確返回序列內部的起始節點，並透過 `ExecutionStack` 管理返回邏輯。
+-   **ParallelNode**：利用 `UniTask.WhenAll` 實現真正的並行等待，確保所有分支都執行完畢後才繼續。
