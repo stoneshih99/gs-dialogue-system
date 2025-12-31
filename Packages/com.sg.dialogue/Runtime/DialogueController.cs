@@ -398,7 +398,7 @@ namespace SG.Dialogue
         
         private void OnSkipRequested()
         {
-            EndDialogue();
+            onSkipRequested?.Invoke();
         }
 
         public void EndDialogue()
