@@ -24,11 +24,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         private TextField _speakerNameField;
         private Toggle _clearAllField;
         private ObjectField _spriteField;
+        private Image _spritePreview; // Sprite 預覽圖
         private Foldout _spineConfigBox;
+        private Image _spinePreview; // Spine 預覽圖
 #if LIVE2D_KIT_AVAILABLE
         private Foldout _live2DConfigBox;
 #endif
         private Foldout _spriteSheetConfigBox;
+        private Image _spriteSheetPreview; // SpriteSheet 預覽圖
         private FloatField _durationField;
 
         public CharacterActionNodeElement(CharacterActionNode data, Action onChanged) : base(data.nodeId)
@@ -66,9 +69,25 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             });
             mainContainer.Add(_renderModeField);
 
+            // Sprite 預覽容器
+            _spritePreview = new Image
+            {
+                scaleMode = ScaleMode.ScaleToFit,
+                style =
+                {
+                    width = 100,
+                    height = 100,
+                    alignSelf = Align.Center,
+                    display = DisplayStyle.None,
+                    marginBottom = 5
+                }
+            };
+            mainContainer.Add(_spritePreview);
+
             _spriteField = CreateObjectField<Sprite>("Sprite", _data.characterSprite, obj =>
             {
                 _data.characterSprite = obj;
+                UpdateSpritePreview(); // 更新預覽
                 onChanged?.Invoke();
             });
             mainContainer.Add(_spriteField);
@@ -103,10 +122,60 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             mainContainer.Add(_durationField);
 
             UpdateVisibility();
+            UpdateSpritePreview(); // 初始化時更新預覽
+            UpdateSpinePreview(); // 初始化時更新預覽
+            UpdateSpriteSheetPreview(); // 初始化時更新預覽
 
             OutputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));
             OutputPort.portName = "Next";
             outputContainer.Add(OutputPort);
+        }
+
+        private void UpdateSpritePreview()
+        {
+            if (_data.characterSprite != null)
+            {
+                // 使用 UI Toolkit 的 sprite 屬性，它能正確處理 Atlas 和 Slicing
+                _spritePreview.sprite = _data.characterSprite;
+                _spritePreview.image = null; // 清除 texture 以防萬一
+                _spritePreview.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                _spritePreview.sprite = null;
+                _spritePreview.image = null;
+                _spritePreview.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void UpdateSpinePreview()
+        {
+            if (_data.spinePortraitConfig?.modelPrefab != null)
+            {
+                var previewTexture = UnityEditor.AssetPreview.GetAssetPreview(_data.spinePortraitConfig.modelPrefab);
+                _spinePreview.image = previewTexture;
+                _spinePreview.style.display = previewTexture != null ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            else
+            {
+                _spinePreview.image = null;
+                _spinePreview.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void UpdateSpriteSheetPreview()
+        {
+            if (_data.spriteSheetPresenter != null)
+            {
+                var previewTexture = UnityEditor.AssetPreview.GetAssetPreview(_data.spriteSheetPresenter);
+                _spriteSheetPreview.image = previewTexture;
+                _spriteSheetPreview.style.display = previewTexture != null ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            else
+            {
+                _spriteSheetPreview.image = null;
+                _spriteSheetPreview.style.display = DisplayStyle.None;
+            }
         }
 
         private EnumField CreateEnumField<TEnum>(string label, TEnum initialValue, Action<TEnum> onChanged)
@@ -148,6 +217,21 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                 value = false
             };
 
+            // Spine 預覽容器
+            _spinePreview = new Image
+            {
+                scaleMode = ScaleMode.ScaleToFit,
+                style =
+                {
+                    width = 100,
+                    height = 100,
+                    alignSelf = Align.Center,
+                    display = DisplayStyle.None,
+                    marginBottom = 5
+                }
+            };
+            _spineConfigBox.Add(_spinePreview);
+
             var spineModelField = CreateObjectField<GameObject>(
                 "Model Prefab",
                 _data.spinePortraitConfig?.modelPrefab,
@@ -159,6 +243,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     }
 
                     _data.spinePortraitConfig.modelPrefab = obj;
+                    UpdateSpinePreview(); // 更新預覽
                     onChanged?.Invoke();
                 });
 
@@ -227,12 +312,28 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                 value = false
             };
 
+            // SpriteSheet 預覽容器
+            _spriteSheetPreview = new Image
+            {
+                scaleMode = ScaleMode.ScaleToFit,
+                style =
+                {
+                    width = 100,
+                    height = 100,
+                    alignSelf = Align.Center,
+                    display = DisplayStyle.None,
+                    marginBottom = 5
+                }
+            };
+            _spriteSheetConfigBox.Add(_spriteSheetPreview);
+
             var spriteSheetConfigField = CreateObjectField<GameObject>(
                 "Object",
                 _data.spriteSheetPresenter,
                 obj =>
                 {
                     _data.spriteSheetPresenter = obj;
+                    UpdateSpriteSheetPreview(); // 更新預覽
                     onChanged?.Invoke();
                 });
 
@@ -323,10 +424,27 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
+            
+            if (_spritePreview != null)
+            {
+                // 只有在 Sprite 模式且有圖片時才顯示預覽
+                _spritePreview.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Sprite && _data.characterSprite != null
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
+            }
+            
 #if SPINE_KIT_AVAILABLE
             if (_spineConfigBox != null)
             {
                 _spineConfigBox.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Spine
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
+            }
+            
+            if (_spinePreview != null)
+            {
+                 // 只有在 Spine 模式且有 Prefab 時才顯示預覽
+                 _spinePreview.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Spine && _data.spinePortraitConfig?.modelPrefab != null
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
@@ -346,6 +464,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     isEnter && _data.portraitRenderMode == PortraitRenderMode.SpriteSheet
                         ? DisplayStyle.Flex
                         : DisplayStyle.None;
+            }
+            
+            if (_spriteSheetPreview != null)
+            {
+                 // 只有在 SpriteSheet 模式且有 Prefab 時才顯示預覽
+                 _spriteSheetPreview.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.SpriteSheet && _data.spriteSheetPresenter != null
+                    ? DisplayStyle.Flex
+                    : DisplayStyle.None;
             }
 
             if (_durationField != null)
