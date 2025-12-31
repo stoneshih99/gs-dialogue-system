@@ -99,6 +99,11 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 _data.nextNodeId = null;
             }
         }
+
+        protected override void ApplyCustomStyle()
+        {
+            style.maxWidth = 120;
+        }
     }
 }
 #endif

@@ -22,9 +22,9 @@ namespace SG.Dialogue.Presentation
 
         private void Awake()
         {
-            if (portraitManager == null) portraitManager = GetComponentInChildren<PortraitManager>();
-            if (backgroundManager == null) backgroundManager = GetComponentInChildren<BackgroundManager>();
-            if (stageTextPresenter == null) stageTextPresenter = GetComponentInChildren<StageTextPresenter>();
+            if (portraitManager == null) portraitManager = FindAnyObjectByType<PortraitManager>();
+            if (backgroundManager == null) backgroundManager = FindAnyObjectByType<BackgroundManager>();
+            if (stageTextPresenter == null) stageTextPresenter = FindAnyObjectByType<StageTextPresenter>();
         }
         
         public void ShowStageText(string message, float speed)

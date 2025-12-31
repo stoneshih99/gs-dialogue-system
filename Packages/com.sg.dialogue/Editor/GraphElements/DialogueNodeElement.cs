@@ -31,7 +31,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             _defaultBackgroundColor = style.backgroundColor.value;
             
             // 設定節點的最大寬度
-            style.maxWidth = 300;
+            ApplyCustomStyle();
         }
 
         public void Initialize(DialogueGraphView graphView, SerializedProperty nodeSerializedProperty)
@@ -123,6 +123,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         }
         
         public abstract DialogueNodeBase NodeData { get; }
+        
+        /// <summary>
+        /// 應用自訂樣式到節點。 
+        /// </summary>
+        protected virtual void ApplyCustomStyle()
+        {
+            style.maxWidth = 250;
+        }
     }
 }
 #endif
