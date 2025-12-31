@@ -53,9 +53,9 @@ namespace SG.Dialogue
         
         [SerializeField] private DialoguePlayerDataResolver playerDataResolver;
 
-        [Header("事件")]
-        public UnityEvent onDialogueStarted;
-        public UnityEvent onDialogueEnded;
+        public event UnityAction onDialogueStarted;
+        public event UnityAction onDialogueEnded;
+        public event UnityAction onSkipRequested;
 
         /// <summary>
         /// 當 FormatString 無法從內部狀態解析變數時觸發。
@@ -99,6 +99,7 @@ namespace SG.Dialogue
             uiManager.OnAdvanceRequested += OnAdvanceRequested;
             uiManager.OnChoiceSelected += OnChoiceSelected;
             uiManager.OnTypingCompleted += OnTypingCompleted;
+            uiManager.OnSkipRequested += OnSkipRequested;
         }
 
         private void OnDisable()
@@ -106,6 +107,7 @@ namespace SG.Dialogue
             uiManager.OnAdvanceRequested -= OnAdvanceRequested;
             uiManager.OnChoiceSelected -= OnChoiceSelected;
             uiManager.OnTypingCompleted -= OnTypingCompleted;
+            uiManager.OnSkipRequested -= OnSkipRequested;
             
             // 清理等待中的 Task
             _inputCompletionSource?.TrySetCanceled();
@@ -392,6 +394,11 @@ namespace SG.Dialogue
 
         private void OnTypingCompleted()
         {
+        }
+        
+        private void OnSkipRequested()
+        {
+            EndDialogue();
         }
 
         public void EndDialogue()
