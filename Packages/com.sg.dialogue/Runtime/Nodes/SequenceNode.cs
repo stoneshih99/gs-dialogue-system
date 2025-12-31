@@ -37,7 +37,7 @@ namespace SG.Dialogue.Nodes
 
         /// <summary>
         /// 處理序列節點的核心邏輯。
-        /// 它會將序列結束後的「返回位址」推入執行堆疊，然後返回一個指令，告訴控制器前進到序列的起始節點。
+        /// 它會將序列結束後的「返回位址」推入執行堆疊，然後讓 Controller 進入序列的起始節點。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
@@ -49,18 +49,19 @@ namespace SG.Dialogue.Nodes
             //    當序列內的流程結束時，控制器會從堆疊中彈出這個 ID 來繼續繼續執行。
             controller.PushToExecutionStack(nextNodeId);
 
-            // 2. 返回一個指令，告訴控制器立即前進到此序列內部的起始節點。
-            await new AdvanceToNode(startNodeId);
+            // 2. 這裡不需要額外指令，因為 GetNextNodeId 會返回 startNodeId，
+            //    DialogueController 會自動 Advance 到那個節點。
+            await UniTask.CompletedTask;
         }
 
         /// <summary>
-        /// 覆寫基底類別的方法，返回此序列節點本身的下一個節點 ID。
-        /// 注意：這與序列內部的流程無關，而是指整個序列節點完成後的走向。
+        /// 覆寫基底類別的方法，返回此序列節點內部的起始節點 ID。
+        /// 這樣 DialogueController 就會進入序列內部執行。
         /// </summary>
-        /// <returns>下一個節點的 ID。</returns>
+        /// <returns>序列內部的起始節點 ID。</returns>
         public override string GetNextNodeId()
         {
-            return nextNodeId;
+            return startNodeId;
         }
 
         /// <summary>
