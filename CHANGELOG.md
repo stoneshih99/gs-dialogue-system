@@ -1,5 +1,15 @@
 # Change Log
 
+## [1.0.8] - 2026-01-02
+### Added
+- 新增 `TextNodeTranslateNode`，支援對話框的進場與退場動畫 (位移與淡入淡出)，可與 `StageTextNode` 配合使用。
+- `CharacterActionNode` 新增 `ForceReplace` 選項，允許在同一位置強制銷毀舊角色並生成新角色。
+- `DialogueUIManager` 新增 `dialoguePanel` 欄位，支援獨立控制對話框的動畫效果，避免影響全域 UI。
+
+### Changed
+- `DialogueController` 將跳過請求事件的邏輯從結束對話更改為觸發事件，提供更靈活的控制。
+- `PortraitManager` 優化角色進場邏輯，支援 `ForceReplace` 行為。
+- 更新 README.md，擴充使用手冊內容，新增環境需求、安裝步驟及疑難排解章節。
 
 ## [1.0.7] - 2025-12-31
 ### Added
@@ -9,7 +19,7 @@
 - 修正 CharacterActionNode 進出場動畫漸入漸出上個節點與下節點的銜接問題。
 
 ### Changed
--DialogueController，將事件類型從 UnityEvent 更改為 UnityAction，並新增跳過請求事件
+- DialogueController，將事件類型從 UnityEvent 更改為 UnityAction，並新增跳過請求事件
 
 
 ## [1.0.6] - 2025-12-31
@@ -31,4 +41,3 @@
 - Core node-based dialogue graph editor.
 - Basic nodes: Text, Choice, Character Action, Camera Control, etc.
 - Support for Spine and Live2D integrations.
-
