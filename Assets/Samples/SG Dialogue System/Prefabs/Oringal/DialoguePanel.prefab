@@ -1338,8 +1338,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ed9a5bd8ad3d44edb7bff065ae45cc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Presentation.StageTextPresenter
-  container: {fileID: 4335700150449374469}
   textLabel: {fileID: 538131960732218131}
+  charsPerSecond: 30
+  enableTypewriter: 1
+  container: {fileID: 4335700150449374469}
 --- !u!1 &5691339071422144150
 GameObject:
   m_ObjectHideFlags: 0
@@ -1551,6 +1553,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.UI.DialogueUIManager
   rootPanel: {fileID: 646180859377800450}
+  dialoguePanel: {fileID: 7970939562814161186}
   speakerLabel: {fileID: 2145019535113561720}
   dialogueTextPresenter: {fileID: 7031563302481422304}
   nextButton: {fileID: 8811198220844525799}
@@ -1572,15 +1575,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dccfd3c5c553a41d3b6302c3f89989c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SG.Dialogue::SG.Dialogue.Presentation.DialogueVisualManager
-  leftPortraitStage: {fileID: 0}
-  centerPortraitStage: {fileID: 0}
-  rightPortraitStage: {fileID: 0}
+  portraitManager: {fileID: 0}
+  backgroundManager: {fileID: 0}
   stageTextPresenter: {fileID: 9177647402790056840}
-  portraitFadeDuration: 0.2
-  backgroundImages:
-  - {fileID: 5505764904447970633}
-  - {fileID: 7411562390445394857}
-  - {fileID: 4620058404871257794}
 --- !u!114 &432268647813499672
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1602,12 +1599,6 @@ MonoBehaviour:
   visualManager: {fileID: 2990892720674022122}
   cameraController: {fileID: 0}
   playerDataResolver: {fileID: 4719698692525247661}
-  onDialogueStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  onDialogueEnded:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &2817269173376254361
 MonoBehaviour:
   m_ObjectHideFlags: 0

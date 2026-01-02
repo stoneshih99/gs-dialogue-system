@@ -65,6 +65,13 @@ namespace SG.Dialogue.Presentation
 
         private async UniTask ProcessEnterAction(CharacterActionNode node, float duration)
         {
+            // 如果強制替換，直接生成新的 (InstantiateNewCharacter 會負責清理舊的)
+            if (node.ForceReplace)
+            {
+                await InstantiateNewCharacter(node, duration);
+                return;
+            }
+
             if (_activeCharacters.TryGetValue(node.TargetPosition, out var existingState))
             {
                 await UpdateExistingCharacter(existingState, node);

@@ -49,6 +49,9 @@ namespace SG.Dialogue.Nodes
         public string spriteSheetAnimationName;
 
         [Header("Action Settings")]
+        [Tooltip("是否強制替換該位置的角色 (銷毀舊的並生成新的)，即使該位置已有角色。")]
+        public bool ForceReplace;
+
         [Tooltip("是否在退場時清除所有角色，而不僅僅是目標位置的角色。僅在退場時有效。")]
         public bool ClearAllOnExit;
 

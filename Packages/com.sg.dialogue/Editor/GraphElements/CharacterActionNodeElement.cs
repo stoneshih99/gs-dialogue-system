@@ -23,6 +23,7 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         private EnumField _renderModeField;
         private TextField _speakerNameField;
         private Toggle _clearAllField;
+        private Toggle _forceReplaceField; // 新增
         private ObjectField _spriteField;
         private Image _spritePreview; // Sprite 預覽圖
         private Foldout _spineConfigBox;
@@ -97,6 +98,17 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             BuildLive2DConfig(onChanged);
 #endif
             BuildSpriteSheetConfig(onChanged);
+
+            _forceReplaceField = new Toggle("Force Replace")
+            {
+                value = _data.ForceReplace
+            };
+            _forceReplaceField.RegisterValueChangedCallback(e =>
+            {
+                _data.ForceReplace = e.newValue;
+                onChanged?.Invoke();
+            });
+            mainContainer.Add(_forceReplaceField);
 
             _clearAllField = new Toggle("Clear All On Exit")
             {
@@ -411,6 +423,11 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             if (_speakerNameField != null)
             {
                 _speakerNameField.style.display = isEnter ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+
+            if (_forceReplaceField != null)
+            {
+                _forceReplaceField.style.display = isEnter ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             if (_clearAllField != null)
