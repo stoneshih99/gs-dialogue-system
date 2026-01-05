@@ -19,6 +19,9 @@ namespace SG.Dialogue.Nodes
         [Tooltip("動畫要作用在哪個位置的角色上（例如：左、中、右）。")]
         public CharacterPosition targetAnimationPosition;
         
+        [Tooltip("是否等待動畫播放完畢才繼續下一個節點。\n如果動畫是無限循環 (Loops = -1)，請務必設為 False，否則對話會卡住。")]
+        public bool waitForCompletion = true;
+        
         [Tooltip("此節點進入時要觸發的 LitMotion 動畫列表。")]
         public List<MotionData> motions = new List<MotionData>();
 

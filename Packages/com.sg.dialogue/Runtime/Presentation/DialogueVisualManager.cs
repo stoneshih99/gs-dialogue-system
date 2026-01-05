@@ -52,12 +52,10 @@ namespace SG.Dialogue.Presentation
 
         public async UniTask PlayAnimations(AnimationNode node)
         {
-            // 動畫播放邏輯目前還沒有專門的 Manager，暫時保留在這裡或移到 PortraitManager
-            // 考慮到 AnimationNode 可能針對非角色物件，這裡暫時保留為空，或者需要一個 AnimationManager
-            // 目前先假設 AnimationNode 主要針對角色，所以委派給 PortraitManager 處理會比較好
-            // 但 PortraitManager 目前沒有 PlayAnimations 方法。
-            // 為了保持重構的純粹性，我們暫時不實作這個方法的具體邏輯，等待 AnimationManager 的建立。
-            await UniTask.CompletedTask;
+            if (portraitManager != null)
+            {
+                await portraitManager.PlayAnimations(node);
+            }
         }
 
         public async UniTask UpdateFromCharacterActionNode(CharacterActionNode node)

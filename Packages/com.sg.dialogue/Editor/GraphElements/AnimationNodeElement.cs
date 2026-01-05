@@ -62,8 +62,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             targetPosField.RegisterValueChangedCallback(e => { _data.targetAnimationPosition = (CharacterPosition)e.newValue; _onChanged?.Invoke(); });
             animFold.Add(targetPosField);
 
+            // 等待完成開關
+            var waitToggle = new Toggle("Wait For Completion") { value = _data.waitForCompletion };
+            waitToggle.tooltip = "如果勾選，對話會等待動畫播放完畢才繼續。\n注意：如果動畫是無限循環 (Loops = -1)，請務必取消勾選，否則會卡住！";
+            waitToggle.RegisterValueChangedCallback(e => { _data.waitForCompletion = e.newValue; _onChanged?.Invoke(); });
+            animFold.Add(waitToggle);
+
             // 添加動畫按鈕
-            var motionsToolbar = new VisualElement { style = { flexDirection = FlexDirection.Row } };
+            var motionsToolbar = new VisualElement { style = { flexDirection = FlexDirection.Row, marginTop = 5 } };
             motionsToolbar.Add(new Button(() => { _data.motions.Add(new MotionData()); RebuildMotionsUI(); }) { text = "+ Motion" });
             animFold.Add(motionsToolbar);
 
@@ -86,7 +92,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             {
                 int index = i;
                 var motion = _data.motions[i];
-                var motionBox = new Box { style = { marginTop = 2, marginBottom = 2, paddingTop = 2, paddingBottom = 4 } };
+                var motionBox = new Box { style = { marginTop = 2, marginBottom = 2, paddingTop = 2, paddingBottom 
+                    = 4, borderTopWidth = 1, borderBottomWidth = 1,
+                    borderLeftWidth = 1, borderRightWidth = 1, borderTopColor = new UnityEngine.Color(0.3f, 0.3f, 0.3f),
+                    borderBottomColor = new UnityEngine.Color(0.3f, 0.3f, 0.3f), 
+                    borderLeftColor = new UnityEngine.Color(0.3f, 0.3f, 0.3f), borderRightColor 
+                        = new UnityEngine.Color(0.3f, 0.3f, 0.3f) } };
 
                 var row1 = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 var propField = new EnumField(motion.TargetProperty) { style = { flexGrow = 1 } };
