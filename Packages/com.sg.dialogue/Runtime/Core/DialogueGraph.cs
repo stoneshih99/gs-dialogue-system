@@ -97,30 +97,32 @@ namespace SG.Dialogue
             BuildLookupRecursively(AllNodes);
         }
 
-        /// <summary>
-        /// 遞迴地建立節點查找表。
-        /// </summary>
-        /// <param name="nodes">要處理的節點列表。</param>
-        private void BuildLookupRecursively(List<DialogueNodeBase> nodes)
-        {
-            if (nodes == null) return;
-            foreach (var node in nodes)
-            {
-                if (node != null && !string.IsNullOrEmpty(node.nodeId))
-                {
-                    _nodeLookup[node.nodeId] = node;
-                    // 如果是容器型節點，則遞迴為其子節點建立查找表
-                    if (node is SequenceNode sequenceNode)
-                    {
-                        BuildLookupRecursively(sequenceNode.childNodes);
-                    }
-                    else if (node is ParallelNode parallelNode)
-                    {
-                        BuildLookupRecursively(parallelNode.childNodes);
-                    }
-                }
-            }
-        }
+       private void BuildLookupRecursively(List<DialogueNodeBase> nodes)
+       {
+           if (nodes == null || nodes.Count == 0) return;
+       
+           foreach (var node in nodes)
+           {
+               if (node == null) continue;
+       
+               var nodeId = node.nodeId;
+               if (!string.IsNullOrEmpty(nodeId))
+               {
+                   _nodeLookup[nodeId] = node;
+               }
+       
+               switch (node)
+               {
+                   case SequenceNode { childNodes: { Count: > 0 } } sequenceNode:
+                       BuildLookupRecursively(sequenceNode.childNodes);
+                       break;
+       
+                   case ParallelNode { childNodes: { Count: > 0 } } parallelNode:
+                       BuildLookupRecursively(parallelNode.childNodes);
+                       break;
+               }
+           }
+       }
 
         /// <summary>
         /// 根據節點 ID 獲取節點實例。
@@ -206,20 +208,28 @@ namespace SG.Dialogue
         /// </summary>
         /// <param name="nodes">要遍歷的節點列表。</param>
         /// <param name="allNodeIds">用於儲存所有節點 ID 的集合。</param>
-        private void GetAllNodeIdsRecursively(List<DialogueNodeBase> nodes, HashSet<string> allNodeIds)
+       private void GetAllNodeIdsRecursively(List<DialogueNodeBase> nodes, HashSet<string> allNodeIds)
         {
-            if (nodes == null) return;
+            if (nodes == null || allNodeIds == null) return;
+        
             foreach (var node in nodes)
             {
                 if (node == null) continue;
-                allNodeIds.Add(node.nodeId);
-                if (node is SequenceNode sequenceNode)
+        
+                if (!string.IsNullOrEmpty(node.nodeId))
                 {
-                    GetAllNodeIdsRecursively(sequenceNode.childNodes, allNodeIds);
+                    allNodeIds.Add(node.nodeId);
                 }
-                else if (node is ParallelNode parallelNode)
+        
+                switch (node)
                 {
-                    GetAllNodeIdsRecursively(parallelNode.childNodes, allNodeIds);
+                    case SequenceNode { childNodes: { Count: > 0 } } sequenceNode:
+                        GetAllNodeIdsRecursively(sequenceNode.childNodes, allNodeIds);
+                        break;
+        
+                    case ParallelNode { childNodes: { Count: > 0 } } parallelNode:
+                        GetAllNodeIdsRecursively(parallelNode.childNodes, allNodeIds);
+                        break;
                 }
             }
         }

@@ -19,6 +19,20 @@ namespace SG.Dialogue.Presentation
         private LitMotionPlayer _motionPlayer;
         private CancellationTokenSource _fadeCts;
 
+        public float Alpha
+        {
+            get => targetImage != null ? targetImage.color.a : 0f;
+            set
+            {
+                if (targetImage != null)
+                {
+                    var c = targetImage.color;
+                    c.a = value;
+                    targetImage.color = c;
+                }
+            }
+        }
+
         private void Awake()
         {
             if (targetImage == null) targetImage = GetComponent<Image>();
@@ -88,8 +102,6 @@ namespace SG.Dialogue.Presentation
             if (_motionPlayer != null) _motionPlayer.Play(data);
             else Debug.LogWarning("ImageDialoguePortraitPresenter: LitMotionPlayer component not found.", this);
         }
-
-
 
         public void SetHighlight(bool isHighlighted)
         {

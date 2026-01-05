@@ -64,18 +64,26 @@ namespace SG.Dialogue.Animation
                     break;
                 
                 case MotionTargetProperty.Alpha:
-                    // 如果擁有 Presentation 元件，則綁定到 Presentation 的 Alpha
-                    // var presentation = GetComponent<IDialoguePortraitPresenter>();
-                    // if (presentation != null)
-                    // {
-                    //     var startAlpha = presentation
-                    //     break;
-                    // }
+                    // 嘗試獲取 IDialoguePortraitPresenter
+                    var presenter = GetComponent<IDialoguePortraitPresenter>();
+                    if (presenter != null)
+                    {
+                        var startAlpha = presenter.Alpha;
+                        var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
+                        _currentHandle = LMotion.Create(startAlpha, endAlpha, duration)
+                            .WithEase(ease)
+                            .WithDelay(data.Delay)
+                            .WithLoops(data.Loops, GetLoopType(data.LoopType))
+                            .Bind(val => presenter.Alpha = val);
+                        break;
+                    }
+                    
+                    // 如果沒有 Presenter，嘗試獲取 CanvasGroup
                     var canvasGroup = GetComponent<CanvasGroup>();
                     if (canvasGroup != null)
                     {
                         var startAlpha = canvasGroup.alpha;
-                        var endAlpha = data.EndValue.x; // 對於 Alpha，使用 EndValue 的 X 分量
+                        var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
                         _currentHandle = LMotion.Create(startAlpha, endAlpha, duration)
                             .WithEase(ease)
                             .WithDelay(data.Delay)
@@ -84,7 +92,7 @@ namespace SG.Dialogue.Animation
                     }
                     else
                     {
-                        Debug.LogWarning("LitMotionPlayer: Alpha target requires a CanvasGroup component.", this);
+                        Debug.LogWarning("LitMotionPlayer: Alpha target requires an IDialoguePortraitPresenter or CanvasGroup component.", this);
                     }
                     break;
             }

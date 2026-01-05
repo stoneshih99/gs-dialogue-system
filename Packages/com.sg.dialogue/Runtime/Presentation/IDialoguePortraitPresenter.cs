@@ -13,6 +13,11 @@ namespace SG.Dialogue.Presentation
     public interface IDialoguePortraitPresenter
     {
         /// <summary>
+        /// 獲取或設定立繪的透明度 (0~1)。
+        /// </summary>
+        float Alpha { get; set; }
+
+        /// <summary>
         /// 根據指定的淡入時間顯示一個靜態的 Sprite 立繪。
         /// </summary>
         /// <param name="sprite">要顯示的 Sprite。</param>

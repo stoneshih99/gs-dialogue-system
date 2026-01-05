@@ -23,6 +23,18 @@ namespace SG.Dialogue.Presentation
         private LitMotionPlayer _motionPlayer;
         private CancellationTokenSource _fadeCts;
 
+        public float Alpha
+        {
+            get => canvasGroup != null ? canvasGroup.alpha : 0f;
+            set
+            {
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = value;
+                }
+            }
+        }
+
         private void Awake()
         {
             if (canvasGroup == null)

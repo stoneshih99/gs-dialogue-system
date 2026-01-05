@@ -22,6 +22,18 @@ namespace SG.Dialogue.Presentation
         private LitMotionPlayer _motionPlayer;
         private CancellationTokenSource _fadeCts;
 
+        public float Alpha
+        {
+            get => _live2DActor != null ? _live2DActor.GetOpacity() : 0f;
+            set
+            {
+                if (_live2DActor != null)
+                {
+                    _live2DActor.SetOpacity(value);
+                }
+            }
+        }
+
         private void Awake()
         {
             if (live2DActorComponent is ILive2DActor actor)

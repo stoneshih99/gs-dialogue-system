@@ -13,121 +13,160 @@ using UnityEngine.UIElements;
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {
     /// <summary>
-    /// DialogueGraphView 是對話圖的視覺化編輯器核心。
-    /// 它繼承自 Unity 的 GraphView，提供了節點的佈局、連接、縮放、拖曳等所有互動功能。
-    /// 這個類別負責將 DialogueGraph ScriptableObject 的資料模型轉換為使用者可以互動的視覺元素。
+    /// 對話系統的圖形化編輯器視圖 (GraphView)。
+    /// <para>
+    /// 此類別負責將 <see cref="DialogueGraph"/> 資料模型視覺化，並處理使用者的互動操作
+    /// (如：拖曳節點、連接線段、縮放視圖、導覽子圖等)。
+    /// </para>
+    /// <para>
+    /// 架構設計：
+    /// 1. **資料驅動**：視圖狀態完全依賴於 <see cref="DialogueGraph"/> 與 <see cref="SerializedObject"/>。
+    /// 2. **導覽堆疊**：支援巢狀子圖 (Sequence/Parallel)，透過 Stack 管理當前顯示層級。
+    /// 3. **解耦渲染**：透過 <see cref="NodeHandlerRegistry"/> 將不同類型節點的渲染邏輯分離。
+    /// </para>
     /// </summary>
     public class DialogueGraphView : GraphView
     {
+        #region Events & Constants
+
         /// <summary>
-        /// 當導覽堆疊（例如，進入或退出子圖）發生變化時觸發的事件。
+        /// 當導覽堆疊變更時觸發 (例如：進入子圖或返回上一層)。
+        /// UI 層可監聽此事件來更新麵包屑 (Breadcrumbs) 導覽列。
         /// </summary>
         public Action<Stack<object>> OnNavigationChanged;
 
         /// <summary>
-        /// 用於在 EditorPrefs 中儲存視圖變換（位置、縮放）的鍵值前綴。
+        /// 用於在 EditorPrefs 儲存視圖狀態 (位置/縮放) 的 Key 前綴。
         /// </summary>
         private const string ViewTransformKeyPrefix = "DialogueGraphView.ViewTransform.";
         
+        #endregion
+
+        #region Fields
+
+        // --- Data (資料模型) ---
+        
         /// <summary>
-        /// 目前正在編輯的對話圖資料資產。
+        /// 當前編輯的對話圖資料資產。
         /// </summary>
         public DialogueGraph Graph => _graph;
         private DialogueGraph _graph;
 
         /// <summary>
-        /// 全域狀態資產，主要用於條件節點的變數選擇。
+        /// 全域狀態資產，用於條件節點 (ConditionNode) 存取變數。
         /// </summary>
         public DialogueStateAsset GlobalState => _globalState;
         private DialogueStateAsset _globalState;
-        
-        private readonly Vector2 defaultNodeSize = new Vector2(200, 150);
-        
-        /// <summary>
-        /// 節點 ID 到其視覺元素（DialogueNodeElement）的快速查找字典。
-        /// </summary>
-        private readonly Dictionary<string, DialogueNodeElement> _nodeViews = new();
+
+        // --- Navigation (導覽狀態) ---
         
         /// <summary>
-        /// 導覽堆疊，用於處理子圖（如 SequenceNode, ParallelNode）的進入和退出。
-        /// 堆疊頂部是目前顯示的容器（DialogueGraph、SequenceNode 或 ParallelNode）。
+        /// 導覽堆疊，用於管理子圖層級。
+        /// Stack 底部通常是 Root Graph，頂部是當前顯示的容器 (SequenceNode/ParallelNode)。
         /// </summary>
         public Stack<object> NavigationStack => _navigationStack;
         private readonly Stack<object> _navigationStack = new();
+
+        // --- Visual Elements Cache (視覺元件快取) ---
         
         /// <summary>
-        /// 一個標記，用於防止在程式化填充視圖時觸發 OnGraphViewChanged 事件。
+        /// 節點 ID 對應到視覺元素 (Node View) 的查找表，用於快速存取與更新。
+        /// </summary>
+        private readonly Dictionary<string, DialogueNodeElement> _nodeViews = new();
+        
+        // --- State Flags (狀態標記) ---
+        
+        /// <summary>
+        /// 標記目前是否正在程式化填充視圖。
+        /// 用於防止在重建圖表時觸發不必要的 <see cref="OnGraphViewChanged"/> 事件。
         /// </summary>
         private bool _isPopulating;
-
-        // --- 子圖相關節點的引用 ---
-        public SequenceStartNodeElement SequenceStartNode { get; private set; }
-        public ParallelBranchStartNodeElement ParallelStartNode { get; private set; }
-
-        // --- 處理器 ---
-        private readonly NodeClipboardHandler _clipboardHandler;
-        private readonly GraphConnectionHandler _connectionHandler;
         
         /// <summary>
-        /// 用於追蹤目前正在執行並高亮的節點。
+        /// 當前正在執行 (Runtime) 並高亮的節點。
         /// </summary>
         private DialogueNodeElement _executingNode;
 
+        // --- Configuration (設定) ---
+        
+        private readonly Vector2 _defaultNodeSize = new Vector2(200, 150);
+
+        // --- Handlers (邏輯處理器) ---
+        
+        private readonly NodeClipboardHandler _clipboardHandler;
+        private readonly GraphConnectionHandler _connectionHandler;
+
+        // --- SubGraph Elements (子圖特殊節點) ---
+        
+        /// <summary>
+        /// 當進入 SequenceNode 子圖時，顯示的虛擬起始節點。
+        /// </summary>
+        public SequenceStartNodeElement SequenceStartNode { get; private set; }
+        
+        /// <summary>
+        /// 當進入 ParallelNode 子圖時，顯示的虛擬分支起始節點。
+        /// </summary>
+        public ParallelBranchStartNodeElement ParallelStartNode { get; private set; }
+
+        #endregion
+
+        #region Initialization
+
         public DialogueGraphView()
         {
-            // --- 初始化 GraphView 的基本功能 ---
-            // 設定縮放範圍
-            this.SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
-            // 添加內容拖曳、選取、框選等操作器
-            this.AddManipulator(new ContentDragger());
-            this.AddManipulator(new SelectionDragger());
-            this.AddManipulator(new RectangleSelector());
-            this.AddManipulator(new ClickSelector());
-            // 監聽圖形變更事件
-            this.graphViewChanged += OnGraphViewChanged;
+            SetupGraphView();
+            
+            // 初始化輔助處理器
+            _clipboardHandler = new NodeClipboardHandler(this);
+            _connectionHandler = new GraphConnectionHandler(this);
 
-            // 添加網格背景
+            // 註冊生命週期事件，確保正確釋放資源
+            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
+            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
+            
+            // 監聽 Unity 的 Undo/Redo，以便在復原時刷新視圖
+            Undo.undoRedoPerformed += OnUndoRedo;
+        }
+
+        /// <summary>
+        /// 設定 GraphView 的基本互動功能與外觀。
+        /// </summary>
+        private void SetupGraphView()
+        {
+            // 設定縮放範圍
+            SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
+            
+            // 加入操作器 (Manipulators)
+            this.AddManipulator(new ContentDragger());      // 拖曳畫布
+            this.AddManipulator(new SelectionDragger());    // 拖曳選取物件
+            this.AddManipulator(new RectangleSelector());   // 框選
+            this.AddManipulator(new ClickSelector());       // 點選
+            
+            // 加入網格背景
             var grid = new GridBackground();
             Insert(0, grid);
             grid.StretchToParentSize();
 
-            style.flexGrow = 1f; // 讓視圖填滿父容器
-
-            // 監聽 Unity 的撤銷/重做操作，以便在操作後刷新視圖
-            Undo.undoRedoPerformed += OnUndoRedo;
+            style.flexGrow = 1f; // 填滿父容器
             
-            // 初始化各種處理器
-            _clipboardHandler = new NodeClipboardHandler(this);
-            _connectionHandler = new GraphConnectionHandler(this);
-
-            // 註冊面板事件，用於管理事件監聽器的生命週期
-            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
-            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
+            // 監聽圖表變更 (新增/刪除/移動)
+            graphViewChanged += OnGraphViewChanged;
         }
 
-        #region Event Handling & Lifecycle
+        #endregion
+
+        #region Lifecycle & Event Handling
+
+        private void OnAttachToPanel(AttachToPanelEvent evt) => RegisterGraphEvents();
         
-        /// <summary>
-        /// 當此視圖被附加到 UI 面板時呼叫。
-        /// </summary>
-        private void OnAttachToPanel(AttachToPanelEvent evt)
-        {
-            // 當 View 被加入到 UI 中時，開始監聽圖表事件
-            RegisterGraphEvents();
-        }
-
-        /// <summary>
-        /// 當此視圖從 UI 面板上分離時呼叫。
-        /// </summary>
         private void OnDetachFromPanel(DetachFromPanelEvent evt)
         {
-            // 當 View 從 UI 中移除時，停止監聽圖表事件，防止記憶體洩漏
             UnregisterGraphEvents();
-            Undo.undoRedoPerformed -= OnUndoRedo; // 也在此處移除 Undo/Redo 的監聽
+            Undo.undoRedoPerformed -= OnUndoRedo;
         }
 
         /// <summary>
-        /// 註冊監聽目前圖表的執行時期事件。
+        /// 註冊 Runtime 事件監聽 (節點進入、對話結束)。
         /// </summary>
         private void RegisterGraphEvents()
         {
@@ -137,31 +176,29 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 取消監聽目前圖表的執行時期事件。
+        /// 移除 Runtime 事件監聽。
         /// </summary>
         private void UnregisterGraphEvents()
         {
             if (_graph == null) return;
             _graph.onNodeEntered.RemoveListener(OnNodeEntered);
             _graph.onDialogueEnded.RemoveListener(OnDialogueEnded);
-            
-            // 清除執行狀態
-            OnDialogueEnded();
+            OnDialogueEnded(); // 確保狀態被清除
         }
 
         /// <summary>
-        /// 當對話執行進入一個新節點時呼叫，用於更新節點高亮。
+        /// Runtime: 當節點被執行時，更新視覺高亮。
         /// </summary>
         private void OnNodeEntered(string nodeId)
         {
-            // 清除上一個執行節點的高亮
+            // 取消上一個節點的高亮
             if (_executingNode != null)
             {
                 _executingNode.SetExecutionState(false);
                 _executingNode = null;
             }
 
-            // 找到並高亮目前節點
+            // 高亮當前節點
             if (_nodeViews.TryGetValue(nodeId, out var currentNodeView))
             {
                 _executingNode = currentNodeView;
@@ -170,7 +207,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 當對話結束時呼叫，用於清除所有高亮。
+        /// Runtime: 對話結束時清除所有高亮。
         /// </summary>
         private void OnDialogueEnded()
         {
@@ -182,43 +219,34 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 當執行撤銷或重做時，重新填充視圖以反映資料變更。
+        /// 當 Undo/Redo 發生時，強制重新繪製圖表以同步資料。
         /// </summary>
         private void OnUndoRedo()
         {
-            if (_graph)
-            {
-                PopulateView(_graph);
-            }
+            if (_graph) PopulateView(_graph);
         }
-        
+
         #endregion
 
-        #region Population & Drawing
+        #region Graph Population (Core Logic)
 
         /// <summary>
-        /// 填充視圖的入口方法。它會設定新的圖表資料，並觸發繪製流程。
+        /// 填充視圖的入口方法。
+        /// <para>此方法會重置導覽堆疊並從根節點開始繪製。</para>
         /// </summary>
-        /// <param name="graph">要顯示的 DialogueGraph 資產。</param>
+        /// <param name="graph">要顯示的對話圖資料。</param>
         public void PopulateView(DialogueGraph graph)
         {
             _isPopulating = true;
             try
             {
-                // 在更換圖表前，先取消監聽舊圖表的事件
-                UnregisterGraphEvents();
+                UnregisterGraphEvents(); // 切換圖表前先移除舊的監聽
 
                 _graph = graph;
                 _navigationStack.Clear();
-                if (graph)
-                {
-                    _navigationStack.Push(graph);
-                }
+                if (graph) _navigationStack.Push(graph);
 
-                // 註冊新圖表的事件
-                RegisterGraphEvents();
-
-                // 從導覽堆疊的頂部開始填充
+                RegisterGraphEvents(); // 註冊新圖表的監聽
                 PopulateFromCurrentNavigation();
             }
             finally
@@ -228,127 +256,170 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 根據目前導覽堆疊的狀態，清除並重新繪製整個圖形視圖。
+        /// 根據目前的導覽堆疊 (Navigation Stack) 重建整個圖表視圖。
+        /// <para>流程：清理 -> 建立子圖節點 -> 建立資料節點 -> 建立連線 -> 更新視圖狀態。</para>
         /// </summary>
         private void PopulateFromCurrentNavigation()
         {
             _isPopulating = true;
             try
             {
-                // --- 清理工作 ---
-                DeleteElements(graphElements.ToList());
-                _nodeViews.Clear();
-                SequenceStartNode = null;
-                ParallelStartNode = null;
-                _executingNode = null; // 重置執行節點
+                // 1. 清理現有元素
+                ClearGraph();
 
                 if (!_graph || _navigationStack.Count == 0) return;
                 
                 var currentContainer = _navigationStack.Peek();
                 if (currentContainer == null) return;
 
-                // --- 繪製節點 ---
-                // 如果在子圖中，創建對應的虛擬起始節點
-                if (currentContainer is SequenceNode seqNode) CreateSequenceStartNode(seqNode);
-                else if (currentContainer is ParallelNode parNode) CreateParallelStartNode(parNode);
-                
-                List<DialogueNodeBase> nodesToDisplay = GetNodesFromContainer(currentContainer);
+                // 2. 建立子圖的虛擬起始節點 (若當前在 Sequence 或 Parallel 內部)
+                CreateSubGraphStartNodes(currentContainer);
+
+                // 3. 獲取並建立所有資料節點
+                var nodesToDisplay = GetNodesFromContainer(currentContainer);
                 if (nodesToDisplay == null) return;
 
-                _graph.BuildLookup(); // 確保節點查找字典是最新的
+                _graph.BuildLookup(); // 重建 ID 查找表
+                CreateNodes(currentContainer, nodesToDisplay);
 
-                // 為了與 Inspector 互動，我們需要使用 SerializedObject
-                var serializedGraph = new SerializedObject(_graph);
-                var nodesProperty = FindNodesProperty(serializedGraph, currentContainer);
-
-                // 遍歷資料並創建視覺元素
-                for (int i = 0; i < nodesToDisplay.Count; i++)
-                {
-                    var nodeData = nodesToDisplay[i];
-                    var nodeProperty = nodesProperty?.GetArrayElementAtIndex(i);
-                    CreateAndRegisterNode(nodeData, nodeProperty);
-                }
-
-                // --- 繪製連線 ---
-                foreach (var nodeData in nodesToDisplay)
-                {
-                    if (!_nodeViews.TryGetValue(nodeData.nodeId, out var sourceView)) continue;
-                    ConnectPortsForNode(sourceView, nodeData);
-                }
-
-                // 連接子圖起始節點的輸出埠
-                if (SequenceStartNode != null && currentContainer is SequenceNode seqNodeData)
-                {
-                    var inputPort = TryGetInputPort(seqNodeData.startNodeId);
-                    if (inputPort != null) ConnectPorts(SequenceStartNode.OutputPort, inputPort);
-                }
-                else if (ParallelStartNode != null && currentContainer is ParallelNode parNodeData)
-                {
-                    for (int i = 0; i < parNodeData.branchStartNodeIds.Count; i++)
-                    {
-                        var inputPort = TryGetInputPort(parNodeData.branchStartNodeIds[i]);
-                        if (inputPort != null && i < ParallelStartNode.BranchPorts.Count)
-                        {
-                            ConnectPorts(ParallelStartNode.BranchPorts[i], inputPort);
-                        }
-                    }
-                }
+                // 4. 建立節點間的連線 (Edges)
+                CreateEdges(currentContainer, nodesToDisplay);
                 
-                // --- 收尾工作 ---
-                ResetView(); // 恢復視圖的位置和縮放
-                OnNavigationChanged?.Invoke(_navigationStack); // 通知外部 UI 更新導覽麵包屑
-                UpdateStartNodeVisuals(); // 更新起始節點的視覺標記
+                // 5. 收尾：更新視圖位置、麵包屑與起始節點標記
+                FinalizeGraphPopulation();
             }
             finally
             {
                 _isPopulating = false;
             }
         }
-        
-        /// <summary>
-        /// 根據節點資料創建對應的視覺元素，並將其註冊到視圖中。
-        /// </summary>
-        public DialogueNodeElement CreateAndRegisterNode(DialogueNodeBase node, SerializedProperty nodeProperty)
+
+        private void ClearGraph()
         {
-            // 使用 NodeHandlerRegistry 來解耦節點類型和其視覺元素的創建
-            if (NodeHandlerRegistry.Handlers.TryGetValue(node.GetType(), out var handler))
-            {
-                var element = handler.CreateNodeElement(node, this, nodeProperty, () => RecordUndo("Modify Node"));
-                if (element != null)
-                {
-                    element.SetPosition(new Rect(_graph.GetNodePosition(node.nodeId), defaultNodeSize));
-                    element.Initialize(this, nodeProperty); 
-                    element.OnDelete = () => 
-                    {
-                        RecordUndo("Delete Node");
-                        var container = _navigationStack.Peek();
-                        GetNodesFromContainer(container)?.Remove(node);
-                        _graph.RemoveNodePosition(node.nodeId);
-                        _nodeViews.Remove(node.nodeId);
-                        EditorUtility.SetDirty(_graph);
-                    };
-                    AddElement(element);
-                    _nodeViews[node.nodeId] = element; // 註冊到字典中以便快速查找
-                }
-                return element;
-            }
-            return null;
+            // 移除所有 GraphElement (Node, Edge, etc.)
+            DeleteElements(graphElements.ToList());
+            _nodeViews.Clear();
+            SequenceStartNode = null;
+            ParallelStartNode = null;
+            _executingNode = null;
+        }
+
+        private void CreateSubGraphStartNodes(object currentContainer)
+        {
+            if (currentContainer is SequenceNode seqNode) CreateSequenceStartNode(seqNode);
+            else if (currentContainer is ParallelNode parNode) CreateParallelStartNode(parNode);
         }
 
         /// <summary>
-        /// 處理使用者在圖形視圖中進行的各種變更（如創建/刪除邊、移動元素）。
+        /// 遍歷資料節點並建立對應的視覺元素。
+        /// </summary>
+        private void CreateNodes(object currentContainer, List<DialogueNodeBase> nodesToDisplay)
+        {
+            // 為了支援 Undo/Redo 與 Inspector 修改，我們使用 SerializedObject
+            var serializedGraph = new SerializedObject(_graph);
+            var nodesProperty = FindNodesProperty(serializedGraph, currentContainer);
+
+            for (int i = 0; i < nodesToDisplay.Count; i++)
+            {
+                var nodeData = nodesToDisplay[i];
+                var nodeProperty = nodesProperty?.GetArrayElementAtIndex(i);
+                CreateAndRegisterNode(nodeData, nodeProperty);
+            }
+        }
+
+        /// <summary>
+        /// 重建所有連線 (Edges)。
+        /// </summary>
+        private void CreateEdges(object currentContainer, List<DialogueNodeBase> nodesToDisplay)
+        {
+            // 連接一般節點之間的線
+            foreach (var nodeData in nodesToDisplay)
+            {
+                if (!_nodeViews.TryGetValue(nodeData.nodeId, out var sourceView)) continue;
+                ConnectPortsForNode(sourceView, nodeData);
+            }
+
+            // 連接子圖虛擬起始節點到第一個實際節點
+            if (SequenceStartNode != null && currentContainer is SequenceNode seqNodeData)
+            {
+                var inputPort = TryGetInputPort(seqNodeData.startNodeId);
+                if (inputPort != null) ConnectPorts(SequenceStartNode.OutputPort, inputPort);
+            }
+            else if (ParallelStartNode != null && currentContainer is ParallelNode parNodeData)
+            {
+                for (int i = 0; i < parNodeData.branchStartNodeIds.Count; i++)
+                {
+                    var inputPort = TryGetInputPort(parNodeData.branchStartNodeIds[i]);
+                    if (inputPort != null && i < ParallelStartNode.BranchPorts.Count)
+                    {
+                        ConnectPorts(ParallelStartNode.BranchPorts[i], inputPort);
+                    }
+                }
+            }
+        }
+
+        private void FinalizeGraphPopulation()
+        {
+            ResetView(); // 恢復上次的視圖位置
+            OnNavigationChanged?.Invoke(_navigationStack); // 通知 UI 更新
+            UpdateStartNodeVisuals(); // 標記起始節點
+        }
+
+        #endregion
+
+        #region Node Creation & Management
+
+        /// <summary>
+        /// 建立單一節點的視覺元素並註冊到視圖中。
+        /// </summary>
+        /// <param name="node">節點資料。</param>
+        /// <param name="nodeProperty">節點的 SerializedProperty (用於 Inspector 綁定)。</param>
+        public DialogueNodeElement CreateAndRegisterNode(DialogueNodeBase node, SerializedProperty nodeProperty)
+        {
+            // 使用 Factory Pattern (NodeHandler) 根據節點類型建立對應的 View
+            if (!NodeHandlerRegistry.Handlers.TryGetValue(node.GetType(), out var handler)) return null;
+
+            var element = handler.CreateNodeElement(node, this, nodeProperty, () => RecordUndo("Modify Node"));
+            if (element == null) return null;
+
+            // 設定位置與初始化
+            element.SetPosition(new Rect(_graph.GetNodePosition(node.nodeId), _defaultNodeSize));
+            element.Initialize(this, nodeProperty);
+            
+            // 設定刪除回調：當使用者在圖表中刪除節點時觸發
+            element.OnDelete = () => DeleteNode(node, element);
+
+            AddElement(element);
+            _nodeViews[node.nodeId] = element;
+            
+            return element;
+        }
+
+        private void DeleteNode(DialogueNodeBase node, DialogueNodeElement element)
+        {
+            RecordUndo("Delete Node");
+            var container = _navigationStack.Peek();
+            GetNodesFromContainer(container)?.Remove(node); // 從資料層移除
+            _graph.RemoveNodePosition(node.nodeId);       // 移除位置資訊
+            _nodeViews.Remove(node.nodeId);               // 從快取移除
+            EditorUtility.SetDirty(_graph);               // 標記資產已修改
+        }
+
+        /// <summary>
+        /// 處理 GraphView 的變更事件 (由 Unity 內部觸發)。
+        /// 包括：建立連線、移除元素、移動元素。
         /// </summary>
         private GraphViewChange OnGraphViewChanged(GraphViewChange change)
         {
             if (_isPopulating || _graph == null) return change;
 
-            // 處理新創建的連線
+            // 處理新連線
             if (change.edgesToCreate != null)
             {
                 foreach (var edge in change.edgesToCreate) _connectionHandler.HandleEdgeConnection(edge);
             }
 
-            // 處理被移除的元素
+            // 處理移除元素
             if (change.elementsToRemove != null)
             {
                 foreach (var el in change.elementsToRemove)
@@ -358,7 +429,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 }
             }
 
-            // 處理被移動的元素
+            // 處理移動元素 (同步位置到資料)
             if (change.movedElements != null && change.movedElements.Count > 0)
             {
                 RecordUndo("Move Nodes");
@@ -367,13 +438,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             return change;
         }
-        
+
         #endregion
 
-        #region Navigation & View
-        
+        #region Navigation & View Control
+
         /// <summary>
-        /// 進入一個容器節點（子圖）。
+        /// 進入容器節點 (子圖)。
         /// </summary>
         public void EnterContainerNode(DialogueNodeBase containerNode)
         {
@@ -385,7 +456,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 從子圖返回上一層。
+        /// 返回上一層圖表。
         /// </summary>
         public void NavigateBack()
         {
@@ -397,7 +468,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 儲存目前的視圖變換（位置和縮放）到 EditorPrefs。
+        /// 儲存當前視圖的變換資訊 (位置、縮放) 到 EditorPrefs。
         /// </summary>
         public void SaveViewTransform()
         {
@@ -408,37 +479,47 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 嘗試從 EditorPrefs 載入並應用視圖變換。
+        /// 嘗試載入並套用視圖變換資訊。
         /// </summary>
         private bool TryLoadViewTransform()
         {
             if (_graph == null) return false;
             string key = GetViewTransformKey();
             string value = EditorPrefs.GetString(key);
-            if (!string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(value)) return false;
+
+            var parts = value.Split(',');
+            if (parts.Length == 3 && 
+                float.TryParse(parts[0], out float x) && 
+                float.TryParse(parts[1], out float y) && 
+                float.TryParse(parts[2], out float scale))
             {
-                var parts = value.Split(',');
-                if (parts.Length == 3 && float.TryParse(parts[0], out float x) && float.TryParse(parts[1], out float y) && float.TryParse(parts[2], out float scale))
-                {
-                    UpdateViewTransform(new Vector3(x, y, viewTransform.position.z), new Vector3(scale, scale, viewTransform.scale.z));
-                    return true;
-                }
+                UpdateViewTransform(new Vector3(x, y, viewTransform.position.z), new Vector3(scale, scale, viewTransform.scale.z));
+                return true;
             }
             return false;
         }
 
+        private void ResetView()
+        {
+            if (!TryLoadViewTransform()) FrameGraph();
+        }
+
         /// <summary>
-        /// 將視圖聚焦到圖的起始節點或整個圖。
+        /// 將視圖聚焦到圖表內容。
         /// </summary>
         public void FrameGraph()
         {
             if (_graph == null || _navigationStack.Count == 0) return;
             var container = _navigationStack.Peek();
             
+            // 根據容器類型決定聚焦策略
             if (container is DialogueGraph graph)
             {
-                if (!string.IsNullOrEmpty(graph.startNodeId) && _nodeViews.TryGetValue(graph.startNodeId, out var startNodeElement)) FrameSelectionOrAll(startNodeElement);
-                else FrameAllOrReset();
+                if (!string.IsNullOrEmpty(graph.startNodeId) && _nodeViews.TryGetValue(graph.startNodeId, out var startNodeElement)) 
+                    FrameSelectionOrAll(startNodeElement);
+                else 
+                    FrameAllOrReset();
             }
             else if (container is SequenceNode) FrameSelectionOrAll(SequenceStartNode);
             else if (container is ParallelNode) FrameSelectionOrAll(ParallelStartNode);
@@ -463,44 +544,49 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 重置視圖，優先載入已儲存的視圖狀態，否則聚焦到圖上。
+        /// 取得視圖狀態儲存的 Key。每個子圖層級都有獨立的 Key。
         /// </summary>
-        private void ResetView()
+        private string GetViewTransformKey()
         {
-            if (!TryLoadViewTransform()) FrameGraph();
+            if (_graph == null) return null;
+            string path = AssetDatabase.GetAssetPath(_graph);
+            string context = "root";
+            if (_navigationStack.Count > 1 && _navigationStack.Peek() is DialogueNodeBase node) context = node.nodeId;
+            return $"{ViewTransformKeyPrefix}{path}_{context}";
         }
-        
+
         #endregion
 
-        #region Context Menu & Node Creation
+        #region Context Menu
 
         /// <summary>
-        /// 建立右鍵上下文菜單。
+        /// 建立右鍵選單。
         /// </summary>
         public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
         {
             base.BuildContextualMenu(evt);
             var mousePos = contentViewContainer.WorldToLocal(evt.mousePosition);
             
-            // 添加複製/貼上選項
-            if (selection.Any(s => s is DialogueNodeElement)) evt.menu.AppendAction("Copy", action => _clipboardHandler.CopySelectionToClipboard());
-            evt.menu.AppendAction("Paste", action => _clipboardHandler.PasteFromClipboard(mousePos), DropdownMenuAction.Status.Normal);
-            if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent()) evt.menu.AppendSeparator();
+            // 複製/貼上
+            if (selection.Any(s => s is DialogueNodeElement)) 
+                evt.menu.AppendAction("Copy", _ => _clipboardHandler.CopySelectionToClipboard());
+            
+            evt.menu.AppendAction("Paste", _ => _clipboardHandler.PasteFromClipboard(mousePos), DropdownMenuAction.Status.Normal);
+            
+            if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent()) 
+                evt.menu.AppendSeparator();
             
             bool inSubGraph = _navigationStack.Count > 1;
 
-            // 根據 NodeHandlerRegistry 動態生成創建節點的菜單項
+            // 動態生成節點創建選項
             foreach (var handler in NodeHandlerRegistry.Handlers.Values)
             {
-                // 在子圖中不允許創建新的子圖節點
+                // 在子圖中禁止創建新的子圖容器 (避免過度巢狀)
                 if (inSubGraph && (handler.CreateNodeData() is SequenceNode || handler.CreateNodeData() is ParallelNode)) continue;
-                evt.menu.AppendAction(handler.MenuName, _ => { CreateAndAddNode(handler.CreateNodeData(), mousePos, handler); });
+                evt.menu.AppendAction(handler.MenuName, _ => CreateAndAddNode(handler.CreateNodeData(), mousePos, handler));
             }
         }
 
-        /// <summary>
-        /// 處理節點創建的邏輯。
-        /// </summary>
         private void CreateAndAddNode(DialogueNodeBase node, Vector2 pos, INodeHandler handler)
         {
             if (_graph == null) return;
@@ -517,6 +603,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             targetList.Add(node); 
             _graph.SetNodePosition(node.nodeId, pos);
 
+            // 獲取新節點的 SerializedProperty
             var serializedGraph = new SerializedObject(_graph);
             var nodesProperty = FindNodesProperty(serializedGraph, container);
             var newNodeProperty = nodesProperty?.GetArrayElementAtIndex(targetList.Count - 1);
@@ -528,10 +615,10 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         #endregion
 
-        #region Helpers
+        #region Helpers & Utilities
 
         /// <summary>
-        /// 設定全域狀態資產，並通知相關節點更新其 UI。
+        /// 設定全域變數狀態，並通知相關節點更新 UI (如 ConditionNode 的下拉選單)。
         /// </summary>
         public void SetGlobalState(DialogueStateAsset state)
         {
@@ -543,34 +630,42 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 設定當前圖的起始節點。
+        /// 設定圖表的起始節點。
         /// </summary>
         public void SetStartNode(string nodeId)
         {
             if (_graph == null) return;
             RecordUndo("Set Start Node");
-            // 更新舊起始節點的視覺
-            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var oldStartNodeElement)) oldStartNodeElement.SetIsStartNode(false);
-            // 更新資料
+            
+            // 更新舊起始節點視覺
+            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var oldStart)) 
+                oldStart.SetIsStartNode(false);
+            
             _graph.startNodeId = nodeId;
-            // 更新新起始節點的視覺
-            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var newStartNodeElement)) newStartNodeElement.SetIsStartNode(true);
+            
+            // 更新新起始節點視覺
+            if (!string.IsNullOrEmpty(_graph.startNodeId) && _nodeViews.TryGetValue(_graph.startNodeId, out var newStart)) 
+                newStart.SetIsStartNode(true);
+            
             EditorUtility.SetDirty(_graph);
         }
         
         /// <summary>
-        /// 根據容器物件獲取其包含的節點列表。
+        /// 根據容器物件取得其包含的節點列表。
         /// </summary>
         public List<DialogueNodeBase> GetNodesFromContainer(object container)
         {
-            if (container is DialogueGraph graph) return graph.AllNodes;
-            if (container is SequenceNode sequence) return sequence.childNodes;
-            if (container is ParallelNode parallel) return parallel.childNodes;
-            return null;
+            return container switch
+            {
+                DialogueGraph graph => graph.AllNodes,
+                SequenceNode sequence => sequence.childNodes,
+                ParallelNode parallel => parallel.childNodes,
+                _ => null
+            };
         }
 
         /// <summary>
-        /// 記錄一步可撤銷的操作。
+        /// 記錄 Unity Undo 操作。
         /// </summary>
         public void RecordUndo(string undoName)
         {
@@ -582,7 +677,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 將所有節點的視覺位置同步到底層的資料資產中。
+        /// 將所有節點的視覺位置同步回資料資產。
         /// </summary>
         public void SyncPositionsToAsset()
         {
@@ -593,18 +688,15 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             }
         }
 
-        /// <summary>
-        /// 根據節點 ID 嘗試獲取其輸入埠。
-        /// </summary>
         private Port TryGetInputPort(string nodeId)
         {
             if (string.IsNullOrEmpty(nodeId)) return null;
-            if (_nodeViews.TryGetValue(nodeId, out var element)) return element.InputPort;
-            return null;
+            return _nodeViews.TryGetValue(nodeId, out var element) ? element.InputPort : null;
         }
 
         /// <summary>
-        /// 根據 SerializedObject 和容器物件，找到對應的節點列表屬性。
+        /// 尋找特定容器節點在 SerializedObject 中的屬性路徑。
+        /// 用於支援 Inspector 的即時修改。
         /// </summary>
         private SerializedProperty FindNodesProperty(SerializedObject serializedGraph, object container)
         {
@@ -622,7 +714,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 遞迴查找目標節點在 SerializedObject 中的屬性路徑。
+        /// 遞迴搜尋節點屬性路徑。
         /// </summary>
         private string FindPropertyPath(List<DialogueNodeBase> nodes, string currentPath, DialogueNodeBase targetNode)
         {
@@ -631,6 +723,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             {
                 var node = nodes[i];
                 if (node.nodeId == targetNode.nodeId) return $"{currentPath}.Array.data[{i}]";
+                
                 if (node is SequenceNode seqNode)
                 {
                     string foundPath = FindPropertyPath(seqNode.childNodes, $"{currentPath}.Array.data[{i}].childNodes", targetNode);
@@ -645,9 +738,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             return null;
         }
 
-        /// <summary>
-        /// 更新所有可見節點的起始節點視覺標記。
-        /// </summary>
         private void UpdateStartNodeVisuals()
         {
             foreach (var nodeView in _nodeViews.Values)
@@ -656,14 +746,57 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             }
         }
 
-        // --- 以下方法是為了與舊程式碼兼容或提供簡化的介面 ---
-        private void CreateSequenceStartNode(SequenceNode seqNode) { SequenceStartNode = new SequenceStartNodeElement(); AddElement(SequenceStartNode); }
-        private void CreateParallelStartNode(ParallelNode parNode) { ParallelStartNode = new ParallelBranchStartNodeElement(); ParallelStartNode.BuildPorts(parNode.branchStartNodeIds); ParallelStartNode.OnBranchesChanged = () => { RecordUndo("Modify Parallel Branches"); while (parNode.branchStartNodeIds.Count < ParallelStartNode.BranchPorts.Count) parNode.branchStartNodeIds.Add(null); while (parNode.branchStartNodeIds.Count > ParallelStartNode.BranchPorts.Count) parNode.branchStartNodeIds.RemoveAt(parNode.branchStartNodeIds.Count - 1); }; AddElement(ParallelStartNode); }
-        private void ConnectPortsForNode(DialogueNodeElement sourceView, DialogueNodeBase nodeData) { if (NodeHandlerRegistry.Handlers.TryGetValue(nodeData.GetType(), out var handler)) handler.ConnectPorts(sourceView, nodeData, TryGetInputPort, ConnectPorts); }
-        private void ConnectPorts(Port output, Port input) { if (output != null && input != null) AddElement(output.ConnectTo(input)); }
-        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter) { var compatiblePorts = new List<Port>(); ports.ForEach(port => { if (startPort != port && startPort.node != port.node && startPort.direction != port.direction) compatiblePorts.Add(port); }); return compatiblePorts; }
-        private string GetViewTransformKey() { if (_graph == null) return null; string path = AssetDatabase.GetAssetPath(_graph); string context = "root"; if (_navigationStack.Count > 1 && _navigationStack.Peek() is DialogueNodeBase node) context = node.nodeId; return $"{ViewTransformKeyPrefix}{path}_{context}"; }
-        private Port GetOutputPort(string nodeId, string portName = "Next") { if (string.IsNullOrEmpty(nodeId) || !_nodeViews.TryGetValue(nodeId, out var element)) return null; if (NodeHandlerRegistry.Handlers.TryGetValue(element.NodeData.GetType(), out var handler)) return handler.GetOutputPort(element, portName); return null; }
+        /// <summary>
+        /// 定義哪些 Port 可以互相連接。
+        /// </summary>
+        public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+        {
+            return ports.ToList().Where(port => 
+                startPort != port && 
+                startPort.node != port.node && 
+                startPort.direction != port.direction
+            ).ToList();
+        }
+
+        #endregion
+
+        #region SubGraph & Connection Helpers
+
+        private void CreateSequenceStartNode(SequenceNode seqNode)
+        {
+            SequenceStartNode = new SequenceStartNodeElement();
+            AddElement(SequenceStartNode);
+        }
+
+        private void CreateParallelStartNode(ParallelNode parNode)
+        {
+            ParallelStartNode = new ParallelBranchStartNodeElement();
+            ParallelStartNode.BuildPorts(parNode.branchStartNodeIds);
+            ParallelStartNode.OnBranchesChanged = () =>
+            {
+                RecordUndo("Modify Parallel Branches");
+                // 同步資料與視覺
+                while (parNode.branchStartNodeIds.Count < ParallelStartNode.BranchPorts.Count) parNode.branchStartNodeIds.Add(null);
+                while (parNode.branchStartNodeIds.Count > ParallelStartNode.BranchPorts.Count) parNode.branchStartNodeIds.RemoveAt(parNode.branchStartNodeIds.Count - 1);
+            };
+            AddElement(ParallelStartNode);
+        }
+
+        private void ConnectPortsForNode(DialogueNodeElement sourceView, DialogueNodeBase nodeData)
+        {
+            if (NodeHandlerRegistry.Handlers.TryGetValue(nodeData.GetType(), out var handler))
+            {
+                handler.ConnectPorts(sourceView, nodeData, TryGetInputPort, ConnectPorts);
+            }
+        }
+
+        private void ConnectPorts(Port output, Port input)
+        {
+            if (output != null && input != null)
+            {
+                AddElement(output.ConnectTo(input));
+            }
+        }
 
         #endregion
     }

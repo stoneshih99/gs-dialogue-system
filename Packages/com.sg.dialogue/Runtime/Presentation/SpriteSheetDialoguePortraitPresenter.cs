@@ -24,6 +24,20 @@ namespace SG.Dialogue.Presentation
         private CancellationTokenSource _animationCts;
         private CancellationTokenSource _fadeCts;
 
+        public float Alpha
+        {
+            get => _portraitSprite != null ? _portraitSprite.color.a : 0f;
+            set
+            {
+                if (_portraitSprite != null)
+                {
+                    var c = _portraitSprite.color;
+                    c.a = value;
+                    _portraitSprite.color = c;
+                }
+            }
+        }
+
         private void Awake()
         {
             if (_portraitSprite == null)

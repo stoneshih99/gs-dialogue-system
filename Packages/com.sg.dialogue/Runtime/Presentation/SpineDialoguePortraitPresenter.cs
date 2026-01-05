@@ -20,6 +20,18 @@ namespace SG.Dialogue.Presentation
         private LitMotionPlayer _motionPlayer;
         private CancellationTokenSource _fadeCts;
 
+        public float Alpha
+        {
+            get => skeletonAnimation != null && skeletonAnimation.skeleton != null ? skeletonAnimation.skeleton.A : 0f;
+            set
+            {
+                if (skeletonAnimation != null && skeletonAnimation.skeleton != null)
+                {
+                    skeletonAnimation.skeleton.A = value;
+                }
+            }
+        }
+
         private void Awake()
         {
             if (skeletonAnimation == null)
