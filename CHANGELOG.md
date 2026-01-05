@@ -2,9 +2,12 @@
 
 ## [1.0.8] - 2026-01-02
 ### Added
-- 新增 `TextNodeTranslateNode`，支援對話框的進場與退場動畫 (位移與淡入淡出)，可與 `StageTextNode` 配合使用。
+- TextNodeTranslateNode`，支援對話框的進場與退場動畫 (位移與淡入淡出)，可與 `StageTextNode` 配合使用。
 - `CharacterActionNode` 新增 `ForceReplace` 選項，允許在同一位置強制銷毀舊角色並生成新角色。
 - `DialogueUIManager` 新增 `dialoguePanel` 欄位，支援獨立控制對話框的動畫效果，避免影響全域 UI。
+
+### Fixed
+AnimationNode 和 PortraitManager，新增等待動畫完成的選項，優化動畫播放邏輯
 
 ### Changed
 - `DialogueController` 將跳過請求事件的邏輯從結束對話更改為觸發事件，提供更靈活的控制。
