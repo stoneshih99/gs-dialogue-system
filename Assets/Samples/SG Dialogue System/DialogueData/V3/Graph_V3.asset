@@ -31,6 +31,7 @@ MonoBehaviour:
   - rid: 273019851638571083
   - rid: 273019851638571084
   - rid: 273019851638571091
+  - rid: 273019854960459852
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -95,11 +96,13 @@ MonoBehaviour:
   - nodeId: TextTranslate_2
     position: {x: -341.5, y: 616.5}
   - nodeId: Anim_2
-    position: {x: -1557.5, y: 548}
+    position: {x: -1696.5, y: 548}
   - nodeId: Anim_3
     position: {x: 964, y: 449.5}
   - nodeId: WAIT_2
     position: {x: 217, y: 577}
+  - nodeId: Anim_4
+    position: {x: -1401.5, y: 566}
   references:
     version: 2
     RefIds:
@@ -128,12 +131,13 @@ MonoBehaviour:
       data:
         nodeId: Anim_2
         IsEnabled: 1
-        nextNodeId: PARALLEL_1
+        nextNodeId: Anim_4
         targetAnimationPosition: 0
         waitForCompletion: 0
         motions:
         - TargetProperty: 0
           EndValue: {x: 0, y: 1, z: 0}
+          EndAlpha: 1
           Duration: 0.5
           Ease: 5
           LoopType: 2
@@ -144,13 +148,14 @@ MonoBehaviour:
       type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: Anim_3
-        IsEnabled: 1
+        IsEnabled: 0
         nextNodeId: LOG_3
         targetAnimationPosition: 1
         waitForCompletion: 0
         motions:
         - TargetProperty: 0
           EndValue: {x: 0, y: 2, z: 0}
+          EndAlpha: 1
           Duration: 0.5
           Ease: 5
           LoopType: 2
@@ -164,6 +169,24 @@ MonoBehaviour:
         IsEnabled: 1
         WaitTime: 5
         nextNodeId: EVENT_1
+    - rid: 273019854960459852
+      type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: Anim_4
+        IsEnabled: 1
+        nextNodeId: PARALLEL_1
+        targetAnimationPosition: 0
+        waitForCompletion: 1
+        motions:
+        - TargetProperty: 3
+          EndValue: {x: 0, y: 0, z: 0}
+          EndAlpha: 0.5
+          Duration: 1
+          Ease: 0
+          LoopType: 0
+          Loops: 0
+          Delay: 0
+          IsRelative: 1
     - rid: 736264920620073050
       type: {class: ParallelNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -252,6 +275,7 @@ MonoBehaviour:
         motions:
         - TargetProperty: 0
           EndValue: {x: 1, y: 0, z: 0}
+          EndAlpha: 1
           Duration: 0.5
           Ease: 5
           LoopType: 2

@@ -8,6 +8,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using LitMotion;
 using SG.Dialogue.Editor.Editor.GraphElements;
+using UnityEngine;
 
 namespace SG.Dialogue.Editor.Dialogue.Editor
 {
@@ -101,15 +102,32 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
                 var row1 = new VisualElement { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
                 var propField = new EnumField(motion.TargetProperty) { style = { flexGrow = 1 } };
-                propField.RegisterValueChangedCallback(e => { motion.TargetProperty = (MotionTargetProperty)e.newValue; _onChanged?.Invoke(); });
+                propField.RegisterValueChangedCallback(e => { 
+                    motion.TargetProperty = (MotionTargetProperty)e.newValue; 
+                    _onChanged?.Invoke(); 
+                    RebuildMotionsUI(); // 屬性改變時重建 UI，以顯示/隱藏對應欄位
+                });
                 row1.Add(propField);
                 row1.Add(new Button(() => { _data.motions.RemoveAt(index); RebuildMotionsUI(); }) { text = "-" }); // 移除動畫按鈕
                 motionBox.Add(row1);
 
                 // 動畫參數輸入欄位
-                var endValueField = new Vector3Field("End Value") { value = motion.EndValue };
-                endValueField.RegisterValueChangedCallback(e => { motion.EndValue = e.newValue; _onChanged?.Invoke(); });
-                motionBox.Add(endValueField);
+                if (motion.TargetProperty == MotionTargetProperty.Alpha)
+                {
+                    var endAlphaField = new FloatField("End Alpha") { value = motion.EndAlpha };
+                    endAlphaField.RegisterValueChangedCallback(e => { 
+                        motion.EndAlpha = Mathf.Clamp(e.newValue, 0f, 1f); // 限制在 0~1 之間
+                        endAlphaField.value = motion.EndAlpha; // 更新 UI 顯示
+                        _onChanged?.Invoke(); 
+                    });
+                    motionBox.Add(endAlphaField);
+                }
+                else
+                {
+                    var endValueField = new Vector3Field("End Value") { value = motion.EndValue };
+                    endValueField.RegisterValueChangedCallback(e => { motion.EndValue = e.newValue; _onChanged?.Invoke(); });
+                    motionBox.Add(endValueField);
+                }
 
                 var durationField = new FloatField("Duration") { value = motion.Duration };
                 durationField.RegisterValueChangedCallback(e => { motion.Duration = e.newValue; _onChanged?.Invoke(); });
@@ -162,6 +180,11 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             {
                 _data.nextNodeId = null;
             }
+        }
+
+        protected override void ApplyCustomStyle()
+        {
+            style.maxWidth = 280;
         }
     }
 }

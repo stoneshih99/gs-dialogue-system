@@ -37,7 +37,15 @@ namespace SG.Dialogue.Animation
 
             MotionHandle newHandle = default;
 
-            Debug.Log($"[LitMotionPlayer] Play {data.TargetProperty} on {target.name}. Duration: {duration}, Relative: {data.IsRelative}, EndValue: {data.EndValue}");
+            // 根據不同屬性印出不同的 Log
+            if (data.TargetProperty == MotionTargetProperty.Alpha)
+            {
+                Debug.Log($"[LitMotionPlayer] Play Alpha on {target.name}. Duration: {duration}, Relative: {data.IsRelative}, EndAlpha: {data.EndAlpha}, Ease: {ease}");
+            }
+            else
+            {
+                Debug.Log($"[LitMotionPlayer] Play {data.TargetProperty} on {target.name}. Duration: {duration}, Relative: {data.IsRelative}, EndValue: {data.EndValue}, Ease: {ease}");
+            }
 
             switch (data.TargetProperty)
             {
@@ -46,7 +54,6 @@ namespace SG.Dialogue.Animation
                     {
                         var startPos = rectTransform.anchoredPosition;
                         var endPos = data.IsRelative ? startPos + (Vector2)data.EndValue : (Vector2)data.EndValue;
-                        Debug.Log($"[LitMotionPlayer] Position (RectTransform): {startPos} -> {endPos}");
                         newHandle = LMotion.Create(startPos, endPos, duration)
                             .WithEase(ease)
                             .WithDelay(data.Delay)
@@ -57,7 +64,6 @@ namespace SG.Dialogue.Animation
                     {
                         var startPos = target.localPosition;
                         var endPos = data.IsRelative ? startPos + data.EndValue : data.EndValue;
-                        Debug.Log($"[LitMotionPlayer] Position (Transform): {startPos} -> {endPos}");
                         newHandle = LMotion.Create(startPos, endPos, duration)
                             .WithEase(ease)
                             .WithDelay(data.Delay)
@@ -87,11 +93,16 @@ namespace SG.Dialogue.Animation
                     break;
                 
                 case MotionTargetProperty.Alpha:
+                    // 使用 EndAlpha 欄位
+                    float targetAlpha = data.EndAlpha;
+                    
                     var presenter = GetComponent<IDialoguePortraitPresenter>();
                     if (presenter != null)
                     {
                         var startAlpha = presenter.Alpha;
-                        var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
+                        var endAlpha = data.IsRelative ? startAlpha + targetAlpha : targetAlpha;
+                        Debug.Log($"[LitMotionPlayer] Alpha Animation: {startAlpha} -> {endAlpha}");
+                        
                         newHandle = LMotion.Create(startAlpha, endAlpha, duration)
                             .WithEase(ease)
                             .WithDelay(data.Delay)
@@ -104,7 +115,9 @@ namespace SG.Dialogue.Animation
                         if (canvasGroup != null)
                         {
                             var startAlpha = canvasGroup.alpha;
-                            var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
+                            var endAlpha = data.IsRelative ? startAlpha + targetAlpha : targetAlpha;
+                            Debug.Log($"[LitMotionPlayer] Alpha Animation (CanvasGroup): {startAlpha} -> {endAlpha}");
+
                             newHandle = LMotion.Create(startAlpha, endAlpha, duration)
                                 .WithEase(ease)
                                 .WithDelay(data.Delay)

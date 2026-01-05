@@ -48,12 +48,14 @@ namespace SG.Dialogue.Presentation
             }
             _motionPlayer = GetComponent<LitMotionPlayer>();
             
+            // 確保初始狀態正確，但不強制設為 0，以免覆蓋編輯器設定或初始狀態
             if (_portraitSprite != null)
             {
                 _portraitSprite.enabled = false;
-                var c = _portraitSprite.color;
-                c.a = 0f;
-                _portraitSprite.color = c;
+                // 移除強制設為 0 的邏輯，讓 Show 方法來控制
+                // var c = _portraitSprite.color;
+                // c.a = 0f;
+                // _portraitSprite.color = c;
             }
         }
 
@@ -73,6 +75,15 @@ namespace SG.Dialogue.Presentation
             
             CancelFade();
             _fadeCts = new CancellationTokenSource();
+            
+            // 如果是第一次顯示，確保 Alpha 從 0 開始（如果需要淡入）
+            if (fadeDuration > 0 && !_portraitSprite.gameObject.activeSelf)
+            {
+                 var c = _portraitSprite.color;
+                 c.a = 0f;
+                 _portraitSprite.color = c;
+            }
+            
             return FadeTo(1f, fadeDuration, _fadeCts.Token);
         }
 
@@ -98,6 +109,9 @@ namespace SG.Dialogue.Presentation
             
             CancelFade();
             _fadeCts = new CancellationTokenSource();
+            
+            // 只有在物件原本未激活或 Alpha 為 0 時，才強制從 0 開始淡入
+            // 這樣可以避免已經顯示的角色在切換動畫時閃爍
             if (!_portraitSprite.gameObject.activeSelf || _portraitSprite.color.a == 0)
             {
                 var c = _portraitSprite.color;

@@ -16,6 +16,10 @@ namespace SG.Dialogue.Animation
 
         [Tooltip("動畫的目標值。對於 Vector3 屬性，這是最終值；對於 Alpha，通常使用 X 分量。")]
         public Vector3 EndValue = Vector3.zero;
+        
+        [Tooltip("動畫的目標 Alpha 值 (0-1)。僅當 TargetProperty 為 Alpha 時有效。")]
+        [Range(0f, 1f)]
+        public float EndAlpha = 1f;
 
         [Tooltip("動畫持續時間（秒）。")]
         public float Duration = 0.5f;
