@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using LitMotion;
 using LitMotion.Extensions;
 using SG.Dialogue.Presentation;
@@ -10,99 +12,126 @@ namespace SG.Dialogue.Animation
     /// </summary>
     public class LitMotionPlayer : MonoBehaviour
     {
-        private MotionHandle _currentHandle; // 當前正在播放的動畫句柄
+        // 使用 Dictionary 來管理不同屬性的動畫 Handle，允許同時播放不同屬性的動畫
+        private readonly Dictionary<MotionTargetProperty, MotionHandle> _activeHandles = new Dictionary<MotionTargetProperty, MotionHandle>();
 
         /// <summary>
         /// 根據提供的 MotionData 播放動畫。
         /// </summary>
         /// <param name="data">包含動畫參數的 MotionData 實例。</param>
-        public void Play(MotionData data)
+        public async UniTask Play(MotionData data)
         {
-            // 停止目前正在播放的動畫，以避免衝突
-            if (_currentHandle.IsActive())
+            // 根據 TargetProperty 取消舊的動畫，避免同屬性動畫衝突
+            if (_activeHandles.TryGetValue(data.TargetProperty, out var handle) && handle.IsActive())
             {
-                _currentHandle.Cancel();
+                handle.Cancel();
             }
 
             var target = transform; // 動畫的目標 Transform
+            var rectTransform = target as RectTransform; // 嘗試轉型為 RectTransform
             var duration = data.Duration; // 動畫持續時間
             var ease = data.Ease; // 緩和曲線
+            
+            // 處理循環次數：0 表示播放一次（不循環），-1 表示無限循環
+            int loops = data.Loops == 0 ? 1 : data.Loops;
+
+            MotionHandle newHandle = default;
+
+            Debug.Log($"[LitMotionPlayer] Play {data.TargetProperty} on {target.name}. Duration: {duration}, Relative: {data.IsRelative}, EndValue: {data.EndValue}");
 
             switch (data.TargetProperty)
             {
                 case MotionTargetProperty.Position:
-                    var startPos = target.localPosition;
-                    // 如果是相對運動，則目標位置是起始位置加上 EndValue；否則直接使用 EndValue
-                    var endPos = data.IsRelative ? startPos + data.EndValue : data.EndValue;
-                    _currentHandle = LMotion.Create(startPos, endPos, duration)
-                        .WithEase(ease)
-                        .WithDelay(data.Delay)
-                        .WithLoops(data.Loops, GetLoopType(data.LoopType))
-                        .BindToLocalPosition(target); // 綁定到本地位置
+                    if (rectTransform != null)
+                    {
+                        var startPos = rectTransform.anchoredPosition;
+                        var endPos = data.IsRelative ? startPos + (Vector2)data.EndValue : (Vector2)data.EndValue;
+                        Debug.Log($"[LitMotionPlayer] Position (RectTransform): {startPos} -> {endPos}");
+                        newHandle = LMotion.Create(startPos, endPos, duration)
+                            .WithEase(ease)
+                            .WithDelay(data.Delay)
+                            .WithLoops(loops, GetLoopType(data.LoopType))
+                            .BindToAnchoredPosition(rectTransform);
+                    }
+                    else
+                    {
+                        var startPos = target.localPosition;
+                        var endPos = data.IsRelative ? startPos + data.EndValue : data.EndValue;
+                        Debug.Log($"[LitMotionPlayer] Position (Transform): {startPos} -> {endPos}");
+                        newHandle = LMotion.Create(startPos, endPos, duration)
+                            .WithEase(ease)
+                            .WithDelay(data.Delay)
+                            .WithLoops(loops, GetLoopType(data.LoopType))
+                            .BindToLocalPosition(target);
+                    }
                     break;
 
                 case MotionTargetProperty.Rotation:
                     var startRot = target.localEulerAngles;
-                    // 如果是相對運動，則目標旋轉是起始旋轉加上 EndValue；否則直接使用 EndValue
                     var endRot = data.IsRelative ? startRot + data.EndValue : data.EndValue;
-                    _currentHandle = LMotion.Create(startRot, endRot, duration)
+                    newHandle = LMotion.Create(startRot, endRot, duration)
                         .WithEase(ease)
                         .WithDelay(data.Delay)
-                        .WithLoops(data.Loops, GetLoopType(data.LoopType))
-                        .BindToLocalEulerAngles(target); // 綁定到本地歐拉角
+                        .WithLoops(loops, GetLoopType(data.LoopType))
+                        .BindToLocalEulerAngles(target);
                     break;
 
                 case MotionTargetProperty.Scale:
                     var startScale = target.localScale;
-                    // 如果是相對運動，則目標縮放是起始縮放加上 EndValue；否則直接使用 EndValue
                     var endScale = data.IsRelative ? startScale + data.EndValue : data.EndValue;
-                    _currentHandle = LMotion.Create(startScale, endScale, duration)
+                    newHandle = LMotion.Create(startScale, endScale, duration)
                         .WithEase(ease)
                         .WithDelay(data.Delay)
-                        .WithLoops(data.Loops, GetLoopType(data.LoopType))
-                        .BindToLocalScale(target); // 綁定到本地縮放
+                        .WithLoops(loops, GetLoopType(data.LoopType))
+                        .BindToLocalScale(target);
                     break;
                 
                 case MotionTargetProperty.Alpha:
-                    // 嘗試獲取 IDialoguePortraitPresenter
                     var presenter = GetComponent<IDialoguePortraitPresenter>();
                     if (presenter != null)
                     {
                         var startAlpha = presenter.Alpha;
                         var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
-                        _currentHandle = LMotion.Create(startAlpha, endAlpha, duration)
+                        newHandle = LMotion.Create(startAlpha, endAlpha, duration)
                             .WithEase(ease)
                             .WithDelay(data.Delay)
-                            .WithLoops(data.Loops, GetLoopType(data.LoopType))
+                            .WithLoops(loops, GetLoopType(data.LoopType))
                             .Bind(val => presenter.Alpha = val);
-                        break;
-                    }
-                    
-                    // 如果沒有 Presenter，嘗試獲取 CanvasGroup
-                    var canvasGroup = GetComponent<CanvasGroup>();
-                    if (canvasGroup != null)
-                    {
-                        var startAlpha = canvasGroup.alpha;
-                        var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
-                        _currentHandle = LMotion.Create(startAlpha, endAlpha, duration)
-                            .WithEase(ease)
-                            .WithDelay(data.Delay)
-                            .WithLoops(data.Loops, GetLoopType(data.LoopType))
-                            .BindToAlpha(canvasGroup); // 綁定到 CanvasGroup 的 Alpha
                     }
                     else
                     {
-                        Debug.LogWarning("LitMotionPlayer: Alpha target requires an IDialoguePortraitPresenter or CanvasGroup component.", this);
+                        var canvasGroup = GetComponent<CanvasGroup>();
+                        if (canvasGroup != null)
+                        {
+                            var startAlpha = canvasGroup.alpha;
+                            var endAlpha = data.IsRelative ? startAlpha + data.EndValue.x : data.EndValue.x;
+                            newHandle = LMotion.Create(startAlpha, endAlpha, duration)
+                                .WithEase(ease)
+                                .WithDelay(data.Delay)
+                                .WithLoops(loops, GetLoopType(data.LoopType))
+                                .BindToAlpha(canvasGroup);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("LitMotionPlayer: Alpha target requires an IDialoguePortraitPresenter or CanvasGroup component.", this);
+                            return;
+                        }
                     }
                     break;
+            }
+
+            // 儲存新的 Handle
+            _activeHandles[data.TargetProperty] = newHandle;
+
+            if (newHandle.IsActive())
+            {
+                await newHandle.ToUniTask();
             }
         }
 
         /// <summary>
         /// 將自定義的 MotionLoopType 轉換為 LitMotion 庫的 LoopType。
         /// </summary>
-        /// <param name="loopType">自定義的 MotionLoopType。</param>
-        /// <returns>LitMotion 庫的 LoopType。</returns>
         private LoopType GetLoopType(MotionLoopType loopType)
         {
             switch (loopType)
@@ -112,17 +141,17 @@ namespace SG.Dialogue.Animation
                 case MotionLoopType.Yoyo:
                     return LoopType.Yoyo;
                 default:
-                    return LoopType.Restart; // LitMotion 對於循環次數大於 1 的預設值
+                    return LoopType.Restart;
             }
         }
 
         private void OnDestroy()
         {
-            // 當物件被摧毀時，取消動畫以避免記憶體洩漏
-            if (_currentHandle.IsActive())
+            foreach (var handle in _activeHandles.Values)
             {
-                _currentHandle.Cancel();
+                if (handle.IsActive()) handle.Cancel();
             }
+            _activeHandles.Clear();
         }
     }
 }

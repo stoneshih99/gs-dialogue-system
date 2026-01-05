@@ -97,9 +97,9 @@ namespace SG.Dialogue.Presentation
             targetImage.sprite = null;
         }
 
-        public void PlayMotion(MotionData data)
+        public async UniTask PlayMotion(MotionData data)
         {
-            if (_motionPlayer != null) _motionPlayer.Play(data);
+            if (_motionPlayer != null) await _motionPlayer.Play(data);
             else Debug.LogWarning("ImageDialoguePortraitPresenter: LitMotionPlayer component not found.", this);
         }
 

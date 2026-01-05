@@ -11,6 +11,7 @@ namespace SG.Dialogue.Presentation
     /// 一個 IDialoguePortraitPresenter 的實作，用於顯示和播放 Sprite Sheet 動畫。
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
+    [RequireComponent(typeof(LitMotionPlayer))]
     public class SpriteSheetDialoguePortraitPresenter : MonoBehaviour, IDialoguePortraitPresenter
     {
         [Tooltip("Sprite Sheet 動畫的播放速度（每秒影格數）。")]
@@ -18,6 +19,7 @@ namespace SG.Dialogue.Presentation
         [Tooltip("動畫是否循環播放。")]
         [SerializeField] public bool loop = true;
         private SpriteRenderer _portraitSprite;
+        private LitMotionPlayer _motionPlayer;
 
         [SerializeField] private List<SpriteSheetStateConfig> stateAnimations;
         
@@ -44,6 +46,8 @@ namespace SG.Dialogue.Presentation
             {
                 _portraitSprite = GetComponent<SpriteRenderer>();
             }
+            _motionPlayer = GetComponent<LitMotionPlayer>();
+            
             if (_portraitSprite != null)
             {
                 _portraitSprite.enabled = false;
@@ -123,9 +127,10 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        public void PlayMotion(MotionData data)
+        public async UniTask PlayMotion(MotionData data)
         {
-            // 可以根據需要實作 LitMotion 動畫
+            if (_motionPlayer != null) await _motionPlayer.Play(data);
+            else Debug.LogWarning("SpriteSheetDialoguePortraitPresenter: LitMotionPlayer component not found.", this);
         }
 
         public void SetHighlight(bool isHighlighted)

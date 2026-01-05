@@ -50,8 +50,8 @@ namespace SG.Dialogue
                 return;
             }
             
-            Debug.LogFormat("DialogueAudioBridge: 收到音訊請求，動作類型：{0}，音訊名稱：{1}",
-                request.ActionType, request.SoundName);
+            // Debug.LogFormat("DialogueAudioBridge: 收到音訊請求，動作類型：{0}，音訊名稱：{1}",
+            //     request.ActionType, request.SoundName);
             
             switch (request.ActionType)
             {

@@ -55,7 +55,7 @@ namespace SG.Dialogue.Presentation
         /// 播放一個指定的 LitMotion 動畫。
         /// </summary>
         /// <param name="data">包含動畫參數的 MotionData 實例。</param>
-        void PlayMotion(MotionData data);
+        UniTask PlayMotion(MotionData data);
 
         /// <summary>
         /// 設定立繪的高亮狀態。

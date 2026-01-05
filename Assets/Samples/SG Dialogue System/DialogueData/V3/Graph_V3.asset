@@ -27,6 +27,10 @@ MonoBehaviour:
   - rid: 736264991698321481
   - rid: 736265219027238986
   - rid: 736265379051733065
+  - rid: 273019851638571082
+  - rid: 273019851638571083
+  - rid: 273019851638571084
+  - rid: 273019851638571091
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -47,13 +51,13 @@ MonoBehaviour:
   - nodeId: TEXT_1
     position: {x: 91, y: 457}
   - nodeId: PARALLEL_1
-    position: {x: -1214.5, y: 255.5}
+    position: {x: -1215.5, y: 255.5}
   - nodeId: Anim_1
-    position: {x: 513.5, y: 409}
+    position: {x: 513.5, y: 449}
   - nodeId: TEXT_2
     position: {x: -850, y: 255.5}
   - nodeId: CharAct_2
-    position: {x: -1488.5, y: 235.5}
+    position: {x: -1646.5, y: 235.5}
   - nodeId: LOG_1
     position: {x: -594.5, y: 393}
   - nodeId: LOG_2
@@ -61,7 +65,7 @@ MonoBehaviour:
   - nodeId: CharAct_3
     position: {x: 0.5, y: 241}
   - nodeId: SEQ_1
-    position: {x: -361, y: 505.5}
+    position: {x: -23, y: 577}
   - nodeId: TEXT_4
     position: {x: -132, y: 436}
   - nodeId: TEXT_5
@@ -71,13 +75,13 @@ MonoBehaviour:
   - nodeId: CharAct_4
     position: {x: 675, y: 436}
   - nodeId: LOG_3
-    position: {x: 932, y: 436}
+    position: {x: 1318, y: 436}
   - nodeId: EVENT_1
-    position: {x: -66, y: 505.5}
+    position: {x: 502, y: 597}
   - nodeId: EVENT_2
     position: {x: 229.5, y: 776}
   - nodeId: SetBG_1
-    position: {x: -1815, y: 235.5}
+    position: {x: -1935, y: 235.5}
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
   - nodeId: StageText_1
@@ -86,9 +90,80 @@ MonoBehaviour:
     position: {x: -1076.5, y: 548}
   - nodeId: AUDIO_1
     position: {x: -850, y: 548}
+  - nodeId: TextTranslate_1
+    position: {x: -615.5, y: 413}
+  - nodeId: TextTranslate_2
+    position: {x: -341.5, y: 616.5}
+  - nodeId: Anim_2
+    position: {x: -1557.5, y: 548}
+  - nodeId: Anim_3
+    position: {x: 964, y: 449.5}
+  - nodeId: WAIT_2
+    position: {x: 217, y: 577}
   references:
     version: 2
     RefIds:
+    - rid: 273019851638571082
+      type: {class: TextNodeTranslateNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TextTranslate_1
+        IsEnabled: 1
+        mode: 1
+        duration: 0.5
+        slideOffset: {x: 0, y: -100}
+        ease: 5
+        nextNodeId: StageText_1
+    - rid: 273019851638571083
+      type: {class: TextNodeTranslateNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: TextTranslate_2
+        IsEnabled: 1
+        mode: 0
+        duration: 0.5
+        slideOffset: {x: 0, y: -100}
+        ease: 5
+        nextNodeId: CharAct_3
+    - rid: 273019851638571084
+      type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: Anim_2
+        IsEnabled: 1
+        nextNodeId: PARALLEL_1
+        targetAnimationPosition: 0
+        waitForCompletion: 0
+        motions:
+        - TargetProperty: 0
+          EndValue: {x: 0, y: 1, z: 0}
+          Duration: 0.5
+          Ease: 5
+          LoopType: 2
+          Loops: -1
+          Delay: 0
+          IsRelative: 0
+    - rid: 273019851638571090
+      type: {class: AnimationNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: Anim_3
+        IsEnabled: 1
+        nextNodeId: LOG_3
+        targetAnimationPosition: 1
+        waitForCompletion: 0
+        motions:
+        - TargetProperty: 0
+          EndValue: {x: 0, y: 2, z: 0}
+          Duration: 0.5
+          Ease: 5
+          LoopType: 2
+          Loops: -1
+          Delay: 0
+          IsRelative: 0
+    - rid: 273019851638571091
+      type: {class: WaitNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: WAIT_2
+        IsEnabled: 1
+        WaitTime: 5
+        nextNodeId: EVENT_1
     - rid: 736264920620073050
       type: {class: ParallelNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -141,6 +216,7 @@ MonoBehaviour:
           scaleX: 1
         spriteSheetPresenter: {fileID: 0}
         spriteSheetAnimationName: 
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 0.2
     - rid: 736264920620073054
@@ -172,9 +248,10 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: 
         targetAnimationPosition: 1
+        waitForCompletion: 0
         motions:
         - TargetProperty: 0
-          EndValue: {x: 0, y: 1, z: 0}
+          EndValue: {x: 1, y: 0, z: 0}
           Duration: 0.5
           Ease: 5
           LoopType: 2
@@ -186,7 +263,7 @@ MonoBehaviour:
       data:
         nodeId: TEXT_2
         IsEnabled: 1
-        nextNodeId: StageText_1
+        nextNodeId: TextTranslate_1
         postTypingDelay: 0.3
         speakerName: '{Nickname}'
         text: "\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002"
@@ -208,7 +285,7 @@ MonoBehaviour:
       data:
         nodeId: CharAct_2
         IsEnabled: 1
-        nextNodeId: PARALLEL_1
+        nextNodeId: Anim_2
         ActionType: 0
         TargetPosition: 0
         portraitRenderMode: 4
@@ -232,6 +309,7 @@ MonoBehaviour:
           scaleX: 1
         spriteSheetPresenter: {fileID: 8288865117904589972, guid: 4040c057d6ac54abfa699f6723d085da, type: 3}
         spriteSheetAnimationName: attack
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 736264920620073067
@@ -279,6 +357,7 @@ MonoBehaviour:
           scaleX: 1
         spriteSheetPresenter: {fileID: 0}
         spriteSheetAnimationName: 
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 3
     - rid: 736264920620073073
@@ -294,8 +373,9 @@ MonoBehaviour:
         - rid: 736264920620073076
         - rid: 736264920620073078
         - rid: 736264920620073079
+        - rid: 273019851638571090
         startNodeId: TEXT_4
-        nextNodeId: EVENT_1
+        nextNodeId: WAIT_2
     - rid: 736264920620073074
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -352,7 +432,7 @@ MonoBehaviour:
       data:
         nodeId: CharAct_4
         IsEnabled: 1
-        nextNodeId: LOG_3
+        nextNodeId: Anim_3
         ActionType: 0
         TargetPosition: 1
         portraitRenderMode: 2
@@ -376,6 +456,7 @@ MonoBehaviour:
           scaleX: 1
         spriteSheetPresenter: {fileID: 0}
         spriteSheetAnimationName: 
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 736264920620073079
@@ -390,7 +471,7 @@ MonoBehaviour:
       type: {class: GameEventNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: EVENT_1
-        IsEnabled: 1
+        IsEnabled: 0
         GameEvent: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
         request:
           EventName: "\u904A\u6232\u4E8B\u4EF6"
@@ -435,7 +516,7 @@ MonoBehaviour:
       data:
         nodeId: StageText_1
         IsEnabled: 1
-        nextNodeId: CharAct_3
+        nextNodeId: TextTranslate_2
         postTypingDelay: 0.3
         message: "\u9019\u662F\u4E00\u6BB5 Stage \u6587\u5B57\uFF0C\\n \u65B7\u884C\u6E2C\u8A66"
         messageKey: "\u9019\u662F\u4E00\u6BB5 Stage Text \u4E3B\u8981\u662F\u986F\u793A\u5728\u821E\u53F0\u4E2D\u9593\u7684\u6587\u5B57"

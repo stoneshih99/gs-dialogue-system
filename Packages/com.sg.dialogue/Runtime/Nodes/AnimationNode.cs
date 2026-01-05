@@ -20,7 +20,7 @@ namespace SG.Dialogue.Nodes
         public CharacterPosition targetAnimationPosition;
         
         [Tooltip("是否等待動畫播放完畢才繼續下一個節點。\n如果動畫是無限循環 (Loops = -1)，請務必設為 False，否則對話會卡住。")]
-        public bool waitForCompletion = true;
+        public bool waitForCompletion = false;
         
         [Tooltip("此節點進入時要觸發的 LitMotion 動畫列表。")]
         public List<MotionData> motions = new List<MotionData>();
@@ -35,15 +35,16 @@ namespace SG.Dialogue.Nodes
         }
 
         /// <summary>
-        /// 處理節點的邏輯。對於 AnimationNode，主要邏輯由 DialogueController 特殊處理，
-        /// 此處僅為滿足抽象類別的要求。
+        /// 處理節點的邏輯。
         /// </summary>
         public override async UniTask Process(DialogueController controller)
         {
-            // AnimationNode 的主要邏輯在 DialogueController.ProcessNodeCoroutine 中處理，
-            // 以便直接控制協程的執行流程。
-            // 此處返回 null 或空的迭代器。
-            await UniTask.CompletedTask;
+            // 在 ParallelNode 或其他直接呼叫 Process 的情境下，
+            // 我們需要主動呼叫 VisualManager 來播放動畫。
+            if (controller != null && controller.VisualManager != null)
+            {
+                await controller.VisualManager.PlayAnimations(this);
+            }
         }
 
         public override void ClearConnectionsForClipboard()

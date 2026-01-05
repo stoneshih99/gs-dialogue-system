@@ -110,9 +110,9 @@ namespace SG.Dialogue.Presentation
             gameObject.SetActive(false);
         }
 
-        public void PlayMotion(MotionData data)
+        public async UniTask PlayMotion(MotionData data)
         {
-            if (_motionPlayer != null) _motionPlayer.Play(data);
+            if (_motionPlayer != null) await _motionPlayer.Play(data);
             else Debug.LogWarning("SpineDialoguePortraitPresenter: LitMotionPlayer component not found.", this);
         }
 

@@ -76,13 +76,18 @@ namespace SG.Dialogue.Presentation
                 return;
             }
 
-            var targetTransform = characterState.Instance.transform;
+            if (characterState.Presenter == null)
+            {
+                Debug.LogWarning($"[PortraitManager] Character at position {node.targetAnimationPosition} has no presenter.");
+                return;
+            }
+
             var tasks = new List<UniTask>();
 
             foreach (var motion in node.motions)
             {
                 Debug.Log($"[PortraitManager] Playing motion: {motion.TargetProperty}, EndValue: {motion.EndValue}, Duration: {motion.Duration}, IsRelative: {motion.IsRelative}");
-                tasks.Add(PlayMotion(targetTransform, motion));
+                tasks.Add(characterState.Presenter.PlayMotion(motion));
             }
 
             if (node.waitForCompletion)
@@ -96,82 +101,6 @@ namespace SG.Dialogue.Presentation
                 // 這樣 DialogueController 就會立即繼續執行下一個節點
                 UniTask.WhenAll(tasks).Forget();
                 await UniTask.CompletedTask;
-            }
-        }
-
-        private async UniTask PlayMotion(Transform target, MotionData motion)
-        {
-            // 1. 處理循環次數：0 表示播放一次（不循環），-1 表示無限循環
-            // LitMotion 的 WithLoops 如果傳入 0 會導致不播放，所以這裡將 0 視為 1
-            int loops = motion.Loops == 0 ? 1 : motion.Loops;
-            
-            // 2. 處理循環類型映射
-            // MotionLoopType (None, Restart, Yoyo) -> LitMotion.LoopType (Restart, Yoyo, Incremental)
-            LitMotion.LoopType loopType = LitMotion.LoopType.Restart;
-            switch (motion.LoopType)
-            {
-                case MotionLoopType.Yoyo: 
-                    loopType = LitMotion.LoopType.Yoyo; 
-                    break;
-                case MotionLoopType.Restart: 
-                    loopType = LitMotion.LoopType.Restart; 
-                    break;
-                case MotionLoopType.None: 
-                default: 
-                    loopType = LitMotion.LoopType.Restart; 
-                    break;
-            }
-
-            switch (motion.TargetProperty)
-            {
-                case MotionTargetProperty.Position:
-                    var startPos = target.localPosition;
-                    var endPos = motion.IsRelative ? startPos + motion.EndValue : motion.EndValue;
-                    await LMotion.Create(startPos, endPos, motion.Duration)
-                        .WithEase(motion.Ease)
-                        .WithDelay(motion.Delay)
-                        .WithLoops(loops, loopType)
-                        .BindToLocalPosition(target)
-                        .ToUniTask();
-                    break;
-
-                case MotionTargetProperty.Rotation:
-                    var startRot = target.localEulerAngles;
-                    var endRot = motion.IsRelative ? startRot + motion.EndValue : motion.EndValue;
-                    await LMotion.Create(startRot, endRot, motion.Duration)
-                        .WithEase(motion.Ease)
-                        .WithDelay(motion.Delay)
-                        .WithLoops(loops, loopType)
-                        .BindToLocalEulerAngles(target)
-                        .ToUniTask();
-                    break;
-
-                case MotionTargetProperty.Scale:
-                    var startScale = target.localScale;
-                    var endScale = motion.IsRelative ? startScale + motion.EndValue : motion.EndValue;
-                    await LMotion.Create(startScale, endScale, motion.Duration)
-                        .WithEase(motion.Ease)
-                        .WithDelay(motion.Delay)
-                        .WithLoops(loops, loopType)
-                        .BindToLocalScale(target)
-                        .ToUniTask();
-                    break;
-
-                case MotionTargetProperty.Alpha:
-                    // Alpha 通常需要 CanvasGroup
-                    var cg = target.GetComponent<CanvasGroup>();
-                    if (cg == null) cg = target.gameObject.AddComponent<CanvasGroup>();
-                    
-                    var startAlpha = cg.alpha;
-                    var endAlpha = motion.IsRelative ? startAlpha + motion.EndValue.x : motion.EndValue.x;
-                    
-                    await LMotion.Create(startAlpha, endAlpha, motion.Duration)
-                        .WithEase(motion.Ease)
-                        .WithDelay(motion.Delay)
-                        .WithLoops(loops, loopType)
-                        .BindToAlpha(cg)
-                        .ToUniTask();
-                    break;
             }
         }
 

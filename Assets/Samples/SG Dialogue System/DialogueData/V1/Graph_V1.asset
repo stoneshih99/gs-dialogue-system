@@ -66,10 +66,10 @@ MonoBehaviour:
       data:
         nodeId: TEXT_1
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: TEXT_2
+        postTypingDelay: 0.3
         speakerName: "\u9ED1\u5BF6"
         text: Hi
-        nextNodeId: TEXT_2
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -82,9 +82,7 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 1643815601279336708
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -112,6 +110,9 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 1643815601279336709
@@ -119,10 +120,10 @@ MonoBehaviour:
       data:
         nodeId: TEXT_2
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: TEXT_3
+        postTypingDelay: 0.3
         speakerName: "\u9ED1\u5BF6"
         text: "\u6211\u662F\u4E00\u4F4D\u8056\u9A0E\u58EB"
-        nextNodeId: TEXT_3
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -135,18 +136,16 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 1643815601279336711
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_3
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: CHAR_2
+        postTypingDelay: 0.3
         speakerName: "\u9ED1\u5BF6"
         text: "\u8B93\u6211\u70BA\u5C55\u793A\u4E00\u4E0B\u6211\u7684\u80FD\u529B"
-        nextNodeId: CHAR_2
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -159,9 +158,7 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 1643815601279336716
       type: {class: CharacterActionNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -189,6 +186,9 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 1643815601279336742
@@ -218,6 +218,9 @@ MonoBehaviour:
           queuedAnimationDelay: 0
           expression: 
           scaleX: 1
+        spriteSheetPresenter: {fileID: 0}
+        spriteSheetAnimationName: 
+        ForceReplace: 0
         ClearAllOnExit: 0
         Duration: 0.3
     - rid: 1643815601279336747
@@ -228,16 +231,17 @@ MonoBehaviour:
         GameEvent: {fileID: 11400000, guid: 5c87cea7950cc49fe89bbafcd5d28213, type: 2}
         request:
           EventName: "\u5C0D\u8A71\u6D41\u7A0B\u7D50\u675F"
+          Parameters: []
         nextNodeId: 
     - rid: 1643815607100244166
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_4
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: CHAR_3
+        postTypingDelay: 0.3
         speakerName: "\u5976\u7403"
         text: "\u63DB\u6211\u767B\u5834\u56C9"
-        nextNodeId: CHAR_3
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -250,18 +254,16 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
     - rid: 1643815607100244167
       type: {class: TextNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
         nodeId: TEXT_5
         IsEnabled: 1
-        AudioEvent: {fileID: 0}
+        nextNodeId: EVENT_1
+        postTypingDelay: 0.3
         speakerName: "\u5976\u7403"
         text: "\u6211\u662F\u64C1\u6709\u98DB\u884C\u80FD\u529B\u7684"
-        nextNodeId: EVENT_1
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -274,6 +276,4 @@ MonoBehaviour:
         onExit:
           m_PersistentCalls:
             m_Calls: []
-        overrideAutoAdvance: 0
         autoAdvanceDelay: 1.2
-        postTypingDelay: 0.3
