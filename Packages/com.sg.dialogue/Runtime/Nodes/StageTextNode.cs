@@ -43,8 +43,14 @@ namespace SG.Dialogue.Nodes
             
             controller.VisualManager.ShowStageText(formattedText, typingSpeed);
 
-            // 等待使用者輸入（第一次點擊會快轉，第二次點擊會完成這個等待）
-            await controller.WaitForInputAsync();
+            // 如果正在打字，則等待完成
+            // 注意：這裡不直接使用 WaitForInputAsync，而是等待打字機狀態
+            // 當使用者點擊時，DialogueController.OnAdvanceRequested 會呼叫 VisualManager.CompleteStageTextTyping
+            // 這會導致 IsStageTextTyping 變為 false，結束這個等待
+            if (controller.VisualManager.IsStageTextTyping())
+            {
+                await UniTask.WaitUntil(() => !controller.VisualManager.IsStageTextTyping());
+            }
         }
 
         public override void OnExit(DialogueController controller)
