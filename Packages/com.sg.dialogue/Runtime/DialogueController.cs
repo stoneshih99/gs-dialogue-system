@@ -383,10 +383,17 @@ namespace SG.Dialogue
         {
             if (!IsRunning) return;
 
-            // 如果正在打字，則快轉打字效果
+            // 優先處理對話框文字的打字機效果
             if (uiManager.IsTyping)
             {
                 uiManager.CompleteTyping();
+                return;
+            }
+            
+            // 其次處理中央舞台文字的打字機效果
+            if (visualManager.IsStageTextTyping())
+            {
+                visualManager.CompleteStageTextTyping();
                 return;
             }
 

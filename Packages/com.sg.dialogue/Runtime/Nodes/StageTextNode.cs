@@ -43,13 +43,8 @@ namespace SG.Dialogue.Nodes
             
             controller.VisualManager.ShowStageText(formattedText, typingSpeed);
 
-            // 等待一幀，確保打字機協程已經啟動並且 IsTyping 狀態已更新
-            await UniTask.Yield(PlayerLoopTiming.Update);
-
-            while (controller.VisualManager.IsStageTextTyping())
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update);
-            }
+            // 等待使用者輸入（第一次點擊會快轉，第二次點擊會完成這個等待）
+            await controller.WaitForInputAsync();
         }
 
         public override void OnExit(DialogueController controller)

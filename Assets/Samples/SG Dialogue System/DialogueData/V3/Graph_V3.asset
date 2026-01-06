@@ -180,13 +180,13 @@ MonoBehaviour:
         motions:
         - TargetProperty: 3
           EndValue: {x: 0, y: 0, z: 0}
-          EndAlpha: 0.5
-          Duration: 1
+          EndAlpha: 0.1
+          Duration: 3
           Ease: 0
           LoopType: 0
           Loops: 0
           Delay: 0
-          IsRelative: 1
+          IsRelative: 0
     - rid: 736264920620073050
       type: {class: ParallelNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:

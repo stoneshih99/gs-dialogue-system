@@ -42,6 +42,14 @@ namespace SG.Dialogue.Presentation
             return stageTextPresenter != null && stageTextPresenter.IsTyping;
         }
 
+        public void CompleteStageTextTyping()
+        {
+            if (stageTextPresenter != null)
+            {
+                stageTextPresenter.SkipTypewriter();
+            }
+        }
+
         public void UpdateFromTextNode(TextNode node)
         {
             if (portraitManager != null)

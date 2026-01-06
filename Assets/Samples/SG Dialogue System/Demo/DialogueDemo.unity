@@ -976,7 +976,7 @@ PrefabInstance:
       objectReference: {fileID: 348571787}
     - target: {fileID: 432268647813499672, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: autoAdvanceOverride
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 974399659758379551, guid: 15f9f793743154699bfcccef84e68ede, type: 3}
       propertyPath: m_Pivot.x
