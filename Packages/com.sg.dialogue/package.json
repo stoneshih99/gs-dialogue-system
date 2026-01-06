@@ -1,6 +1,6 @@
 {
     "name": "com.sg.dialogue",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "displayName": "SG Dialogue System",
     "description": "A flexible and extensible graph-based dialogue system for Unity, featuring custom nodes, event handling, and a visual editor.",
     "unity": "2022.3",

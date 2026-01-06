@@ -1,5 +1,16 @@
 # Change Log
 
+## [1.0.9] - 2026-01-06
+### Added
+- `StageTextNode` 新增 `Allow Fast Forward` 選項，允許開發者控制是否讓玩家透過點擊來快轉打字機效果。
+- 完善 `StageTextNode` 相關單元測試 (Runtime Tests)。
+
+### Fixed
+- 修復 `StageTextNode` 在 `AutoAdvanceMode.ForceEnable` 模式下會被強制暫停等待輸入，導致無法自動推進的問題。
+
+### Changed
+- 優化 `DialogueController` 與 `VisualManager` 的打字機狀態同步邏輯，改為等待打字機狀態完成而非強制等待輸入信號。
+
 ## [1.0.8] - 2026-01-02
 ### Added
 - TextNodeTranslateNode`，支援對話框的進場與退場動畫 (位移與淡入淡出)，可與 `StageTextNode` 配合使用。
