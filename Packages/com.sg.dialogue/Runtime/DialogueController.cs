@@ -393,6 +393,11 @@ namespace SG.Dialogue
             // 其次處理中央舞台文字的打字機效果
             if (visualManager.IsStageTextTyping())
             {
+                if (_lastNode is StageTextNode stageNode && !stageNode.allowFastForward)
+                {
+                    return;
+                }
+
                 visualManager.CompleteStageTextTyping();
                 return;
             }

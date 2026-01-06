@@ -40,6 +40,17 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             });
             mainContainer.Add(speedField);
 
+            var allowFastForwardToggle = new Toggle("Allow Fast Forward")
+            {
+                value = _data.allowFastForward
+            };
+            allowFastForwardToggle.RegisterValueChangedCallback(evt =>
+            {
+                _data.allowFastForward = evt.newValue;
+                onChanged?.Invoke();
+            });
+            mainContainer.Add(allowFastForwardToggle);
+
             OutputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Single, typeof(bool));
             OutputPort.portName = "Next";
             outputContainer.Add(OutputPort);

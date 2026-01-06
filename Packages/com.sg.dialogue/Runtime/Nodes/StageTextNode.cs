@@ -22,6 +22,9 @@ namespace SG.Dialogue.Nodes
         [Header("打字機效果設定")]
         [Tooltip("每個字元出現的時間間隔（秒）。數值越小，打字速度越快。")]
         public float typingSpeed = 0.1f;
+
+        [Tooltip("是否允許玩家點擊以快轉打字機效果。")]
+        public bool allowFastForward = true;
         
         // --- 抽象屬性實作 ---
         protected override string Text => message;
