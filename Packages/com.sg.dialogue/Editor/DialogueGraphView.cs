@@ -335,6 +335,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 _graph.BuildLookup(); // 重建 ID 查找表
                 CreateNodes(currentContainer, nodesToDisplay);
 
+                // 3.5 建立 Groups 和 Sticky Notes (僅在 Root 層級顯示)
+                if (currentContainer == _graph)
+                {
+                    CreateGroups();
+                    CreateStickyNotes();
+                }
+
                 // 4. 建立節點間的連線 (Edges)
                 CreateEdges(currentContainer, nodesToDisplay);
                 
@@ -420,6 +427,97 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         #endregion
 
+        #region Groups & Sticky Notes
+
+                private void CreateGroups()
+
+                {
+
+                    if (_graph.Groups == null) return;
+
+                    foreach (var groupData in _graph.Groups)
+
+                    {
+
+                        var group = CreateGroupElement(groupData);
+
+                        AddElement(group);
+
+        
+
+                        // 加入包含的節點
+
+                        foreach (var nodeId in groupData.containedNodeIds)
+
+                        {
+
+                            if (_nodeViews.TryGetValue(nodeId, out var nodeView))
+
+                            {
+
+                                group.AddElement(nodeView);
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+        
+
+                private Group CreateGroupElement(DialogueGraph.GroupData groupData)
+
+                {
+
+                    var group = new Group
+
+                    {
+
+                        title = groupData.title,
+
+                        viewDataKey = groupData.id,
+
+                        autoUpdateGeometry = true
+
+                    };
+
+                    group.SetPosition(new Rect(groupData.position, Vector2.zero));
+
+                    return group;
+
+                }
+
+        
+
+                private void CreateStickyNotes()
+
+        
+        {
+            if (_graph.StickyNotes == null) return;
+            foreach (var noteData in _graph.StickyNotes)
+            {
+                var note = new StickyNote()
+                {
+                    title = noteData.title,
+                    contents = noteData.contents,
+                    viewDataKey = noteData.id
+                };
+                note.SetPosition(noteData.position);
+                
+                if (!string.IsNullOrEmpty(noteData.theme))
+                {
+                    if (Enum.TryParse<StickyNoteTheme>(noteData.theme, out var theme))
+                        note.theme = theme;
+                }
+                
+                AddElement(note);
+            }
+        }
+
+        #endregion
+
         #region Node Creation & Management
 
         /// <summary>
@@ -479,6 +577,24 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 {
                     if (el is Edge edge) _connectionHandler.HandleEdgeDisconnection(edge);
                     else if (el is DialogueNodeElement nodeElement) nodeElement.OnDelete?.Invoke();
+                    else if (el is Group group)
+                    {
+                        RecordUndo("Delete Group");
+                        
+                        // [關鍵修正] 在刪除群組前，先將內部的節點移出群組 (Ungroup)
+                        // 否則節點會因為是 Group 的子物件而跟著一起在視覺上消失
+                        var containedElements = group.containedElements.ToList();
+                        group.RemoveElements(containedElements);
+                        
+                        _graph.Groups.RemoveAll(g => g.id == group.viewDataKey);
+                        EditorUtility.SetDirty(_graph);
+                    }
+                    else if (el is StickyNote note)
+                    {
+                        RecordUndo("Delete Sticky Note");
+                        _graph.StickyNotes.RemoveAll(n => n.id == note.viewDataKey);
+                        EditorUtility.SetDirty(_graph);
+                    }
                 }
             }
 
@@ -620,6 +736,13 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             base.BuildContextualMenu(evt);
             var mousePos = contentViewContainer.WorldToLocal(evt.mousePosition);
             
+            // 針對選取的元素提供特定操作
+            if (selection.Any(s => s is Group))
+            {
+                evt.menu.AppendAction("Ungroup (Keep Nodes)", _ => UngroupSelectedGroups(), DropdownMenuAction.Status.Normal);
+                evt.menu.AppendSeparator();
+            }
+
             // 複製/貼上
             if (selection.Any(s => s is DialogueNodeElement)) 
                 evt.menu.AppendAction("Copy", _ => _clipboardHandler.CopySelectionToClipboard());
@@ -629,6 +752,11 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             if (selection.Any(s => s is DialogueNodeElement) || _clipboardHandler.HasClipboardContent()) 
                 evt.menu.AppendSeparator();
             
+            // Add Groups & Sticky Notes
+            evt.menu.AppendAction("Create Group", _ => CreateGroupFromSelection(mousePos), DropdownMenuAction.Status.Normal);
+            evt.menu.AppendAction("Create Sticky Note", _ => CreateStickyNote(mousePos), DropdownMenuAction.Status.Normal);
+            evt.menu.AppendSeparator();
+
             bool inSubGraph = _navigationStack.Count > 1;
 
             // 動態生成節點創建選項
@@ -664,6 +792,62 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             CreateAndRegisterNode(node, newNodeProperty); 
             
             EditorUtility.SetDirty(_graph);
+        }
+
+        private void CreateGroupFromSelection(Vector2 mousePos)
+        {
+            if (_graph == null) return;
+            RecordUndo("Create Group");
+
+            var groupData = new DialogueGraph.GroupData
+            {
+                id = Guid.NewGuid().ToString(),
+                title = "New Group",
+                position = mousePos
+            };
+
+            var group = CreateGroupElement(groupData);
+            
+            // 如果有選取節點，則將其加入群組
+            var selectedNodes = selection.OfType<DialogueNodeElement>().ToList();
+            if (selectedNodes.Count > 0)
+            {
+                foreach (var node in selectedNodes) group.AddElement(node);
+            }
+
+            AddElement(group);
+            SyncPositionsToAsset(); // 立即儲存
+        }
+
+        private void CreateStickyNote(Vector2 mousePos)
+        {
+            if (_graph == null) return;
+            RecordUndo("Create Sticky Note");
+
+            var note = new StickyNote()
+            {
+                title = "Title",
+                contents = "Double click to edit contents...",
+                viewDataKey = Guid.NewGuid().ToString()
+            };
+            note.SetPosition(new Rect(mousePos, new Vector2(200, 160)));
+            
+            AddElement(note);
+            SyncPositionsToAsset(); // 立即儲存
+        }
+
+        private void UngroupSelectedGroups()
+        {
+            var selectedGroups = selection.OfType<Group>().ToList();
+            if (selectedGroups.Count == 0) return;
+
+            RecordUndo("Ungroup Nodes");
+            foreach (var group in selectedGroups)
+            {
+                var elements = group.containedElements.ToList();
+                group.RemoveElements(elements);
+            }
+            SyncPositionsToAsset();
         }
 
         #endregion
@@ -730,15 +914,63 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 將所有節點的視覺位置同步回資料資產。
+        /// 將所有節點、群組與便利貼的狀態同步回資料資產。
         /// </summary>
         public void SyncPositionsToAsset()
         {
             if (_graph == null) return;
+            
+            // 1. Nodes
             foreach (var node in nodes.OfType<DialogueNodeElement>())
             {
                 _graph.SetNodePosition(node.NodeId, node.GetPosition().position);
             }
+
+            // 僅在 Root 層級時同步 Group/Note，避免子圖混亂
+            if (_navigationStack.Count == 1 && _navigationStack.Peek() == _graph)
+            {
+                // 2. Groups
+                _graph.Groups.Clear();
+                foreach (var group in graphElements.OfType<Group>())
+                {
+                    if (string.IsNullOrEmpty(group.viewDataKey)) group.viewDataKey = Guid.NewGuid().ToString();
+                    
+                    var groupData = new DialogueGraph.GroupData
+                    {
+                        id = group.viewDataKey,
+                        title = group.title,
+                        position = group.GetPosition().position
+                    };
+                    
+                    // Group.containedElements 是 IEnumerable<GraphElement>
+                    foreach (var element in group.containedElements)
+                    {
+                        if (element is DialogueNodeElement nodeElem)
+                        {
+                            groupData.containedNodeIds.Add(nodeElem.NodeId);
+                        }
+                    }
+                    _graph.Groups.Add(groupData);
+                }
+
+                // 3. Sticky Notes
+                _graph.StickyNotes.Clear();
+                foreach (var note in graphElements.OfType<StickyNote>())
+                {
+                    if (string.IsNullOrEmpty(note.viewDataKey)) note.viewDataKey = Guid.NewGuid().ToString();
+                    
+                    _graph.StickyNotes.Add(new DialogueGraph.StickyNoteData
+                    {
+                        id = note.viewDataKey,
+                        title = note.title,
+                        contents = note.contents,
+                        position = note.GetPosition(),
+                        theme = note.theme.ToString()
+                    });
+                }
+            }
+            
+            EditorUtility.SetDirty(_graph);
         }
 
         private Port TryGetInputPort(string nodeId)

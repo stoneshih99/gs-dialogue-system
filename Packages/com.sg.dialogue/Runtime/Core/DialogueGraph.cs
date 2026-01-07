@@ -166,6 +166,32 @@ namespace SG.Dialogue
         [Serializable]
         public class NodePosition { public string nodeId; public Vector2 position; }
         [SerializeField, HideInInspector] private List<NodePosition> nodePositions = new List<NodePosition>();
+        
+        // --- Groups & Sticky Notes Support ---
+        
+        [Serializable]
+        public class GroupData
+        {
+            public string id;
+            public string title;
+            public Vector2 position;
+            public List<string> containedNodeIds = new List<string>();
+        }
+        [SerializeField, HideInInspector] private List<GroupData> groups = new List<GroupData>();
+
+        [Serializable]
+        public class StickyNoteData
+        {
+            public string id;
+            public string title;
+            public string contents;
+            public Rect position;
+            public string theme; // e.g. "Red", "Green"
+        }
+        [SerializeField, HideInInspector] private List<StickyNoteData> stickyNotes = new List<StickyNoteData>();
+
+        public List<GroupData> Groups => groups;
+        public List<StickyNoteData> StickyNotes => stickyNotes;
 
         /// <summary>
         /// 獲取指定節點在編輯器中儲存的位置。
