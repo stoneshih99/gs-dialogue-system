@@ -126,6 +126,9 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             
             // 監聽 Unity 的 Undo/Redo，以便在復原時刷新視圖
             Undo.undoRedoPerformed += OnUndoRedo;
+            
+            // 監聽 PlayMode 狀態變化，以便在停止播放時清理高亮
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
 
         /// <summary>
@@ -163,6 +166,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         {
             UnregisterGraphEvents();
             Undo.undoRedoPerformed -= OnUndoRedo;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
         }
 
         /// <summary>
@@ -204,6 +208,44 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 _executingNode = currentNodeView;
                 _executingNode.SetExecutionState(true);
             }
+            
+            // 更新歷史路徑視覺
+            UpdateHistoryVisuals();
+        }
+
+        private void UpdateHistoryVisuals()
+        {
+            if (!Application.isPlaying) return;
+            var controller = UnityEngine.Object.FindObjectOfType<DialogueController>();
+            if (controller == null) return;
+            
+            var history = controller.ExecutionHistory;
+            if (history == null || history.Count == 0) return;
+
+            // 1. 更新節點狀態
+            foreach (var kvp in _nodeViews)
+            {
+                bool visited = history.Contains(kvp.Key);
+                kvp.Value.SetVisitedState(visited);
+            }
+
+            // 2. 更新連線 (Edge) 狀態 (暫時移除，因 Edge.mainColor 不可存取)
+            /* 
+             * Edge coloring requires deeper customization or USS classes manipulation 
+             * as 'mainColor' is not a public property of Edge.
+             * Keeping it commented out to fix compilation error.
+             */
+        }
+
+        /// <summary>
+        /// 當 Play Mode 狀態改變時觸發。確保在停止播放時清理所有殘留的視覺效果。
+        /// </summary>
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.ExitingPlayMode || state == PlayModeStateChange.EnteredEditMode)
+            {
+                ClearRuntimeVisuals();
+            }
         }
 
         /// <summary>
@@ -211,11 +253,22 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// </summary>
         private void OnDialogueEnded()
         {
+            ClearRuntimeVisuals();
+        }
+
+        /// <summary>
+        /// 清除所有 Runtime 相關的視覺狀態 (高亮、歷史路徑等)。
+        /// </summary>
+        private void ClearRuntimeVisuals()
+        {
             if (_executingNode != null)
             {
                 _executingNode.SetExecutionState(false);
                 _executingNode = null;
             }
+            
+            // 清除歷史高亮
+            foreach (var nodeView in _nodeViews.Values) nodeView.SetVisitedState(false);
         }
 
         /// <summary>

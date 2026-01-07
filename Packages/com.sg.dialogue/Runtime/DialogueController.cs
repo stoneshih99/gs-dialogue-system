@@ -99,7 +99,11 @@ namespace SG.Dialogue
         /// <summary>獲取當前對話圖的預設自動前進延遲時間。</summary>
         public float AutoAdvanceDelay => graph != null ? graph.defaultAutoAdvanceDelay : 0f;
 
+        /// <summary>獲取最近執行的節點 ID 歷史記錄 (最多保留 50 筆)。</summary>
+        public IReadOnlyList<string> ExecutionHistory => _executionHistory;
+
         private readonly DialogueState _localState = new DialogueState();
+        private readonly List<string> _executionHistory = new List<string>();
         private string _currentNodeId;
         private DialogueNodeBase _lastNode;
         private WaitForAll _activeWaitForAll;
@@ -167,6 +171,7 @@ namespace SG.Dialogue
 
             _localState.Clear();
             _executionStack.Clear();
+            _executionHistory.Clear();
             
             uiManager.SetPanelVisibility(true);
             uiManager.SetSkipButtonVisibility(graph.IsSkippable);
@@ -229,6 +234,13 @@ namespace SG.Dialogue
                 if (debugLoggingEnabled)
                 {
                     Debug.Log($"[Dialogue Debug] Executing node: {node.GetType().Name} (ID: {node.nodeId})");
+                }
+
+                // 記錄執行歷程 (只保留最近 50 筆)
+                _executionHistory.Add(node.nodeId);
+                if (_executionHistory.Count > 50)
+                {
+                    _executionHistory.RemoveAt(0);
                 }
 
                 TriggerOnEnterAndVariableChanges(node);

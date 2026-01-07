@@ -91,10 +91,30 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
             if (isExecuting)
             {
                 style.backgroundColor = new StyleColor(new Color(0.9f, 0.9f, 0.6f)); // 設定為淡黃色
+                MarkDirtyRepaint();
             }
             else
             {
                 style.backgroundColor = _defaultBackgroundColor; // 恢復為預設顏色
+                MarkDirtyRepaint();
+            }
+        }
+
+        /// <summary>
+        /// 設定節點的歷史訪問狀態。
+        /// </summary>
+        public void SetVisitedState(bool isVisited)
+        {
+            if (isVisited)
+            {
+                // 使用青色邊框表示已訪問
+                style.borderBottomColor = style.borderLeftColor = style.borderRightColor = style.borderTopColor = Color.cyan;
+                style.borderBottomWidth = style.borderLeftWidth = style.borderRightWidth = style.borderTopWidth = 2f;
+            }
+            else
+            {
+                // 如果是 Start Node，恢復綠色；否則恢復預設灰色
+                SetIsStartNode(GraphView.Graph.startNodeId == NodeId);
             }
         }
 
