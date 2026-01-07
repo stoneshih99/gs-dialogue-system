@@ -6,6 +6,7 @@ using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Events;
 using SG.Dialogue.Nodes;
+using SG.Dialogue.Profiles;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
@@ -33,11 +34,19 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 呼叫基底類別的 Initialize 方法
             Initialize(graphView, nodeSerializedProperty);
 
-            title = $"Text ({data.nodeId})";
-
-            // 還原為手動建立 UI 元素
-            var nameField = new TextField("Speaker") { value = data.speakerName , tooltip = "Supports {variableName} format for variable insertion."};
-            nameField.RegisterValueChangedCallback(e => { _data.speakerName = e.newValue; _onChanged?.Invoke(); });
+                        title = $"Text ({data.nodeId})";
+            
+                        // 還原為手動建立 UI 元素
+                        var styleField = new ObjectField("Style") 
+                        {
+                            objectType = typeof(DialogueStyleProfile), 
+                            allowSceneObjects = false, 
+                            value = data.styleProfile 
+                        };
+                        styleField.RegisterValueChangedCallback(e => { _data.styleProfile = e.newValue as DialogueStyleProfile; _onChanged?.Invoke(); });
+                        mainContainer.Add(styleField);
+            
+                        var nameField = new TextField("Speaker") { value = data.speakerName , tooltip = "Supports {variableName} format for variable insertion."};            nameField.RegisterValueChangedCallback(e => { _data.speakerName = e.newValue; _onChanged?.Invoke(); });
             mainContainer.Add(nameField);
 
             var textField = new TextField("Text") { value = data.text, multiline = true };

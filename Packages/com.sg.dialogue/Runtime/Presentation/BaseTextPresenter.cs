@@ -39,6 +39,21 @@ namespace SG.Dialogue.Presentation
 
         public bool IsTyping => isTyping;
 
+        public void SetTextColor(Color color)
+        {
+            if (textLabel != null) textLabel.color = color;
+        }
+
+        public void SetFont(TMP_FontAsset font)
+        {
+            if (textLabel != null && font != null) textLabel.font = font;
+        }
+        
+        public void SetFontSize(float size)
+        {
+            if (textLabel != null && size > 0) textLabel.fontSize = size;
+        }
+
         protected virtual void Awake()
         {
             if (textLabel == null)

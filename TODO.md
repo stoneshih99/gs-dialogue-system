@@ -17,27 +17,39 @@
 
 ## 📅 Backlog (待辦清單)
 
-### ✨ Features (新功能)
-- [ ] **Visual Breakpoints (圖形化斷點)**: 允許在 Graph Node 上按右鍵設置斷點，Runner 執行到此時自動暫停。
-- [ ] **In-Game Debug Overlay (實機除錯面板)**: 輕量級 Runtime UI，用於手機/Build 版本顯示當前節點與變數狀態。
-- [ ] **進階邏輯節點**: 實作更多流程控制 (e.g., Random Selector, Loop, Sub-Graph).
-- [ ] **編輯器 UX**: 改善 Graph Editor 操作體驗 (e.g., Minimap, 註解區塊, 搜尋節點).
-- [ ] **多語言系統**: 強化 Localization 整合流程.
-
 ### 🐛 Bugs & Fixes (錯誤修復)
 - [ ] 檢查 GraphView 在大量節點下的拖曳效能.
 - [ ] 驗證 Undo/Redo 在複雜連線操作下的穩定性 (依據 AGENTS.md 規範).
+- [ ] **Known Issue**: GraphView 中連線 (Edge) 的變色功能因 API 限制暫時移除，目前僅支援節點變色顯示路徑。
 
 ### 🔧 Refactoring (重構與優化)
 - [ ] **測試覆蓋率**: 補齊 `DialogueRunner` 與核心 Node 的自動化測試.
 - [ ] **效能檢測**: 針對 Runtime 熱路徑 (Hot Path) 進行 Profiling，消除不必要的 GC.
 
+### ✨ Features: Debugging (除錯功能)
+- [ ] **Visual Breakpoints (圖形化斷點)**: 允許在 Graph Node 上按右鍵設置斷點，Runner 執行到此時自動暫停。
+- [ ] **In-Game Debug Overlay (實機除錯面板)**: 輕量級 Runtime UI，用於手機/Build 版本顯示當前節點與變數狀態。
+
+### ✨ Features: Narrative & Polish (敘事與打磨)
+- [ ] **Rich Text Typewriter Tags (豐富打字機標籤)**:
+  - 支援 `<wait=0.5>` (暫停打字).
+  - 支援 `<speed=50>` (改變打字速度).
+  - 支援 `<signal=EventName>` (打字途中觸發事件).
+- [ ] **Text Effects (文字特效)**: 新增 `<wave>`, `<rainbow>`, `<wiggle>` 等頂點動畫效果。
+
+### ✨ Features: UI & Presentation (介面與呈現)
+- [X] **Dynamic Dialogue Box (動態對話框)**: 根據 `CharacterProfile` 自動切換對話框樣式 (e.g., 旁白樣式 vs. 角色樣式).
+
+### ✨ Features: Editor Productivity (編輯器生產力)
+- [ ] **Groups & Sticky Notes (群組與註解)**: 允許在 Graph 中建立有顏色的區塊與註解文字。
+- [ ] **MiniMap (小地圖)**: 快速瀏覽大型圖表。
+- [ ] **Search / Finder (搜尋功能)**: 快速定位包含特定文字或變數的節點。
+- [ ] **CSV/Excel Import/Export (試算表整合)**: 支援批次匯出文本給翻譯人員，並匯入回寫。
+- [ ] **多語言系統優化**: 強化 Localization 整合流程.
+
 ## 📝 Documentation (文件)
 - [x] 建立 `ARCHITECTURE.md` 說明系統資料流與架構設計.
 - [x] 補充 `ADR.md` 記錄關鍵架構決策.
-
-## 🛑 Known Issues (已知問題)
-- GraphView 中連線 (Edge) 的變色功能因 API 限制暫時移除，目前僅支援節點變色顯示路徑。
 
 ---
 *Last Updated: 2026-01-07*

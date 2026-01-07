@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Events;
 using SG.Dialogue.Variables;
+using SG.Dialogue.Profiles;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,8 +14,9 @@ namespace SG.Dialogue.Nodes
     public class TextNode : BaseTextNode
     {
         // [Header("事件通道")]
-        // [Tooltip("用於發出音訊請求的事件通道。")]
-        // public AudioEvent AudioEvent;
+        [Header("Style Profile")]
+        [Tooltip("指定對話框的樣式設定檔。若指定，將使用其定義的樣式 (背景、顏色、字體)。")]
+        public DialogueStyleProfile styleProfile;
 
         [Tooltip("說話者的名稱。支援使用 {variableName} 的格式來插入變數。")]
         public string speakerName;

@@ -5,6 +5,7 @@ using LitMotion;
 using LitMotion.Extensions;
 using SG.Dialogue.Conditions;
 using SG.Dialogue.Nodes;
+using SG.Dialogue.Profiles;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -73,11 +74,28 @@ namespace SG.Dialogue.UI
         private Vector2 _rootPanelDefaultPos;
         private Vector2 _dialoguePanelDefaultPos;
         
+        // --- Style Support ---
+        private class DefaultStyleSnapshot
+        {
+            public Sprite panelBackground;
+            public Color panelColor;
+            public Sprite nameLabelBackground;
+            public Color nameLabelColor;
+            public Color nameTextColor;
+            public TMP_FontAsset nameTextFont;
+            public Color contentTextColor;
+            public TMP_FontAsset contentTextFont;
+            public float contentTextSize;
+        }
+        private DefaultStyleSnapshot _defaultStyle;
+
         private GameObject AnimationTarget => dialoguePanel != null ? dialoguePanel : rootPanel;
         private Vector2 AnimationTargetDefaultPos => dialoguePanel != null ? _dialoguePanelDefaultPos : _rootPanelDefaultPos;
 
         private void Awake()
         {
+            CaptureDefaultStyle();
+
             if (dialogueTextPresenter == null)
             {
                 dialogueTextPresenter = GetComponentInChildren<DialogueTextPresenter>();
@@ -240,15 +258,163 @@ namespace SG.Dialogue.UI
             }
         }
 
-        public void ShowText(TextNode node, string text)
+        private void CaptureDefaultStyle()
         {
+            _defaultStyle = new DefaultStyleSnapshot();
+            
+            // Capture Panel
+            if (dialoguePanel != null)
+            {
+                var img = dialoguePanel.GetComponent<Image>();
+                if (img != null)
+                {
+                    _defaultStyle.panelBackground = img.sprite;
+                    _defaultStyle.panelColor = img.color;
+                }
+            }
+
+            // Capture Name Label
             if (speakerLabel != null)
             {
-                bool hasSpeaker = !string.IsNullOrEmpty(node.speakerName);
+                _defaultStyle.nameTextColor = speakerLabel.color;
+                _defaultStyle.nameTextFont = speakerLabel.font;
+                
+                // Name Label Background (Assuming it's on the same object or parent)
+                var bg = speakerLabel.GetComponentInParent<Image>(); // Simple assumption
+                // Or maybe speakerLabel has a background image component on itself?
+                // Let's assume the background is on the same object for now, or check parent if null.
+                if (bg == null) bg = speakerLabel.GetComponent<Image>();
+                
+                if (bg != null)
+                {
+                    _defaultStyle.nameLabelBackground = bg.sprite;
+                    _defaultStyle.nameLabelColor = bg.color;
+                }
+            }
+
+            // Capture Content Text (via Presenter)
+            if (dialogueTextPresenter != null)
+            {
+                // We need access to the internal TextMeshProUGUI to capture its default state.
+                // Since BaseTextPresenter doesn't expose it directly but allows setting, 
+                // we might need to rely on assumptions or add a getter.
+                // For now, let's use GetComponentInChildren as a fallback to find the TMP
+                var tmp = dialogueTextPresenter.GetComponentInChildren<TextMeshProUGUI>();
+                if (tmp != null)
+                {
+                    _defaultStyle.contentTextColor = tmp.color;
+                    _defaultStyle.contentTextFont = tmp.font;
+                    _defaultStyle.contentTextSize = tmp.fontSize;
+                }
+            }
+        }
+
+        private void ApplyStyle(DialogueStyleProfile style)
+        {
+            if (style == null)
+            {
+                RestoreDefaultStyle();
+                return;
+            }
+
+            // 1. Panel
+            if (dialoguePanel != null)
+            {
+                var img = dialoguePanel.GetComponent<Image>();
+                if (img != null)
+                {
+                    if (style.panelBackground != null) img.sprite = style.panelBackground;
+                    img.color = style.panelColor;
+                }
+            }
+
+            // 2. Name Label
+            if (speakerLabel != null)
+            {
+                speakerLabel.color = style.nameTextColor;
+                if (style.nameTextFont != null) speakerLabel.font = style.nameTextFont;
+
+                var bg = speakerLabel.GetComponentInParent<Image>();
+                if (bg == null) bg = speakerLabel.GetComponent<Image>();
+                
+                if (bg != null)
+                {
+                    if (style.nameLabelBackground != null) bg.sprite = style.nameLabelBackground;
+                    bg.color = style.nameLabelColor;
+                }
+            }
+
+            // 3. Content Text
+            if (dialogueTextPresenter != null)
+            {
+                dialogueTextPresenter.SetTextColor(style.contentTextColor);
+                if (style.contentTextFont != null) dialogueTextPresenter.SetFont(style.contentTextFont);
+                if (style.contentTextSize > 0) dialogueTextPresenter.SetFontSize(style.contentTextSize);
+            }
+        }
+
+        private void RestoreDefaultStyle()
+        {
+            if (_defaultStyle == null) return;
+
+            // Restore Panel
+            if (dialoguePanel != null)
+            {
+                var img = dialoguePanel.GetComponent<Image>();
+                if (img != null)
+                {
+                    img.sprite = _defaultStyle.panelBackground;
+                    img.color = _defaultStyle.panelColor;
+                }
+            }
+
+            // Restore Name Label
+            if (speakerLabel != null)
+            {
+                speakerLabel.color = _defaultStyle.nameTextColor;
+                speakerLabel.font = _defaultStyle.nameTextFont;
+
+                var bg = speakerLabel.GetComponentInParent<Image>();
+                if (bg == null) bg = speakerLabel.GetComponent<Image>();
+                
+                if (bg != null)
+                {
+                    bg.sprite = _defaultStyle.nameLabelBackground;
+                    bg.color = _defaultStyle.nameLabelColor;
+                }
+            }
+
+            // Restore Content Text
+            if (dialogueTextPresenter != null)
+            {
+                dialogueTextPresenter.SetTextColor(_defaultStyle.contentTextColor);
+                dialogueTextPresenter.SetFont(_defaultStyle.contentTextFont);
+                dialogueTextPresenter.SetFontSize(_defaultStyle.contentTextSize);
+            }
+        }
+
+        public void ShowText(TextNode node, string text)
+        {
+            // Apply Style
+            if (node.styleProfile != null)
+            {
+                ApplyStyle(node.styleProfile);
+            }
+            else
+            {
+                RestoreDefaultStyle();
+            }
+
+            // Determine Speaker Name (from node directly)
+            string displaySpeakerName = node.speakerName;
+            
+            if (speakerLabel != null)
+            {
+                bool hasSpeaker = !string.IsNullOrEmpty(displaySpeakerName);
                 speakerLabel.gameObject.SetActive(hasSpeaker);
                 if (hasSpeaker)
                 {
-                    speakerLabel.text = node.speakerName;
+                    speakerLabel.text = displaySpeakerName;
                 }
             }
 
