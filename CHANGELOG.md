@@ -1,5 +1,27 @@
 # Change Log
 
+## [1.1.0] - 2026-01-07
+### Added
+- **除錯工具 (Debugging Tools)**:
+  - 實作 `DialogueVariableDebugger` 編輯器視窗，支援 Runtime 即時檢視與修改全域/局部變數。
+  - 實作 `Execution History` 追蹤，自動紀錄最近 50 個執行過的節點。
+  - 在 Graph Editor 中即時高亮顯示走過的節點路徑 (Cyan Border)。
+- **UI 與視覺呈現 (UI & Presentation)**:
+  - 實作 `DialogueStyleProfile` 系統，支援自定義對話框背景、顏色、字體與文字大小。
+  - `TextNode` 新增 `styleProfile` 欄位，支援根據不同對話自動切換 UI 樣式。
+  - `DialogueUIManager` 支援捕捉與還原預設 UI 樣式。
+- **編輯器生產力 (Editor Productivity)**:
+  - 在 Graph Editor 中加入 `Groups` (群組) 與 `Sticky Notes` (便利貼) 功能，支援持久化存檔。
+  - 優化群組刪除邏輯，支援「刪除群組但保留節點 (Ungroup)」功能。
+- **文件與架構 (Documentation)**:
+  - 建立 `docs/ARCHITECTURE.md` 詳細說明系統架構與資料流。
+  - 建立 `docs/ADR.md` 紀錄關鍵技術決策。
+  - 建立 `TODO.md` 追蹤開發進度與產品路線圖。
+
+### Changed
+- 優化 `DialogueGraphView` 的生命週期管理，確保在切換資產或停止 Play Mode 時正確清理視覺高亮。
+- 調整 `TextNodeElement` 的 UI 配置，整合 Style Profile 選擇功能。
+
 ## [1.0.9] - 2026-01-06
 ### Added
 - `StageTextNode` 新增 `Allow Fast Forward` 選項，允許開發者控制是否讓玩家透過點擊來快轉打字機效果。
