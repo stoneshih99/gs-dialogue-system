@@ -19,6 +19,10 @@ namespace SG.Dialogue.UI
     /// </summary>
     public class DialogueUIManager : MonoBehaviour
     {
+        [Header("核心參考")]
+        [Tooltip("對話控制器，用於變數替換等功能")]
+        [SerializeField] private DialogueController dialogueController;
+        
         [Header("UI 介面參考")]
         [Tooltip("對話 UI 的根面板")]
         [SerializeField] private GameObject rootPanel;
@@ -94,6 +98,12 @@ namespace SG.Dialogue.UI
 
         private void Awake()
         {
+            // Auto-find DialogueController if not assigned
+            if (dialogueController == null)
+            {
+                dialogueController = GetComponent<DialogueController>();
+            }
+            
             CaptureDefaultStyle();
 
             if (dialogueTextPresenter == null)
@@ -405,8 +415,14 @@ namespace SG.Dialogue.UI
                 RestoreDefaultStyle();
             }
 
-            // Determine Speaker Name (from node directly)
+            // Determine Speaker Name (from node directly) and apply variable replacement
             string displaySpeakerName = node.speakerName;
+            
+            // 使用 DialogueController 的 FormatString 來替換變數
+            if (!string.IsNullOrEmpty(displaySpeakerName) && dialogueController != null)
+            {
+                displaySpeakerName = dialogueController.FormatString(displaySpeakerName);
+            }
             
             if (speakerLabel != null)
             {
@@ -448,7 +464,16 @@ namespace SG.Dialogue.UI
                 if (choice.condition != null && !conditionChecker(choice.condition)) continue;
                 var go = Instantiate(choiceButtonPrefab, choicesRoot);
                 var label = go.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null) label.text = choice.text;
+                if (label != null)
+                {
+                    // 使用 DialogueController 的 FormatString 來替換變數
+                    string choiceText = choice.text;
+                    if (!string.IsNullOrEmpty(choiceText) && dialogueController != null)
+                    {
+                        choiceText = dialogueController.FormatString(choiceText);
+                    }
+                    label.text = choiceText;
+                }
                 var btn = go.GetComponent<Button>();
                 if (btn != null)
                 {

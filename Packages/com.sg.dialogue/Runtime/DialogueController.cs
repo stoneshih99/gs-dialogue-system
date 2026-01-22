@@ -114,6 +114,8 @@ namespace SG.Dialogue
         {
             if (uiManager == null) uiManager = GetComponent<DialogueUIManager>();
             if (visualManager == null) visualManager = GetComponent<DialogueVisualManager>();
+            if (playerDataResolver == null) playerDataResolver = GetComponent<DialoguePlayerDataResolver>();
+            if (cameraController == null) cameraController = GetComponent<DialogueCameraController>();
             
             #if !UNITY_EDITOR
             debugLoggingEnabled = false;
@@ -158,20 +160,37 @@ namespace SG.Dialogue
                 throw new ArgumentNullException(nameof(newGraph), "newGraph.startNodeId must be specified.");
             }
 
-            if (playerDataVariables != null)
-            {
-                foreach (var entry in playerDataVariables.ToList())
-                {
-                    playerDataResolver.AddDataMapping(entry.Key, entry.Value);
-                }
-            }
-            
             graph = newGraph;
             graph.BuildLookup(); // 建立節點查找表以提高效能
 
             _localState.Clear();
             _executionStack.Clear();
             _executionHistory.Clear();
+
+            if (playerDataVariables != null)
+            {
+                // 方法1: 將變數加入到 LocalState 作為字串變數（直接解析，不需要額外組件）
+                foreach (var entry in playerDataVariables.ToList())
+                {
+                    _localState.SetString(entry.Key, entry.Value);
+                }
+                
+                // 方法2: 如果有 DialoguePlayerDataResolver，也將變數加入其中（供外部事件解析使用）
+                if (playerDataResolver != null)
+                {
+                    foreach (var entry in playerDataVariables.ToList())
+                    {
+                        playerDataResolver.AddDataMapping(entry.Key, entry.Value);
+                    }
+                }
+                else
+                {
+                    if (debugLoggingEnabled)
+                    {
+                        Debug.Log("DialogueController: playerDataResolver is null. Variables will be resolved through LocalState instead.");
+                    }
+                }
+            }
             
             uiManager.SetPanelVisibility(true);
             uiManager.SetSkipButtonVisibility(graph.IsSkippable);

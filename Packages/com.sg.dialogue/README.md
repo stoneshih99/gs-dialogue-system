@@ -322,6 +322,31 @@
     2.  在 `Other Settings` 下的 `Scripting Define Symbols` 中，新增 `SPINE_KIT_AVAILABLE`。
 *   **效果**: 新增此符號後，`CharacterActionNode` 中將會出現 `Spine` 的選項，讓您可以直接控制 Spine 角色的顯示與動作。
 
+## 5. UI 樣式與編輯器工具 (UI Styling & Editor Tools)
+
+### 5.1 動態對話樣式 (Dynamic Dialogue Style)
+本系統支援透過 `DialogueStyleProfile` 資產來定義多種對話框樣式 (如：一般、旁白、心聲)，並在節點中自由切換。
+
+*   **Style Profile**: 建立 `DialogueStyleProfile` 設定背景圖、顏色濾鏡、字體與文字顏色。
+*   **套用方式**: 在 `TextNode` 的 `Style Profile` 欄位中指定樣式。
+
+| 預設樣式 | 自訂樣式 (e.g. 旁白) |
+| :---: | :---: |
+| ![Default Style](../../.github/Assets/DialogueStyle-0.png) | ![Custom Style](../../.github/Assets/DialogueStyle-1.png) |
+
+### 5.2 編輯器分組與便利貼 (Groups & Sticky Notes)
+為了更有效地組織大型對話圖，編輯器提供了原生的分組與註解功能。
+
+*   **Groups**: 選取多個節點，右鍵 `Create Group` 即可將其打包。支援標題命名與整體拖曳。
+*   **Sticky Notes**: 右鍵 `Create Sticky Note` 建立黃色便利貼，用於記錄待辦事項或劇情備註。
+
+![Groups](../../.github/Assets/Group-0.png)
+
+### 5.3 變數監視器 (Variable Watcher)
+在 Runtime 除錯時，可開啟 `SG/Dialogue > Variable Debugger` 視窗。
+*   即時監看全域 (Global) 與區域 (Local) 變數數值。
+*   支援手動修改數值以測試邏輯分支。
+
 ---
 
 ## 6. 疑難排解 (Troubleshooting)
