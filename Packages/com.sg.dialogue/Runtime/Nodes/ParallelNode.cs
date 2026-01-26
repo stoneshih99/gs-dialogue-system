@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -28,7 +29,7 @@ namespace SG.Dialogue.Nodes
         [Tooltip("當所有並行分支都執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             if (branchStartNodeIds == null || branchStartNodeIds.Count == 0)
             {
@@ -50,7 +51,7 @@ namespace SG.Dialogue.Nodes
             {
                 await UniTask.WhenAll(tasks);
             }
-            
+
             if (wasInputSwallowed)
             {
                 await new WaitForUserInput();

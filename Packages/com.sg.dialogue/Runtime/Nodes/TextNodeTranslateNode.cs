@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using LitMotion;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace SG.Dialogue.Nodes
         [Tooltip("下一個節點 ID")]
         public string nextNodeId;
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             bool show = mode == TranslateMode.Enter;
             await controller.UiManager.AnimatePanel(show, duration, slideOffset, ease);

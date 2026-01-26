@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -35,7 +36,9 @@ namespace SG.Dialogue.Nodes
         /// 模板方法：定義了處理文字節點的完整演算法。
         /// 流程：準備文字 -> 顯示文字（由子類別定義） -> 處理後續流程。
         /// </summary>
-        public sealed override async UniTask Process(DialogueController controller)
+        /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
+        public sealed override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             // 1. 準備要顯示的文字 (通用邏輯)
             string rawText = !string.IsNullOrEmpty(TextKey) ? LocalizationManager.GetText(TextKey) : Text;
@@ -43,12 +46,12 @@ namespace SG.Dialogue.Nodes
             string formattedText = controller.FormatString(rawText);
 
             // 2. 顯示文字 (由子類別實現)
-            await DoShowText(controller, formattedText);
+            await DoShowText(controller, formattedText, ct);
 
             // 3. 處理打字後延遲 (通用邏輯)
             if (postTypingDelay > 0)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(postTypingDelay), ignoreTimeScale: false);
+                await UniTask.Delay(TimeSpan.FromSeconds(postTypingDelay), ignoreTimeScale: false, cancellationToken: ct);
             }
 
             // 4. 處理自動前進或等待輸入 (通用邏輯)
@@ -75,7 +78,7 @@ namespace SG.Dialogue.Nodes
 
             if (advance)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(delay), ignoreTimeScale: false);
+                await UniTask.Delay(TimeSpan.FromSeconds(delay), ignoreTimeScale: false, cancellationToken: ct);
             }
             else
             {
@@ -89,7 +92,8 @@ namespace SG.Dialogue.Nodes
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
         /// <param name="formattedText">已經過本地化和變數格式化處理的最終文字。</param>
-        protected abstract UniTask DoShowText(DialogueController controller, string formattedText);
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
+        protected abstract UniTask DoShowText(DialogueController controller, string formattedText, CancellationToken ct = default);
 
         public override string GetNextNodeId()
         {

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -34,10 +35,9 @@ namespace SG.Dialogue.Nodes
             return nextNodeId;
         }
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
-            // 主要邏輯由 DialogueController 處理
-            await UniTask.CompletedTask;
+            await controller.VisualManager.UpdateFromSetBackgroundNode(this);
         }
 
         public override void ClearConnectionsForClipboard()

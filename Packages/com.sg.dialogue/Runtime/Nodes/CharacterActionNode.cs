@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Enums;
@@ -63,7 +64,7 @@ namespace SG.Dialogue.Nodes
             return nextNodeId;
         }
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             // 呼叫 DialogueVisualManager 的方法，並等待其完成
             await controller.VisualManager.UpdateFromCharacterActionNode(this);

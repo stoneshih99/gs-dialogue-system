@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Events;
 using SG.Dialogue.Variables;
@@ -54,15 +55,15 @@ namespace SG.Dialogue.Nodes
         protected override string Text => text;
         protected override string TextKey => textKey;
 
-        protected override async UniTask DoShowText(DialogueController controller, string formattedText)
+        protected override async UniTask DoShowText(DialogueController controller, string formattedText, CancellationToken ct = default)
         {
             string formattedSpeaker = controller.FormatString(speakerName);
 
             var displayNode = (TextNode)this.MemberwiseClone();
             displayNode.speakerName = formattedSpeaker;
-            
-            controller.VisualManager.UpdateFromTextNode(displayNode); 
-            
+
+            controller.VisualManager.UpdateFromTextNode(displayNode);
+
             // 1. 呼叫 ShowText (它會立即返回)
             controller.UiManager.ShowText(this, formattedText);
 
@@ -73,7 +74,7 @@ namespace SG.Dialogue.Nodes
                 Action onComplete = () => typingCompleted = true;
                 controller.UiManager.OnTypingCompleted += onComplete;
 
-                await UniTask.WaitUntil(() => typingCompleted || !controller.UiManager.IsTyping);
+                await UniTask.WaitUntil(() => typingCompleted || !controller.UiManager.IsTyping, cancellationToken: ct);
 
                 controller.UiManager.OnTypingCompleted -= onComplete;
             }

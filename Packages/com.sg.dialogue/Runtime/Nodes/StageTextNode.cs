@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -30,20 +31,20 @@ namespace SG.Dialogue.Nodes
         protected override string Text => message;
         protected override string TextKey => messageKey;
 
-        protected override async UniTask DoShowText(DialogueController controller, string formattedText)
+        protected override async UniTask DoShowText(DialogueController controller, string formattedText, CancellationToken ct = default)
         {
             if (string.IsNullOrEmpty(formattedText))
             {
                 Debug.LogWarning("StageTextNode: 格式化後文字為空，將不顯示任何舞台文字。");
                 return;
             }
-            
+
             if (controller.VisualManager == null)
             {
                 Debug.LogError("StageTextNode: VisualManager 為 null，無法顯示舞台文字。");
                 return;
             }
-            
+
             controller.VisualManager.ShowStageText(formattedText, typingSpeed);
 
             // 如果正在打字，則等待完成
@@ -52,7 +53,7 @@ namespace SG.Dialogue.Nodes
             // 這會導致 IsStageTextTyping 變為 false，結束這個等待
             if (controller.VisualManager.IsStageTextTyping())
             {
-                await UniTask.WaitUntil(() => !controller.VisualManager.IsStageTextTyping());
+                await UniTask.WaitUntil(() => !controller.VisualManager.IsStageTextTyping(), cancellationToken: ct);
             }
         }
 

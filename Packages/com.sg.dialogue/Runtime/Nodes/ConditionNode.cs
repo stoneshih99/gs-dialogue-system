@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Conditions;
 using SG.Dialogue.Core.Instructions;
@@ -30,8 +31,9 @@ namespace SG.Dialogue.Nodes
         /// 它會評估條件，並返回一個指令來告訴控制器下一步要去哪個節點。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             // 檢查條件是否滿足
             bool result = Condition.Check(controller);

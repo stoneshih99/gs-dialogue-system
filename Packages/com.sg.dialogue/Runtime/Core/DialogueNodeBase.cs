@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -29,11 +30,12 @@ namespace SG.Dialogue
         /// 例如：
         /// - await new WaitForUserInput(); // 等待玩家點擊
         /// - await new AdvanceToNode("otherNodeId"); // 直接跳轉到另一個節點
-        /// - await UniTask.Delay(1000); // 等待一段時間
+        /// - await UniTask.Delay(1000, cancellationToken: ct); // 等待一段時間
         /// </summary>
         /// <param name="controller">對話總控制器，提供對 UI、視覺、狀態等管理器的存取。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個 UniTask，用於非同步執行。</returns>
-        public abstract UniTask Process(DialogueController controller);
+        public abstract UniTask Process(DialogueController controller, CancellationToken ct = default);
 
         /// <summary>
         /// 當對話流程離開此節點時，由 DialogueController 呼叫。
@@ -53,14 +55,7 @@ namespace SG.Dialogue
         /// 這個方法的行為可能會有所不同（例如返回 null）。
         /// </summary>
         /// <returns>下一個節點的 ID；如果沒有預設的下一個節點，則返回 null。</returns>
-        public virtual string GetNextNodeId()
-        {
-            // 預設實作：嘗試透過反射取得名為 "nextNodeId" 的欄位值。
-            // 這是一個通用的方法，適用於大多數只有一個「下一步」連接的簡單節點。
-            // 派生類別可以覆寫此方法以提供更具體的邏輯。
-            var field = GetType().GetField("nextNodeId");
-            return field?.GetValue(this) as string;
-        }
+        public abstract string GetNextNodeId();
         
         #region Clipboard Hooks
 

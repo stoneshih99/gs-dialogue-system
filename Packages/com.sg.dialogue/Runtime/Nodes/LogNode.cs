@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -30,8 +31,9 @@ namespace SG.Dialogue.Nodes
         /// 它會根據設定的訊息類型，將格式化後的訊息印出到 Unity Console。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個空的協程迭代器。</returns>
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             string formattedMessage = controller.FormatString(message); // 使用控制器內建的格式化方法
 

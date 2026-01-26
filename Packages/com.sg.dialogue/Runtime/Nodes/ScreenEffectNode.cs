@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Presentation;
 using UnityEngine;
@@ -33,8 +34,9 @@ namespace SG.Dialogue.Nodes
         /// 它會尋找場景中的 ScreenEffectController 並呼叫對應的方法來啟用或禁用特效。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個協程迭代器，用於等待特效動畫完成。</returns>
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             var effectController = UnityEngine.Object.FindObjectOfType<ScreenEffectController>();
             if (effectController == null)

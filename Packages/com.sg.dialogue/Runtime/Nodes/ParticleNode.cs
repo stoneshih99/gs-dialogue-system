@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Enums;
@@ -33,7 +34,7 @@ namespace SG.Dialogue.Nodes
         public bool WaitForInput = false;
         public string nextNodeId;
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             if (ParticleEvent != null)
             {

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Enums;
@@ -37,7 +38,9 @@ namespace SG.Dialogue.Nodes
         /// <summary>
         /// 處理節點的邏輯。
         /// </summary>
-        public override async UniTask Process(DialogueController controller)
+        /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             // 在 ParallelNode 或其他直接呼叫 Process 的情境下，
             // 我們需要主動呼叫 VisualManager 來播放動畫。

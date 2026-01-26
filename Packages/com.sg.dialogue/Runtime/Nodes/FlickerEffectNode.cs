@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Enums;
 using UnityEngine;
@@ -43,10 +44,9 @@ namespace SG.Dialogue.Nodes
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
-            // 主要邏輯由 DialogueController 處理
-            await UniTask.CompletedTask;
+            await controller.VisualManager.ExecuteFlickerEffect(this);
         }
 
         public override string GetNextNodeId()

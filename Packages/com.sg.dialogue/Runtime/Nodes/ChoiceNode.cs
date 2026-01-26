@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -29,14 +30,15 @@ namespace SG.Dialogue.Nodes
         /// 它會指示 UI 管理器顯示所有符合條件的選項，並返回一個等待使用者輸入的指令。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             // 指示 UI 管理器顯示選項。
             // 我們傳遞一個 Lambda 函數 `(condition) => condition.Check(controller)` 給 UiManager，
             // 讓 UI 層可以自行檢查每個選項的顯示條件是否滿足。
             controller.UiManager.ShowChoices(this, (condition) => condition.Check(controller));
-            
+
             // 返回指令，告訴控制器在此暫停，等待使用者從 UI 上選擇一個選項。
             await new WaitForUserInput();
         }

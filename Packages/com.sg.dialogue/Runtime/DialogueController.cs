@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Nodes;
@@ -31,6 +32,9 @@ namespace SG.Dialogue
     [RequireComponent(typeof(DialogueUIManager), typeof(DialogueVisualManager))]
     public class DialogueController : MonoBehaviour
     {
+        // --- 靜態編譯的 Regex，避免每次 FormatString 都重新編譯 ---
+        private static readonly Regex VariablePattern =
+            new Regex(@"\{(\w+)\}", RegexOptions.Compiled);
         [Header("圖表與狀態")]
         [Tooltip("要執行的對話圖 ScriptableObject。")]
         [SerializeField] private DialogueGraph graph;
@@ -109,6 +113,7 @@ namespace SG.Dialogue
         private WaitForAll _activeWaitForAll;
         private readonly Stack<string> _executionStack = new Stack<string>();
         private UniTaskCompletionSource _inputCompletionSource;
+        private CancellationTokenSource _dialogueCts;
 
         private void Awake()
         {
@@ -162,6 +167,11 @@ namespace SG.Dialogue
 
             graph = newGraph;
             graph.BuildLookup(); // 建立節點查找表以提高效能
+
+            // 建立新的 CancellationTokenSource 用於取消對話中的非同步操作
+            _dialogueCts?.Cancel();
+            _dialogueCts?.Dispose();
+            _dialogueCts = new CancellationTokenSource();
 
             _localState.Clear();
             _executionStack.Clear();
@@ -316,32 +326,12 @@ namespace SG.Dialogue
         }
 
         /// <summary>
-        /// 處理單一節點的邏輯。根據節點類型分派給不同的管理器或直接執行節點的 Process 方法。
+        /// 處理單一節點的邏輯。統一呼叫節點的 Process 方法。
         /// </summary>
         private async UniTaskVoid ProcessNode(DialogueNodeBase node)
         {
-            // 對特定視覺節點進行特殊處理，以簡化節點本身的邏輯
-            if (node is AnimationNode animNode)
-            {
-                await visualManager.PlayAnimations(animNode);
-            }
-            else if (node is CharacterActionNode charActionNode)
-            {
-                await visualManager.UpdateFromCharacterActionNode(charActionNode);
-            }
-            else if (node is SetBackgroundNode bgNode)
-            {
-                await visualManager.UpdateFromSetBackgroundNode(bgNode);
-            }
-            else if (node is FlickerEffectNode flickerNode)
-            {
-                await visualManager.ExecuteFlickerEffect(flickerNode);
-            }
-            else
-            {
-                // 對於其他所有節點，執行其自身的 Process 方法
-                await node.Process(this);
-            }
+            // 所有節點統一透過 Process 方法執行邏輯，傳遞 CancellationToken
+            await node.Process(this, _dialogueCts?.Token ?? CancellationToken.None);
 
             // 節點處理完畢後，自動前進到下一個節點
             string defaultNextId = node.GetNextNodeId();
@@ -375,7 +365,7 @@ namespace SG.Dialogue
                     Debug.Log($"[Dialogue Debug] Executing branch node: {node.GetType().Name} (ID: {node.nodeId})");
                 }
 
-                await node.Process(this);
+                await node.Process(this, _dialogueCts?.Token ?? CancellationToken.None);
 
                 currentBranchNodeId = node.GetNextNodeId();
             }
@@ -490,13 +480,18 @@ namespace SG.Dialogue
             if (!IsRunning) return;
             IsRunning = false;
 
+            // 取消所有進行中的非同步操作
+            _dialogueCts?.Cancel();
+            _dialogueCts?.Dispose();
+            _dialogueCts = null;
+
             // 清理所有可能正在等待的任務
             _activeWaitForAll?.ForceComplete();
             _activeWaitForAll = null;
-            
+
             _inputCompletionSource?.TrySetCanceled();
             _inputCompletionSource = null;
-            
+
             if (_lastNode != null)
             {
                 TriggerOnExit(_lastNode);
@@ -572,8 +567,8 @@ namespace SG.Dialogue
         {
             if (string.IsNullOrEmpty(text)) return text;
 
-            // 使用正則表達式匹配 {variable} 格式
-            return Regex.Replace(text, @"\{(\w+)\}", match =>
+            // 使用預編譯的靜態 Regex 匹配 {variable} 格式
+            return VariablePattern.Replace(text, match =>
             {
                 string varName = match.Groups[1].Value;
                 

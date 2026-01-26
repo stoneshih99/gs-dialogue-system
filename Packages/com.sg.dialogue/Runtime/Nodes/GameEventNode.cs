@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Events;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace SG.Dialogue.Nodes
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             if (GameEvent != null)
             {

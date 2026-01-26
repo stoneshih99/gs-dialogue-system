@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using UnityEngine;
@@ -40,8 +41,9 @@ namespace SG.Dialogue.Nodes
         /// 它會將序列結束後的「返回位址」推入執行堆疊，然後讓 Controller 進入序列的起始節點。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個包含對話指令的協程迭代器。</returns>
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             Debug.Log($"[對話] 進入序列: {sequenceName}"); // 調整回使用 sequenceName
 

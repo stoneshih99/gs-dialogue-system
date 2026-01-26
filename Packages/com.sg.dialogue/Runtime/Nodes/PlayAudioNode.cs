@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Events;
@@ -40,8 +41,9 @@ namespace SG.Dialogue.Nodes
         /// 它會發出一個音訊請求事件。
         /// </summary>
         /// <param name="controller">對話總控制器。</param>
+        /// <param name="ct">用於取消非同步操作的 CancellationToken。</param>
         /// <returns>一個協程迭代器。</returns>
-        public override async UniTask Process(DialogueController controller)
+        public override async UniTask Process(DialogueController controller, CancellationToken ct = default)
         {
             if (AudioEvent != null)
             {
