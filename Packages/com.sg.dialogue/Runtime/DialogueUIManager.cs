@@ -241,7 +241,7 @@ namespace SG.Dialogue.UI
             }
             else
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(duration));
+                await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: this.GetCancellationTokenOnDestroy());
             }
             
             // 確保狀態正確

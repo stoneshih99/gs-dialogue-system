@@ -56,7 +56,7 @@ namespace SG.Dialogue.Nodes
                 Debug.LogWarning($"PlayAudioNode '{nodeId}' 缺少 AudioEvent 引用。");
             }
 
-            await UniTask.Yield(PlayerLoopTiming.Update);
+            await UniTask.Yield(PlayerLoopTiming.Update, ct);
         }
 
         /// <summary>

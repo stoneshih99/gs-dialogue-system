@@ -141,10 +141,18 @@ namespace SG.Dialogue
             uiManager.OnChoiceSelected -= OnChoiceSelected;
             uiManager.OnTypingCompleted -= OnTypingCompleted;
             uiManager.OnSkipRequested -= OnSkipRequested;
-            
+
             // 清理等待中的 Task，避免在物件禁用後還持有引用
             _inputCompletionSource?.TrySetCanceled();
             _inputCompletionSource = null;
+        }
+
+        private void OnDestroy()
+        {
+            // 確保物件被銷毀時取消所有進行中的非同步操作，防止繼續執行下一個節點
+            _dialogueCts?.Cancel();
+            _dialogueCts?.Dispose();
+            _dialogueCts = null;
         }
 
         /// <summary>
@@ -330,8 +338,12 @@ namespace SG.Dialogue
         /// </summary>
         private async UniTaskVoid ProcessNode(DialogueNodeBase node)
         {
+            var ct = _dialogueCts?.Token ?? CancellationToken.None;
             // 所有節點統一透過 Process 方法執行邏輯，傳遞 CancellationToken
-            await node.Process(this, _dialogueCts?.Token ?? CancellationToken.None);
+            await node.Process(this, ct);
+
+            // 節點已被取消（例如物件銷毀或 EndDialogue），不繼續往下執行
+            if (ct.IsCancellationRequested) return;
 
             // 節點處理完畢後，自動前進到下一個節點
             string defaultNextId = node.GetNextNodeId();
@@ -343,9 +355,14 @@ namespace SG.Dialogue
         /// </summary>
         public async UniTask GetBranchEnumerator(string startNodeId, Action onInputSwallowed)
         {
+            // 在進入迴圈前先取得 token，避免 _dialogueCts 在迴圈中途被 null（例如 EndDialogue 呼叫後）
+            // 導致後續 iteration 拿到 CancellationToken.None 而失去取消能力
+            var ct = _dialogueCts?.Token ?? CancellationToken.None;
             string currentBranchNodeId = startNodeId;
             while (!string.IsNullOrEmpty(currentBranchNodeId))
             {
+                if (ct.IsCancellationRequested) return;
+
                 var node = graph.GetNode(currentBranchNodeId);
                 if (node == null)
                 {
@@ -365,7 +382,10 @@ namespace SG.Dialogue
                     Debug.Log($"[Dialogue Debug] Executing branch node: {node.GetType().Name} (ID: {node.nodeId})");
                 }
 
-                await node.Process(this, _dialogueCts?.Token ?? CancellationToken.None);
+                await node.Process(this, ct);
+
+                // 節點已被取消，停止繼續執行分支
+                if (ct.IsCancellationRequested) return;
 
                 currentBranchNodeId = node.GetNextNodeId();
             }
@@ -441,7 +461,7 @@ namespace SG.Dialogue
         /// <summary>
         /// 等待使用者輸入（例如點擊）。這會暫停節點的 Process 流程。
         /// </summary>
-        public async UniTask WaitForInputAsync()
+        public async UniTask WaitForInputAsync(CancellationToken ct = default)
         {
             if (_inputCompletionSource != null)
             {
@@ -449,7 +469,7 @@ namespace SG.Dialogue
             }
 
             _inputCompletionSource = new UniTaskCompletionSource();
-            await _inputCompletionSource.Task;
+            await _inputCompletionSource.Task.AttachExternalCancellation(ct);
         }
 
         /// <summary>

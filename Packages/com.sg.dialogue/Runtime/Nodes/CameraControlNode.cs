@@ -58,7 +58,7 @@ namespace SG.Dialogue.Nodes
             if (controller.CameraController != null)
             {
                 // 呼叫攝影機控制器來執行這個動作，並等待其完成
-                await controller.CameraController.Execute(this);
+                await controller.CameraController.Execute(this, ct);
             }
             else
             {

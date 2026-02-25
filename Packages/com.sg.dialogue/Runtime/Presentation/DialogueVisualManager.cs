@@ -77,7 +77,7 @@ namespace SG.Dialogue.Presentation
             
             if (duration > 0)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(duration), ignoreTimeScale: true);
+                await UniTask.Delay(TimeSpan.FromSeconds(duration), ignoreTimeScale: true, cancellationToken: this.GetCancellationTokenOnDestroy());
             }
         }
 

@@ -48,11 +48,11 @@ namespace SG.Dialogue.Nodes
 
             if (WaitForInput)
             {
-                await controller.WaitForInputAsync();
+                await controller.WaitForInputAsync(ct);
             }
             else
             {
-                await UniTask.Yield();
+                await UniTask.Yield(ct);
             }
         }
 

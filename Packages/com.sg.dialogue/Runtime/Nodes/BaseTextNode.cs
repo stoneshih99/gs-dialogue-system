@@ -83,7 +83,7 @@ namespace SG.Dialogue.Nodes
             else
             {
                 // 使用 controller 的等待方法，而不是 new WaitForUserInput()
-                await controller.WaitForInputAsync();
+                await controller.WaitForInputAsync(ct);
             }
         }
 

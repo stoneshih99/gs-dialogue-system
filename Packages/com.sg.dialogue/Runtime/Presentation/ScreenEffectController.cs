@@ -100,15 +100,17 @@ namespace SG.Dialogue.Presentation
 
         private async UniTask FadeMaskRoutine(Image mask, Color baseColor, float targetAlpha, float duration)
         {
+            var token = this.GetCancellationTokenOnDestroy();
             float startAlpha = mask.color.a;
             float time = 0;
             while (time < duration)
             {
+                if (token.IsCancellationRequested) return;
                 time += Time.deltaTime;
                 float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
                 baseColor.a = newAlpha;
                 mask.color = baseColor;
-                await UniTask.Yield(PlayerLoopTiming.Update);
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
             baseColor.a = targetAlpha;
             mask.color = baseColor;
@@ -116,14 +118,16 @@ namespace SG.Dialogue.Presentation
 
         private async UniTask FadeBlurRoutine(float targetBlur, float duration)
         {
+            var token = this.GetCancellationTokenOnDestroy();
             float startBlur = _blurMaterialInstance.GetFloat("_BlurSize");
             float time = 0;
             while (time < duration)
             {
+                if (token.IsCancellationRequested) return;
                 time += Time.deltaTime;
                 float newBlur = Mathf.Lerp(startBlur, targetBlur, time / duration);
                 _blurMaterialInstance.SetFloat("_BlurSize", newBlur);
-                await UniTask.Yield(PlayerLoopTiming.Update);
+                await UniTask.Yield(PlayerLoopTiming.Update, token);
             }
             _blurMaterialInstance.SetFloat("_BlurSize", targetBlur);
         }
