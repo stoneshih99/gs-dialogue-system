@@ -16,7 +16,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         public DialogueNodeElement CreateNodeElement(DialogueNodeBase node, DialogueGraphView graphView, SerializedProperty nodeProperty, Action onChanged)
         {
-            return new ConditionNodeElement(node as ConditionNode, onChanged, graphView.GlobalState);
+            return new ConditionNodeElement(node as ConditionNode, onChanged);
         }
 
         public void ConnectPorts(DialogueNodeElement sourceView, DialogueNodeBase nodeData, Func<string, Port> getInputPort, Action<Port, Port> connect)

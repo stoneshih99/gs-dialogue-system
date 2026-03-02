@@ -27,7 +27,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         {
             public string GraphGuid;
             public string TableGuid;
-            public string StateGuid;
         }
 
         /// <summary>
@@ -48,7 +47,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         // 視窗開啟時載入的初始資產
         private DialogueGraph _initialGraph;
         private LocalizationTable _initialTable;
-        private DialogueStateAsset _initialState;
 
         /// <summary>
         /// 在 Unity 編輯器菜單中添加一個項目，用於打開對話圖與本地化視窗。
@@ -118,11 +116,10 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             string graphGuid = graph != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(graph)) : null;
 
-            // 如果傳入的 graph 是 null，清除當前 session 的 table 和 state
+            // 如果傳入的 graph 是 null，清除當前 session 的 table
             if (string.IsNullOrEmpty(graphGuid))
             {
                 SetTable(null);
-                SetState(null);
                 return;
             }
 
@@ -182,38 +179,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 設定當前使用的全域對話狀態資產。
-        /// </summary>
-        /// <param name="state">要設定的全域對話狀態資產。</param>
-        public void SetState(DialogueStateAsset state)
-        {
-            _initialState = state;
-            // 將狀態資產設定到各個相關分頁
-            if (_graphTab != null) _graphTab.SetState(state);
-            if (_simulatorTab != null) _simulatorTab.SetState(state);
-
-            // 如果沒有 graph，就無法建立關聯
-            if (_initialGraph == null) return;
-            string graphGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(_initialGraph));
-            if (string.IsNullOrEmpty(graphGuid)) return;
-
-            string stateGuid = state != null ? AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(state)) : null;
-
-            var list = LoadGuidGroups();
-            var groupToUpdate = list.Groups.FirstOrDefault(g => g.GraphGuid == graphGuid);
-
-            if (groupToUpdate != null)
-            {
-                // 只有在 GUID 不同的時候才儲存，避免不必要的寫入
-                if (groupToUpdate.StateGuid != stateGuid)
-                {
-                    groupToUpdate.StateGuid = stateGuid;
-                    SaveGuidGroups(list);
-                }
-            }
-        }
-
-        /// <summary>
         /// 創建視窗的 UI 佈局和各個分頁。
         /// </summary>
         private void CreateGUI()
@@ -239,7 +204,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 設定分頁之間的回調，以便同步選取的資產
             _graphTab.OnGraphSelected = SetGraph;
             _graphTab.OnTableSelected = SetTable;
-            _graphTab.OnStateSelected = SetState;
             _locTab.OnGraphSelected = SetGraph;
             _locTab.OnTableSelected = SetTable;
             _tableTab.OnTableSelected = SetTable;
@@ -253,7 +217,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 設定初始資產
             SetGraph(_initialGraph);
             SetTable(_initialTable);
-            SetState(_initialState);
 
             SwitchTab(0); // 預設顯示 Graph 分頁
         }
@@ -274,9 +237,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
             string tableGuid = lastGroup.TableGuid;
             _initialTable = !string.IsNullOrEmpty(tableGuid) ? AssetDatabase.LoadAssetAtPath<LocalizationTable>(AssetDatabase.GUIDToAssetPath(tableGuid)) : null;
-
-            string stateGuid = lastGroup.StateGuid;
-            _initialState = !string.IsNullOrEmpty(stateGuid) ? AssetDatabase.LoadAssetAtPath<DialogueStateAsset>(AssetDatabase.GUIDToAssetPath(stateGuid)) : null;
         }
 
         /// <summary>
@@ -331,16 +291,11 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 string tableGuid = group.TableGuid;
                 var table = !string.IsNullOrEmpty(tableGuid) ? AssetDatabase.LoadAssetAtPath<LocalizationTable>(AssetDatabase.GUIDToAssetPath(tableGuid)) : null;
                 SetTable(table);
-
-                string stateGuid = group.StateGuid;
-                var state = !string.IsNullOrEmpty(stateGuid) ? AssetDatabase.LoadAssetAtPath<DialogueStateAsset>(AssetDatabase.GUIDToAssetPath(stateGuid)) : null;
-                SetState(state);
             }
             else
             {
-                // 如果找不到關聯的群組 (例如，在創建新 Graph 後)，則清空 Table 和 State
+                // 如果找不到關聯的群組 (例如，在創建新 Graph 後)，則清空 Table
                 SetTable(null);
-                SetState(null);
             }
         }
 

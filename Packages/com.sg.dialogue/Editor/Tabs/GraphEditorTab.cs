@@ -24,19 +24,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         /// 當本地化表格被選中時觸發的事件。
         /// </summary>
         public Action<LocalizationTable> OnTableSelected;
-        /// <summary>
-        /// 當全域對話狀態資產被選中時觸發的事件。
-        /// </summary>
-        public Action<DialogueStateAsset> OnStateSelected;
-
         private DialogueGraphView _graphView; // 對話圖的視覺化視圖
         private ObjectField _graphField; // 用於選擇對話圖資產的欄位
-        private ObjectField _stateField; // 用於選擇全域對話狀態資產的欄位
         private VisualElement _breadcrumbContainer; // 用於顯示導航路徑的容器
-        
+
         private DialogueGraph _graph; // 當前編輯的對話圖數據
         private LocalizationTable _table; // 當前選中的本地化表格
-        private DialogueStateAsset _state; // 當前選中的全域對話狀態資產
         private EnumField _languageField; // 語言選擇下拉選單
         private LocalizationLanguage _currentLanguage = LocalizationLanguage.ZhTw; // 當前選中的語言
 
@@ -55,10 +48,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 對話圖資產選擇欄位
             _graphField = new ObjectField("Graph") { objectType = typeof(DialogueGraph), allowSceneObjects = false, style = { minWidth = 250 } };
             header.Add(_graphField);
-
-            // 全域狀態資產選擇欄位
-            _stateField = new ObjectField("Global State") { objectType = typeof(DialogueStateAsset), allowSceneObjects = false, style = { minWidth = 250 } };
-            header.Add(_stateField);
 
             // 保存按鈕，用於保存對話圖資產
             header.Add(new Button(() => { if (_graph != null) { _graphView?.SyncPositionsToAsset(); EditorUtility.SetDirty(_graph); AssetDatabase.SaveAssets(); } }) { text = "Save" });
@@ -146,35 +135,12 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         }
 
         /// <summary>
-        /// 設定當前選中的全域對話狀態資產。
-        /// </summary>
-        /// <param name="state">要設定的狀態資產。</param>
-        public void SetState(DialogueStateAsset state)
-        {
-            _state = state;
-            // 解除註冊並重新註冊回調，以避免重複觸發
-            _stateField.UnregisterValueChangedCallback(OnStateFieldValueChanged);
-            _stateField.SetValueWithoutNotify(state);
-            _stateField.RegisterValueChangedCallback(OnStateFieldValueChanged);
-            _graphView.SetGlobalState(state); // 設定對話圖視圖的全域狀態
-        }
-        
-        /// <summary>
         /// 對話圖 ObjectField 值改變時的回調。
         /// </summary>
         /// <param name="evt">改變事件。</param>
         private void OnGraphFieldValueChanged(ChangeEvent<UnityEngine.Object> evt)
         {
             OnGraphSelected?.Invoke(evt.newValue as DialogueGraph);
-        }
-
-        /// <summary>
-        /// 全域狀態 ObjectField 值改變時的回調。
-        /// </summary>
-        /// <param name="evt">改變事件。</param>
-        private void OnStateFieldValueChanged(ChangeEvent<UnityEngine.Object> evt)
-        {
-            OnStateSelected?.Invoke(evt.newValue as DialogueStateAsset);
         }
 
         /// <summary>

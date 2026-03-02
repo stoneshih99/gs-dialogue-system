@@ -92,9 +92,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             // 建立 LocalizationTable
             CreateAsset<LocalizationTable>("LocalizationTable_" + _baseFileName);
 
-            // 建立 DialogueStateAsset
-            CreateAsset<DialogueStateAsset>("State_" + _baseFileName);
-
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 

@@ -32,6 +32,8 @@ MonoBehaviour:
   - rid: 273019851638571084
   - rid: 273019851638571091
   - rid: 273019854960459852
+  - rid: 6734174513240735819
+  - rid: 6734174513240735820
   onDialogueStarted:
     m_PersistentCalls:
       m_Calls: []
@@ -67,6 +69,8 @@ MonoBehaviour:
     position: {x: -13.5, y: 141}
   - nodeId: SEQ_1
     position: {x: -23, y: 577}
+  - nodeId: CharAct_3
+    position: {x: -0.5, y: 241}
   - nodeId: TEXT_4
     position: {x: -132, y: 436}
   - nodeId: TEXT_5
@@ -86,7 +90,7 @@ MonoBehaviour:
   - nodeId: SetBG_2
     position: {x: 386, y: 241}
   - nodeId: StageText_1
-    position: {x: -465, y: 255.5}
+    position: {x: -465, y: 139.5}
   - nodeId: CAM_1
     position: {x: -1076.5, y: 548}
   - nodeId: AUDIO_1
@@ -103,6 +107,12 @@ MonoBehaviour:
     position: {x: 217, y: 577}
   - nodeId: Anim_4
     position: {x: -1401.5, y: 566}
+  - nodeId: TextTranslate_1
+    position: {x: -671.5, y: 409}
+  - nodeId: TextTranslate_2
+    position: {x: -272, y: 317}
+  groups: []
+  stickyNotes: []
   references:
     version: 2
     RefIds:
@@ -249,6 +259,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: 
         postTypingDelay: 0.3
+        styleProfile: {fileID: 0}
         speakerName: "\u591C\u53C9\u738B"
         text: "\u5728\u4E00\u500B\u5929\u6C23\u6674\u90CE\u7684\u4E0B\u5348\u4E0D\u77E5\u9053\u8981\u5E79\u561B"
         IsInterruptible: 0
@@ -289,8 +300,9 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: TextTranslate_1
         postTypingDelay: 0.3
+        styleProfile: {fileID: 0}
         speakerName: '{Nickname}'
-        text: "\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002"
+        text: "\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002\u9019\u662F\u4E00\u6BB5\u666E\u901A\u7684\u6587\u5B57\uFF0C<shake>\u9019\u6BB5\u6587\u5B57\u6703\u9707\u52D5</shake>\uFF0C\u7136\u5F8C\u6062\u5FA9\u6B63\u5E38\u3002"
         IsInterruptible: 0
         InterruptEvent: {fileID: 0}
         InterruptNextNodeId: 
@@ -309,7 +321,7 @@ MonoBehaviour:
       data:
         nodeId: CharAct_2
         IsEnabled: 1
-        nextNodeId: Anim_2
+        nextNodeId: PARALLEL_1
         ActionType: 0
         TargetPosition: 0
         portraitRenderMode: 4
@@ -358,7 +370,7 @@ MonoBehaviour:
         nodeId: CharAct_3
         IsEnabled: 1
         nextNodeId: SetBG_2
-        ActionType: 0
+        ActionType: 1
         TargetPosition: 1
         portraitRenderMode: 2
         speakerName: NPC
@@ -366,7 +378,7 @@ MonoBehaviour:
         spinePortraitConfig:
           modelPrefab: {fileID: 3018829666159599951, guid: 523e2787e88b547979d243fb82201cf2, type: 3}
           skin: 
-          enterAnimation: fall
+          enterAnimation: idle
           loop: 1
           queuedAnimation: 
           queuedAnimationDelay: 0
@@ -381,9 +393,9 @@ MonoBehaviour:
           scaleX: 1
         spriteSheetPresenter: {fileID: 0}
         spriteSheetAnimationName: 
-        ForceReplace: 1
+        ForceReplace: 0
         ClearAllOnExit: 0
-        Duration: 0
+        Duration: 3
     - rid: 736264920620073073
       type: {class: SequenceNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
       data:
@@ -407,6 +419,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: TEXT_5
         postTypingDelay: 0.3
+        styleProfile: {fileID: 0}
         speakerName: "\u591C\u53C9\u738B"
         text: "\u5148\u9078\u64C7\u4F3A\u670D\u5668"
         IsInterruptible: 0
@@ -429,6 +442,7 @@ MonoBehaviour:
         IsEnabled: 1
         nextNodeId: WAIT_1
         postTypingDelay: 0.3
+        styleProfile: {fileID: 0}
         speakerName: '{Nickname}'
         text: "\u767B\u5165\u9B3C\u5CF6\u8A0E\u4F10\u60E1\u9B3C\u5427"
         IsInterruptible: 0
@@ -456,7 +470,7 @@ MonoBehaviour:
       data:
         nodeId: CharAct_4
         IsEnabled: 1
-        nextNodeId: Anim_3
+        nextNodeId: LOG_3
         ActionType: 0
         TargetPosition: 1
         portraitRenderMode: 2
@@ -570,3 +584,23 @@ MonoBehaviour:
         Loop: 0
         FadeDuration: 1
         nextNodeId: TEXT_2
+    - rid: 6734174513240735819
+      type: {class: TextNodeTranslateNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: 7be039e1-ca69-45db-af0d-d7df16990a91
+        IsEnabled: 1
+        mode: 1
+        duration: 0.5
+        slideOffset: {x: 0, y: -100}
+        ease: 5
+        nextNodeId: StageText_1
+    - rid: 6734174513240735820
+      type: {class: TextNodeTranslateNode, ns: SG.Dialogue.Nodes, asm: SG.Dialogue}
+      data:
+        nodeId: ae99c85a-594a-44f1-80af-23203e73ec31
+        IsEnabled: 1
+        mode: 0
+        duration: 0.5
+        slideOffset: {x: 0, y: -100}
+        ease: 5
+        nextNodeId: CharAct_3

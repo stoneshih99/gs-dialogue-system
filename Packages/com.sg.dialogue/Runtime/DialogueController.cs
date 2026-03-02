@@ -38,8 +38,7 @@ namespace SG.Dialogue
         [Header("圖表與狀態")]
         [Tooltip("要執行的對話圖 ScriptableObject。")]
         [SerializeField] private DialogueGraph graph;
-        [Tooltip("全域對話狀態，可在不同對話間共享。")]
-        [SerializeField] private DialogueStateAsset globalState;
+        private DialogueStateAsset _globalState = new DialogueStateAsset();
 
         [Header("流程控制覆寫")]
         [Tooltip("覆寫對話圖的自動前進設定。")]
@@ -96,7 +95,7 @@ namespace SG.Dialogue
         /// <summary>本地對話狀態，只在當前對話期間有效。</summary>
         public DialogueState LocalState => _localState;
         /// <summary>全域對話狀態，可在不同對話間共享。</summary>
-        public DialogueStateAsset GlobalState => globalState;
+        public DialogueStateAsset GlobalState => _globalState;
         
         /// <summary>提供給節點使用的協程運行器。</summary>
         public MonoBehaviour CoroutineRunner => this;
@@ -121,7 +120,7 @@ namespace SG.Dialogue
             if (visualManager == null) visualManager = GetComponent<DialogueVisualManager>();
             if (playerDataResolver == null) playerDataResolver = GetComponent<DialoguePlayerDataResolver>();
             if (cameraController == null) cameraController = GetComponent<DialogueCameraController>();
-            
+
             #if !UNITY_EDITOR
             debugLoggingEnabled = false;
             #endif
@@ -557,16 +556,16 @@ namespace SG.Dialogue
                 switch (change.type)
                 {
                     case VariableChange.VarType.Int:
-                        if (globalState != null && globalState.HasInt(change.variableName))
-                            globalState.AddInt(change.variableName, change.intDelta);
+                        if (_globalState != null && _globalState.HasInt(change.variableName))
+                            _globalState.AddInt(change.variableName, change.intDelta);
                         else
                             _localState.AddInt(change.variableName, change.intDelta);
                         break;
                     case VariableChange.VarType.Bool:
-                        if (globalState != null && globalState.HasBool(change.variableName))
+                        if (_globalState != null && _globalState.HasBool(change.variableName))
                         {
-                            if (change.setBool) globalState.SetBool(change.variableName, change.boolValue);
-                            else globalState.ToggleBool(change.variableName);
+                            if (change.setBool) _globalState.SetBool(change.variableName, change.boolValue);
+                            else _globalState.ToggleBool(change.variableName);
                         }
                         else
                         {
@@ -594,13 +593,13 @@ namespace SG.Dialogue
                 
                 // 查找順序: Local State -> Global State -> 外部解析器
                 if (_localState.HasString(varName)) return _localState.GetString(varName);
-                if (globalState != null && globalState.HasString(varName)) return globalState.GetString(varName);
+                if (_globalState != null && _globalState.HasString(varName)) return _globalState.GetString(varName);
                 
                 if (_localState.HasInt(varName)) return _localState.GetInt(varName).ToString();
-                if (globalState != null && globalState.HasInt(varName)) return globalState.GetInt(varName).ToString();
+                if (_globalState != null && _globalState.HasInt(varName)) return _globalState.GetInt(varName).ToString();
 
                 if (_localState.HasBool(varName)) return _localState.GetBool(varName).ToString();
-                if (globalState != null && globalState.HasBool(varName)) return globalState.GetBool(varName).ToString();
+                if (_globalState != null && _globalState.HasBool(varName)) return _globalState.GetBool(varName).ToString();
 
                 // 如果內部找不到，觸發外部事件讓其他系統解析
                 if (OnResolveVariable != null)

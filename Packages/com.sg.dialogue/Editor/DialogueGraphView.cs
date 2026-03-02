@@ -52,12 +52,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         public DialogueGraph Graph => _graph;
         private DialogueGraph _graph;
 
-        /// <summary>
-        /// 全域狀態資產，用於條件節點 (ConditionNode) 存取變數。
-        /// </summary>
-        public DialogueStateAsset GlobalState => _globalState;
-        private DialogueStateAsset _globalState;
-
         // --- Navigation (導覽狀態) ---
         
         /// <summary>
@@ -853,18 +847,6 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         #endregion
 
         #region Helpers & Utilities
-
-        /// <summary>
-        /// 設定全域變數狀態，並通知相關節點更新 UI (如 ConditionNode 的下拉選單)。
-        /// </summary>
-        public void SetGlobalState(DialogueStateAsset state)
-        {
-            _globalState = state;
-            foreach (var nodeView in _nodeViews.Values.OfType<ConditionNodeElement>())
-            {
-                nodeView.UpdateDropdowns(_globalState);
-            }
-        }
 
         /// <summary>
         /// 設定圖表的起始節點。

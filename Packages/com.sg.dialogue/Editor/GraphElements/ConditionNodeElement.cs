@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using SG.Dialogue.Conditions;
 using SG.Dialogue.Editor.Editor.GraphElements;
 using SG.Dialogue.Nodes;
@@ -25,7 +24,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
         private VisualElement _conditionContainer;
         private Action _onChanged;
 
-        public ConditionNodeElement(ConditionNode data, Action onChanged, DialogueStateAsset globalState) : base(data.nodeId)
+        public ConditionNodeElement(ConditionNode data, Action onChanged) : base(data.nodeId)
         {
             _data = data;
             _onChanged = onChanged;
@@ -44,39 +43,28 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             _conditionContainer = new VisualElement();
             mainContainer.Add(_conditionContainer);
 
-            UpdateDropdowns(globalState);
+            RebuildConditionUI();
         }
 
-        public void UpdateDropdowns(DialogueStateAsset globalState)
+        private void RebuildConditionUI()
         {
-            RebuildConditionUI(_conditionContainer, _data.Condition, _onChanged, globalState);
-        }
+            var container = _conditionContainer;
+            var condition = _data.Condition;
+            var onChanged = _onChanged;
 
-        private void RebuildConditionUI(VisualElement container, Condition condition, Action onChanged, DialogueStateAsset globalState)
-        {
             container.Clear();
 
-            var intChoices = globalState?.InitialInts.Select(p => p.key).ToList() ?? new List<string>();
-            var boolChoices = globalState?.InitialBools.Select(p => p.key).ToList() ?? new List<string>();
-
             container.Add(new Label("Int Conditions") { style = { unityFontStyleAndWeight = UnityEngine.FontStyle.Bold } });
-            container.Add(new Button(() => { condition.intConditions.Add(new IntCondition()); UpdateDropdowns(globalState); onChanged?.Invoke(); }) { text = "+ Int" });
+            container.Add(new Button(() => { condition.intConditions.Add(new IntCondition()); RebuildConditionUI(); onChanged?.Invoke(); }) { text = "+ Int" });
 
             for (int i = 0; i < condition.intConditions.Count; i++)
             {
                 var intCond = condition.intConditions[i];
                 var box = new Box { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
 
-                var currentVar = intCond.variableName;
-                var currentChoices = new List<string>(intChoices);
-                if (!string.IsNullOrEmpty(currentVar) && !currentChoices.Contains(currentVar))
-                {
-                    currentChoices.Insert(0, currentVar);
-                }
-
-                var popup = new PopupField<string>(currentChoices, currentVar ?? (currentChoices.Count > 0 ? currentChoices[0] : ""));
-                popup.RegisterValueChangedCallback(evt => { intCond.variableName = evt.newValue; onChanged?.Invoke(); });
-                box.Add(popup);
+                var varField = new TextField { value = intCond.variableName ?? "", style = { minWidth = 80 } };
+                varField.RegisterValueChangedCallback(evt => { intCond.variableName = evt.newValue; onChanged?.Invoke(); });
+                box.Add(varField);
 
                 var comparisonField = new EnumField("Comparison", intCond.comparison) { style = { minWidth = 80 } };
                 comparisonField.RegisterValueChangedCallback(evt => { intCond.comparison = (Comparison)evt.newValue; onChanged?.Invoke(); });
@@ -86,36 +74,29 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 valueField.RegisterValueChangedCallback(evt => { intCond.value = evt.newValue; onChanged?.Invoke(); });
                 box.Add(valueField);
 
-                var deleteButton = new Button(() => { condition.intConditions.Remove(intCond); UpdateDropdowns(globalState); onChanged?.Invoke(); }) { text = "-" };
+                var deleteButton = new Button(() => { condition.intConditions.Remove(intCond); RebuildConditionUI(); onChanged?.Invoke(); }) { text = "-" };
                 box.Add(deleteButton);
-                
+
                 container.Add(box);
             }
 
             container.Add(new Label("Bool Conditions") { style = { unityFontStyleAndWeight = UnityEngine.FontStyle.Bold, marginTop = 6 } });
-            container.Add(new Button(() => { condition.boolConditions.Add(new BoolCondition()); UpdateDropdowns(globalState); onChanged?.Invoke(); }) { text = "+ Bool" });
+            container.Add(new Button(() => { condition.boolConditions.Add(new BoolCondition()); RebuildConditionUI(); onChanged?.Invoke(); }) { text = "+ Bool" });
 
             for (int i = 0; i < condition.boolConditions.Count; i++)
             {
                 var boolCond = condition.boolConditions[i];
                 var box = new Box { style = { flexDirection = FlexDirection.Row, alignItems = Align.Center } };
 
-                var currentVar = boolCond.variableName;
-                var currentChoices = new List<string>(boolChoices);
-                if (!string.IsNullOrEmpty(currentVar) && !currentChoices.Contains(currentVar))
-                {
-                    currentChoices.Insert(0, currentVar);
-                }
-
-                var popup = new PopupField<string>(currentChoices, currentVar ?? (currentChoices.Count > 0 ? currentChoices[0] : ""));
-                popup.RegisterValueChangedCallback(evt => { boolCond.variableName = evt.newValue; onChanged?.Invoke(); });
-                box.Add(popup);
+                var varField = new TextField { value = boolCond.variableName ?? "", style = { minWidth = 80 } };
+                varField.RegisterValueChangedCallback(evt => { boolCond.variableName = evt.newValue; onChanged?.Invoke(); });
+                box.Add(varField);
 
                 var valueToggle = new Toggle("Required Value") { value = boolCond.requiredValue };
                 valueToggle.RegisterValueChangedCallback(evt => { boolCond.requiredValue = evt.newValue; onChanged?.Invoke(); });
                 box.Add(valueToggle);
 
-                var deleteButton = new Button(() => { condition.boolConditions.Remove(boolCond); UpdateDropdowns(globalState); onChanged?.Invoke(); }) { text = "-" };
+                var deleteButton = new Button(() => { condition.boolConditions.Remove(boolCond); RebuildConditionUI(); onChanged?.Invoke(); }) { text = "-" };
                 box.Add(deleteButton);
 
                 container.Add(box);
