@@ -40,7 +40,9 @@ namespace SG.Dialogue.UI
         [SerializeField] private Button skipButton;
         [Tooltip("全螢幕點擊前進的透明按鈕")]
         [SerializeField] private Button fullscreenAdvanceButton;
-
+        [Tooltip("自動前進下一句對話的開關")]
+        [SerializeField] private Toggle autoAdvanceToggle;
+        
         [Header("選項")]
         [Tooltip("選項按鈕的根容器")]
         [SerializeField] private RectTransform choicesRoot;
@@ -74,6 +76,8 @@ namespace SG.Dialogue.UI
         /// 當前是否正在進行打字機效果。
         /// </summary>
         public bool IsTyping => dialogueTextPresenter != null && dialogueTextPresenter.IsTyping;
+
+        private const string AutoAdvancePrefsKey = "SG_Dialogue_AutoAdvance";
 
         private Vector2 _rootPanelDefaultPos;
         private Vector2 _dialoguePanelDefaultPos;
@@ -118,6 +122,8 @@ namespace SG.Dialogue.UI
             if (nextButton != null) nextButton.onClick.AddListener(HandleNextClick);
             if (skipButton != null) skipButton.onClick.AddListener(() => OnSkipRequested?.Invoke());
             if (fullscreenAdvanceButton != null) fullscreenAdvanceButton.onClick.AddListener(HandleFullscreenClick);
+
+            InitAutoAdvanceToggle();
             
             if (rootPanel != null)
             {
@@ -162,6 +168,30 @@ namespace SG.Dialogue.UI
         private void HandleFullscreenClick()
         {
             if (clickAnywhereToAdvance) HandleNextClick();
+        }
+
+        private void InitAutoAdvanceToggle()
+        {
+            if (autoAdvanceToggle == null) return;
+
+            bool saved = PlayerPrefs.GetInt(AutoAdvancePrefsKey, 0) == 1;
+            autoAdvanceToggle.SetIsOnWithoutNotify(saved);
+            ApplyAutoAdvanceState(saved);
+
+            autoAdvanceToggle.onValueChanged.AddListener(OnAutoAdvanceToggleChanged);
+        }
+
+        private void OnAutoAdvanceToggleChanged(bool isOn)
+        {
+            PlayerPrefs.SetInt(AutoAdvancePrefsKey, isOn ? 1 : 0);
+            PlayerPrefs.Save();
+            ApplyAutoAdvanceState(isOn);
+        }
+
+        private void ApplyAutoAdvanceState(bool isOn)
+        {
+            if (dialogueController == null) return;
+            dialogueController.autoAdvanceOverride = isOn ? AutoAdvanceMode.ForceEnable : AutoAdvanceMode.Default;
         }
 
 
