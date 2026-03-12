@@ -12,6 +12,7 @@ namespace SG.Dialogue.Nodes
     /// AnimationNode 用於在對話中觸發 LitMotion 動畫。
     /// 它可以指定要對哪個位置的角色（左、中、右）播放一或多個動畫。
     /// </summary>
+    [System.Serializable]  
     public class AnimationNode : DialogueNodeBase
     {
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。如果留空，對話將在此節點後結束。")]

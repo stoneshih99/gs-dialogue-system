@@ -11,6 +11,7 @@ namespace SG.Dialogue.Nodes
     /// <summary>
     /// CharacterActionNode 用於控制角色立繪的進場與退場。
     /// </summary>
+    [System.Serializable] 
     public class CharacterActionNode : DialogueNodeBase
     {
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]

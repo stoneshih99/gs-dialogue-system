@@ -8,6 +8,7 @@ namespace SG.Dialogue.Nodes
     /// <summary>
     /// SetBackgroundNode 用於控制對話中的背景視覺效果。
     /// </summary>
+    [System.Serializable]      
     public class SetBackgroundNode : DialogueNodeBase
     {
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
