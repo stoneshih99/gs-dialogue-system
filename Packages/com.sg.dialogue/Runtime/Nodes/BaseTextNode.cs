@@ -12,6 +12,7 @@ namespace SG.Dialogue.Nodes
     /// 它統一處理了文字準備（本地化、變數格式化）和流程控制（自動前進、等待輸入）的邏輯。
     /// 子類別只需要實作如何「顯示」文字的核心行為。
     /// </summary>
+    [Serializable]
     public abstract class BaseTextNode : DialogueNodeBase
     {
         [Header("流程控制")]
