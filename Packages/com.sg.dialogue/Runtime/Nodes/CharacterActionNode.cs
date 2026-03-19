@@ -31,22 +31,30 @@ namespace SG.Dialogue.Nodes
         public string speakerName;
 
         [Header("Sprite Settings")]
-        [Tooltip("要顯示的角色 Sprite。僅在 Sprite 模式下有效。")]
+        [Tooltip("要顯示的角色 Sprite。僅在 Sprite 模式下有效。（若設定了 resourceKey，此欄位將被忽略）")]
         public Sprite characterSprite;
+        [Tooltip("角色 Sprite 的資源 Key（用於透過 DialogueResourceBridge 延遲載入）。")]
+        public string characterSpriteKey;
 
         [Header("Spine Settings")]
         [Tooltip("Spine 立繪的設定。僅在 Spine 模式下有效。")]
         public SpinePortraitConfig spinePortraitConfig;
+        [Tooltip("Spine 模型 Prefab 的資源 Key（用於透過 DialogueResourceBridge 延遲載入）。")]
+        public string spineModelPrefabKey;
 
         [Header("Live2D Settings")]
-        [Tooltip("Live2D 模型的 Prefab。僅在 Live2D 模式下有效。")]
+        [Tooltip("Live2D 模型的 Prefab。僅在 Live2D 模式下有效。（若設定了 resourceKey，此欄位將被忽略）")]
         public GameObject live2DModelPrefab;
+        [Tooltip("Live2D 模型 Prefab 的資源 Key（用於透過 DialogueResourceBridge 延遲載入）。")]
+        public string live2DModelPrefabKey;
         [Tooltip("Live2D 立繪的設定。僅在 Live2D 模式下有效。")]
         public Live2DPortraitConfig live2DPortraitConfig;
 
-        [Tooltip("Sprite Sheet 立繪的設定。僅在 Sprite Sheet 模式下有效。")]
+        [Tooltip("Sprite Sheet 立繪的設定。僅在 Sprite Sheet 模式下有效。（若設定了 resourceKey，此欄位將被忽略）")]
         public GameObject spriteSheetPresenter;
-        
+        [Tooltip("Sprite Sheet Presenter 的資源 Key（用於透過 DialogueResourceBridge 延遲載入）。")]
+        public string spriteSheetPresenterKey;
+
         [Tooltip("要播放的 Sprite Sheet 動畫名稱。僅在 Sprite Sheet 模式下有效。")]
         public string spriteSheetAnimationName;
 

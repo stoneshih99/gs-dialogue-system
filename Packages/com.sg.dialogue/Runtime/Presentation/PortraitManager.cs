@@ -6,6 +6,7 @@ using LitMotion.Extensions;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Nodes;
+using SG.Dialogue.Resource;
 using UnityEngine;
 
 namespace SG.Dialogue.Presentation
@@ -36,6 +37,7 @@ namespace SG.Dialogue.Presentation
 
         private readonly Dictionary<CharacterPosition, Transform> _stageLookup = new();
         private readonly Dictionary<CharacterPosition, CharacterState> _activeCharacters = new();
+        private readonly List<string> _loadedResourceKeys = new();
 
         private void Awake()
         {
@@ -128,12 +130,6 @@ namespace SG.Dialogue.Presentation
         {
             if (!_stageLookup.TryGetValue(node.TargetPosition, out var stage) || stage == null) return;
 
-            // 這裡的 ClearCharacterAt 會導致問題，如果 duration > 0
-            // 因為它會啟動一個非同步的 WaitAndDestroy，但我們馬上就要在這個位置生成新的角色
-            // 如果舊的角色還沒被銷毀，新的角色可能會被舊的擋住，或者位置重疊
-            // 修正：如果是 Enter 動作且該位置已有角色，應該立即銷毀舊的，或者等待舊的消失後再生成新的
-            // 但通常 Enter 動作隱含了「替換」的意思，所以應該立即清理舊的狀態
-            
             // 為了避免「退場動畫還沒播完，新角色就進來」導致的視覺混亂，
             // 這裡我們強制以 0 秒清除該位置的舊角色（如果有的話），確保舞台是乾淨的。
             // 如果使用者想要「舊角色淡出 -> 新角色淡入」，應該在圖表中顯式安排一個 Exit 節點，然後才是 Enter 節點。
@@ -148,28 +144,39 @@ namespace SG.Dialogue.Presentation
                     characterInstance = new GameObject("SpritePortrait");
                     var imagePresenter = characterInstance.AddComponent<ImageDialoguePortraitPresenter>();
                     presenter = imagePresenter;
-                    // 先初始化，稍後顯示
                     break;
 #if SPINE_KIT_AVAILABLE
                 case PortraitRenderMode.Spine:
-                    characterInstance = Instantiate(node.spinePortraitConfig.modelPrefab);
+                {
+                    var prefab = await ResolveAsset<GameObject>(node.spineModelPrefabKey, node.spinePortraitConfig?.modelPrefab);
+                    if (prefab == null) return;
+                    characterInstance = Instantiate(prefab);
                     var spinePresenter = characterInstance.GetComponent<SpineDialoguePortraitPresenter>();
                     if (spinePresenter == null) spinePresenter = characterInstance.AddComponent<SpineDialoguePortraitPresenter>();
                     presenter = spinePresenter;
                     break;
+                }
 #endif
 #if LIVE2D_KIT_AVAILABLE
                 case PortraitRenderMode.Live2D:
-                    characterInstance = Instantiate(node.live2DModelPrefab);
+                {
+                    var prefab = await ResolveAsset<GameObject>(node.live2DModelPrefabKey, node.live2DModelPrefab);
+                    if (prefab == null) return;
+                    characterInstance = Instantiate(prefab);
                     var live2DPresenter = characterInstance.GetComponent<Live2DDialoguePortraitPresenter>();
                     presenter = live2DPresenter;
                     break;
+                }
 #endif
                 case PortraitRenderMode.SpriteSheet:
-                    characterInstance = Instantiate(node.spriteSheetPresenter);
+                {
+                    var prefab = await ResolveAsset<GameObject>(node.spriteSheetPresenterKey, node.spriteSheetPresenter);
+                    if (prefab == null) return;
+                    characterInstance = Instantiate(prefab);
                     var spriteSheetPresenter = characterInstance.GetComponent<SpriteSheetDialoguePortraitPresenter>();
                     presenter = spriteSheetPresenter;
                     break;
+                }
             }
 
             if (characterInstance != null && presenter != null)
@@ -182,8 +189,11 @@ namespace SG.Dialogue.Presentation
                 switch (node.portraitRenderMode)
                 {
                     case PortraitRenderMode.Sprite:
-                        await presenter.ShowSprite(node.characterSprite, duration);
+                    {
+                        var sprite = await ResolveAsset<Sprite>(node.characterSpriteKey, node.characterSprite);
+                        await presenter.ShowSprite(sprite, duration);
                         break;
+                    }
 #if SPINE_KIT_AVAILABLE
                     case PortraitRenderMode.Spine:
                         await presenter.ShowSpine(node.spinePortraitConfig, duration);
@@ -221,7 +231,10 @@ namespace SG.Dialogue.Presentation
                 await spinePresenter.ShowSpine(node.spinePortraitConfig, 0f);
 #endif
             else if (node.portraitRenderMode == PortraitRenderMode.Sprite && existingState.Presenter is ImageDialoguePortraitPresenter imagePresenter)
-                await imagePresenter.ShowSprite(node.characterSprite, 0f);
+            {
+                var sprite = await ResolveAsset<Sprite>(node.characterSpriteKey, node.characterSprite);
+                await imagePresenter.ShowSprite(sprite, 0f);
+            }
         }
 
         private async UniTask ClearCharacterAt(CharacterPosition position, float duration)
@@ -267,6 +280,36 @@ namespace SG.Dialogue.Presentation
             if (leftPortraitStage != null) _stageLookup[CharacterPosition.Left] = leftPortraitStage;
             if (centerPortraitStage != null) _stageLookup[CharacterPosition.Center] = centerPortraitStage;
             if (rightPortraitStage != null) _stageLookup[CharacterPosition.Right] = rightPortraitStage;
+        }
+
+        /// <summary>
+        /// 解析資源：優先透過 Bridge 以 key 載入，否則 fallback 到直接引用。
+        /// </summary>
+        private async UniTask<T> ResolveAsset<T>(string resourceKey, T directReference) where T : UnityEngine.Object
+        {
+            if (!string.IsNullOrEmpty(resourceKey) && DialogueResourceBridge.HasProvider)
+            {
+                var asset = await DialogueResourceBridge.LoadAsync<T>(resourceKey);
+                if (asset != null)
+                {
+                    _loadedResourceKeys.Add(resourceKey);
+                    return asset;
+                }
+                Debug.LogWarning($"[PortraitManager] 無法透過 Bridge 載入資源 '{resourceKey}'，嘗試使用直接引用。");
+            }
+            return directReference;
+        }
+
+        /// <summary>
+        /// 釋放所有透過 Bridge 載入的資源。應在對話結束時呼叫。
+        /// </summary>
+        public void ReleaseAllResources()
+        {
+            foreach (var key in _loadedResourceKeys)
+            {
+                DialogueResourceBridge.Release(key);
+            }
+            _loadedResourceKeys.Clear();
         }
     }
 }

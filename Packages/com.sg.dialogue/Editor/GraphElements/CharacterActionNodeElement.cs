@@ -25,13 +25,17 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
         private Toggle _clearAllField;
         private Toggle _forceReplaceField; // 新增
         private ObjectField _spriteField;
+        private TextField _spriteKeyField;
         private Image _spritePreview; // Sprite 預覽圖
         private Foldout _spineConfigBox;
+        private TextField _spineKeyField;
         private Image _spinePreview; // Spine 預覽圖
 #if LIVE2D_KIT_AVAILABLE
         private Foldout _live2DConfigBox;
+        private TextField _live2DKeyField;
 #endif
         private Foldout _spriteSheetConfigBox;
+        private TextField _spriteSheetKeyField;
         private Image _spriteSheetPreview; // SpriteSheet 預覽圖
         private FloatField _durationField;
 
@@ -92,6 +96,13 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                 onChanged?.Invoke();
             });
             mainContainer.Add(_spriteField);
+
+            _spriteKeyField = CreateTextField("Sprite Key", _data.characterSpriteKey, value =>
+            {
+                _data.characterSpriteKey = value;
+                onChanged?.Invoke();
+            });
+            mainContainer.Add(_spriteKeyField);
 
             BuildSpineConfig(onChanged);
 #if LIVE2D_KIT_AVAILABLE
@@ -273,7 +284,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     onChanged?.Invoke();
                 });
 
+            _spineKeyField = CreateTextField("Model Key", _data.spineModelPrefabKey, value =>
+            {
+                _data.spineModelPrefabKey = value;
+                onChanged?.Invoke();
+            });
+
             _spineConfigBox.Add(spineModelField);
+            _spineConfigBox.Add(_spineKeyField);
             _spineConfigBox.Add(spineAnimField);
             mainContainer.Add(_spineConfigBox);
         }
@@ -310,7 +328,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                     onChanged?.Invoke();
                 });
 
+            _live2DKeyField = CreateTextField("Model Key", _data.live2DModelPrefabKey, value =>
+            {
+                _data.live2DModelPrefabKey = value;
+                onChanged?.Invoke();
+            });
+
             _live2DConfigBox.Add(live2DModelField);
+            _live2DConfigBox.Add(_live2DKeyField);
             _live2DConfigBox.Add(live2DExpressionField);
             mainContainer.Add(_live2DConfigBox);
         }
@@ -404,7 +429,14 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
                 onChanged?.Invoke();
             });
 
+            _spriteSheetKeyField = CreateTextField("Presenter Key", _data.spriteSheetPresenterKey, value =>
+            {
+                _data.spriteSheetPresenterKey = value;
+                onChanged?.Invoke();
+            });
+
             _spriteSheetConfigBox.Add(spriteSheetConfigField);
+            _spriteSheetConfigBox.Add(_spriteSheetKeyField);
             _spriteSheetConfigBox.Add(spriteSheetAnimationField);
             _spriteSheetConfigBox.Add(fpsField);
             _spriteSheetConfigBox.Add(loopField);
@@ -437,9 +469,10 @@ namespace SG.Dialogue.Editor.Editor.GraphElements
 
             if (_spriteField != null)
             {
-                _spriteField.style.display = isEnter && _data.portraitRenderMode == PortraitRenderMode.Sprite
-                    ? DisplayStyle.Flex
-                    : DisplayStyle.None;
+                var spriteVisible = isEnter && _data.portraitRenderMode == PortraitRenderMode.Sprite;
+                _spriteField.style.display = spriteVisible ? DisplayStyle.Flex : DisplayStyle.None;
+                if (_spriteKeyField != null)
+                    _spriteKeyField.style.display = spriteVisible ? DisplayStyle.Flex : DisplayStyle.None;
             }
             
             if (_spritePreview != null)

@@ -20,6 +20,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
         // UI 引用
         private PropertyField _prefabField;
+        private PropertyField _prefabKeyField;
         private PropertyField _positionField;
         private PropertyField _scaleField;
         
@@ -64,6 +65,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
 
                 // Prefab
                 _prefabField = AddPropertyField(nodeProperty, "ParticlePrefab", "Prefab");
+                _prefabKeyField = AddPropertyField(nodeProperty, "ParticlePrefabKey", "Prefab Key");
                 
                 // Position & Edit Button
                 _positionField = AddPropertyField(nodeProperty, "Position", "Position");
@@ -100,6 +102,7 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
             DisplayStyle style = isPlay ? DisplayStyle.Flex : DisplayStyle.None;
 
             if (_prefabField != null) _prefabField.style.display = style;
+            if (_prefabKeyField != null) _prefabKeyField.style.display = style;
             if (_positionField != null) _positionField.style.display = style;
             if (_scaleField != null) _scaleField.style.display = style;
             if (_editButton != null) _editButton.style.display = style;

@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Enums;
 using SG.Dialogue.Events;
+using SG.Dialogue.Resource;
 using UnityEngine;
 
 namespace SG.Dialogue.Nodes
@@ -22,8 +23,10 @@ namespace SG.Dialogue.Nodes
         [Tooltip("粒子 ID (用於識別和停止特定粒子)")]
         public string ParticleID;
 
-        [Tooltip("要播放的粒子 Prefab (僅 Play 模式需要)")]
+        [Tooltip("要播放的粒子 Prefab (僅 Play 模式需要)。（若設定了 resourceKey，此欄位將被忽略）")]
         public GameObject ParticlePrefab;
+        [Tooltip("粒子 Prefab 的資源 Key（用於透過 DialogueResourceBridge 延遲載入）。")]
+        public string ParticlePrefabKey;
 
         [Header("變形設定")]
         public Vector3 Position;
@@ -38,7 +41,16 @@ namespace SG.Dialogue.Nodes
         {
             if (ParticleEvent != null)
             {
-                var request = new ParticleRequest(ActionType, ParticleID, ParticlePrefab, Position, Scale);
+                // 透過 Bridge 延遲載入粒子 Prefab，或 fallback 到直接引用
+                GameObject prefab = ParticlePrefab;
+                if (!string.IsNullOrEmpty(ParticlePrefabKey) && DialogueResourceBridge.HasProvider)
+                {
+                    var loaded = await DialogueResourceBridge.LoadAsync<GameObject>(ParticlePrefabKey);
+                    if (loaded != null) prefab = loaded;
+                    else Debug.LogWarning($"[ParticleNode] 無法透過 Bridge 載入資源 '{ParticlePrefabKey}'，嘗試使用直接引用。");
+                }
+
+                var request = new ParticleRequest(ActionType, ParticleID, prefab, Position, Scale);
                 ParticleEvent.Raise(request);
             }
             else

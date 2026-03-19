@@ -14,8 +14,10 @@ namespace SG.Dialogue.Nodes
         [Tooltip("此節點執行完畢後，要前往的下一個節點 ID。")]
         public string nextNodeId;
 
-        [Tooltip("要設定的背景圖片。如果留空，則只會執行清除或黑屏操作。")]
+        [Tooltip("要設定的背景圖片。如果留空，則只會執行清除或黑屏操作。（若設定了 resourceKey，此欄位將被忽略）")]
         public Sprite backgroundSprite;
+        [Tooltip("背景 Sprite 的資源 Key（用於透過 DialogueResourceBridge 延遲載入）。")]
+        public string backgroundSpriteKey;
         
         [Tooltip("要顯示的背景圖片索引。")]
         public int spriteIndex;

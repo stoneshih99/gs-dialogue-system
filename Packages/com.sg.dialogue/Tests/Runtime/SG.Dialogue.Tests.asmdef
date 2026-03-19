@@ -1,10 +1,13 @@
 {
     "name": "SG.Dialogue.Tests",
+    "rootNamespace": "",
     "references": [
         "SG.Dialogue",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UniTask"
+        "UniTask",
+        "Unity.Addressables",
+        "UniTask.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

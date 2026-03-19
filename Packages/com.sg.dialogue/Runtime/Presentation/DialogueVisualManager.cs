@@ -2,6 +2,7 @@ using System;
 using Cysharp.Threading.Tasks;
 using SG.Dialogue.Animation;
 using SG.Dialogue.Nodes;
+using SG.Dialogue.Resource;
 using SG.Dialogue.Utils;
 using UnityEngine;
 
@@ -110,6 +111,17 @@ namespace SG.Dialogue.Presentation
                 // 為了簡單起見，我們暫時略過這裡，或者在 PortraitManager 中添加 FlickerCharacter 方法
                 await UniTask.CompletedTask;
             }
+        }
+
+        /// <summary>
+        /// 釋放所有透過 DialogueResourceBridge 載入的資源。
+        /// 應在對話結束時由 DialogueController 呼叫。
+        /// </summary>
+        public void ReleaseAllResources()
+        {
+            if (portraitManager != null) portraitManager.ReleaseAllResources();
+            if (backgroundManager != null) backgroundManager.ReleaseAllResources();
+            DialogueResourceBridge.ReleaseAll();
         }
     }
 }

@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using SG.Dialogue.Core.Instructions;
 using SG.Dialogue.Nodes;
 using SG.Dialogue.Presentation;
+using SG.Dialogue.Resource;
 using SG.Dialogue.UI;
 using SG.Dialogue.VariableResolver;
 using SG.Dialogue.Variables;
@@ -156,11 +157,12 @@ namespace SG.Dialogue
 
         /// <summary>
         /// 開始一段新的對話。如果已有對話正在運行，會先將其結束。
+        /// 如果已註冊 DialogueResourceBridge 的 Provider，會先預載入圖表中所有資源再開始。
         /// </summary>
         /// <param name="newGraph">要開始的對話圖。</param>
         /// <param name="playerDataVariables">用於在運行時替換文本變數的字典。</param>
         /// <exception cref="ArgumentNullException">如果 newGraph 的 startNodeId 為空或未指定。</exception>
-        public void StartDialogue(DialogueGraph newGraph, Dictionary<string, string> playerDataVariables=null)
+        public async UniTask StartDialogueAsync(DialogueGraph newGraph, Dictionary<string, string> playerDataVariables = null)
         {
             if (IsRunning)
             {
@@ -175,6 +177,53 @@ namespace SG.Dialogue
             graph = newGraph;
             graph.BuildLookup(); // 建立節點查找表以提高效能
 
+            // 預載入圖表中所有資源（在對話開始前完成，避免對話中載入造成掉幀）
+            if (DialogueResourceBridge.HasProvider)
+            {
+                var resourceKeys = graph.CollectAllResourceKeys();
+                if (resourceKeys.Count > 0)
+                {
+                    if (debugLoggingEnabled)
+                        Debug.Log($"[DialogueController] 預載入 {resourceKeys.Count} 個資源...");
+
+                    await DialogueResourceBridge.PreloadAsync(resourceKeys);
+
+                    if (debugLoggingEnabled)
+                        Debug.Log("[DialogueController] 資源預載入完成。");
+                }
+            }
+
+            InitializeDialogueState(playerDataVariables);
+            Advance(graph.startNodeId);
+        }
+
+        /// <summary>
+        /// 開始一段新的對話（同步版本，不預載入資源）。
+        /// 若需要資源預載入以避免掉幀，請使用 StartDialogueAsync。
+        /// </summary>
+        public void StartDialogue(DialogueGraph newGraph, Dictionary<string, string> playerDataVariables = null)
+        {
+            if (IsRunning)
+            {
+                EndDialogue();
+            }
+
+            if (string.IsNullOrEmpty(newGraph.startNodeId))
+            {
+                throw new ArgumentNullException(nameof(newGraph), "newGraph.startNodeId must be specified.");
+            }
+
+            graph = newGraph;
+            graph.BuildLookup();
+            InitializeDialogueState(playerDataVariables);
+            Advance(graph.startNodeId);
+        }
+
+        /// <summary>
+        /// 初始化對話狀態（共用邏輯，供 sync / async 版本呼叫）。
+        /// </summary>
+        private void InitializeDialogueState(Dictionary<string, string> playerDataVariables)
+        {
             // 建立新的 CancellationTokenSource 用於取消對話中的非同步操作
             _dialogueCts?.Cancel();
             _dialogueCts?.Dispose();
@@ -186,13 +235,11 @@ namespace SG.Dialogue
 
             if (playerDataVariables != null)
             {
-                // 方法1: 將變數加入到 LocalState 作為字串變數（直接解析，不需要額外組件）
                 foreach (var entry in playerDataVariables.ToList())
                 {
                     _localState.SetString(entry.Key, entry.Value);
                 }
-                
-                // 方法2: 如果有 DialoguePlayerDataResolver，也將變數加入其中（供外部事件解析使用）
+
                 if (playerDataResolver != null)
                 {
                     foreach (var entry in playerDataVariables.ToList())
@@ -208,15 +255,13 @@ namespace SG.Dialogue
                     }
                 }
             }
-            
+
             uiManager.SetPanelVisibility(true);
             uiManager.SetSkipButtonVisibility(graph.IsSkippable);
-            
+
             IsRunning = true;
             onDialogueStarted?.Invoke();
             graph?.onDialogueStarted?.Invoke();
-
-            Advance(graph.startNodeId);
         }
 
         /// <summary>
@@ -227,7 +272,7 @@ namespace SG.Dialogue
             if (graph == null) { Debug.LogError("DialogueController: DialogueGraph is null."); return; }
             StartDialogue(graph);
         }
-        
+
         /// <summary>
         /// 使用目前已設定的對話圖開始對話，並提供玩家資料變數。
         /// </summary>
@@ -236,6 +281,24 @@ namespace SG.Dialogue
         {
             if (graph == null) { Debug.LogError("DialogueController: DialogueGraph is null."); return; }
             StartDialogue(graph, playerDataVariables);
+        }
+
+        /// <summary>
+        /// 使用目前已設定的對話圖非同步開始對話（含資源預載入）。
+        /// </summary>
+        public async UniTask StartDialogueAsync()
+        {
+            if (graph == null) { Debug.LogError("DialogueController: DialogueGraph is null."); return; }
+            await StartDialogueAsync(graph);
+        }
+
+        /// <summary>
+        /// 使用目前已設定的對話圖非同步開始對話（含資源預載入），並提供玩家資料變數。
+        /// </summary>
+        public async UniTask StartDialogueAsync(Dictionary<string, string> playerDataVariables)
+        {
+            if (graph == null) { Debug.LogError("DialogueController: DialogueGraph is null."); return; }
+            await StartDialogueAsync(graph, playerDataVariables);
         }
 
         /// <summary>
@@ -518,6 +581,9 @@ namespace SG.Dialogue
             }
 
             uiManager.SetPanelVisibility(false);
+
+            // 釋放所有透過 Bridge 載入的資源
+            if (visualManager != null) visualManager.ReleaseAllResources();
 
             onDialogueEnded?.Invoke();
             graph?.onDialogueEnded?.Invoke();

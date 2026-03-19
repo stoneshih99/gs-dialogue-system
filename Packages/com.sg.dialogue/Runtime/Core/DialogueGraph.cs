@@ -237,27 +237,75 @@ namespace SG.Dialogue
        private void GetAllNodeIdsRecursively(List<DialogueNodeBase> nodes, HashSet<string> allNodeIds)
         {
             if (nodes == null || allNodeIds == null) return;
-        
+
             foreach (var node in nodes)
             {
                 if (node == null) continue;
-        
+
                 if (!string.IsNullOrEmpty(node.nodeId))
                 {
                     allNodeIds.Add(node.nodeId);
                 }
-        
+
                 switch (node)
                 {
                     case SequenceNode { childNodes: { Count: > 0 } } sequenceNode:
                         GetAllNodeIdsRecursively(sequenceNode.childNodes, allNodeIds);
                         break;
-        
+
                     case ParallelNode { childNodes: { Count: > 0 } } parallelNode:
                         GetAllNodeIdsRecursively(parallelNode.childNodes, allNodeIds);
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// 收集此對話圖中所有節點上設定的 resourceKey，用於在對話開始前預載入資源。
+        /// </summary>
+        /// <returns>不重複的 resourceKey 集合。</returns>
+        public HashSet<string> CollectAllResourceKeys()
+        {
+            var keys = new HashSet<string>();
+            CollectResourceKeysRecursively(AllNodes, keys);
+            return keys;
+        }
+
+        private void CollectResourceKeysRecursively(List<DialogueNodeBase> nodes, HashSet<string> keys)
+        {
+            if (nodes == null) return;
+
+            foreach (var node in nodes)
+            {
+                if (node == null) continue;
+
+                switch (node)
+                {
+                    case CharacterActionNode ca:
+                        AddIfNotEmpty(keys, ca.characterSpriteKey);
+                        AddIfNotEmpty(keys, ca.spineModelPrefabKey);
+                        AddIfNotEmpty(keys, ca.live2DModelPrefabKey);
+                        AddIfNotEmpty(keys, ca.spriteSheetPresenterKey);
+                        break;
+                    case SetBackgroundNode bg:
+                        AddIfNotEmpty(keys, bg.backgroundSpriteKey);
+                        break;
+                    case ParticleNode pt:
+                        AddIfNotEmpty(keys, pt.ParticlePrefabKey);
+                        break;
+                    case SequenceNode { childNodes: { Count: > 0 } } seq:
+                        CollectResourceKeysRecursively(seq.childNodes, keys);
+                        break;
+                    case ParallelNode { childNodes: { Count: > 0 } } par:
+                        CollectResourceKeysRecursively(par.childNodes, keys);
+                        break;
+                }
+            }
+        }
+
+        private static void AddIfNotEmpty(HashSet<string> set, string value)
+        {
+            if (!string.IsNullOrEmpty(value)) set.Add(value);
         }
     }
 }

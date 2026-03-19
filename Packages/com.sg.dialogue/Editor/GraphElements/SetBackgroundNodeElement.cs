@@ -36,6 +36,14 @@ namespace SG.Dialogue.Editor.Dialogue.Editor
                 _data.backgroundSprite = e.newValue as Sprite; onChanged?.Invoke();
             });
             mainContainer.Add(bgField);
+
+            var bgKeyField = new TextField("Resource Key") { value = _data.backgroundSpriteKey ?? "" };
+            bgKeyField.RegisterValueChangedCallback(e =>
+            {
+                _data.backgroundSpriteKey = e.newValue;
+                onChanged?.Invoke();
+            });
+            mainContainer.Add(bgKeyField);
             
             // 依據當前指定的 spriteIndex 取得對應的 Sprite，並顯示預覽
             var spritePreview = new Image();
