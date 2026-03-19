@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -25,7 +26,8 @@ namespace SG.Dialogue.Resource
         /// 預設實作會逐一呼叫 LoadAsync，子類別可覆寫以實作更高效的批次載入。
         /// </summary>
         /// <param name="keys">要預載入的資源 key 列表。</param>
-        UniTask PreloadAsync(IEnumerable<string> keys);
+        /// <param name="onProgress">載入進度回調 (0.0 ~ 1.0)，可用於顯示 Loading 畫面。傳入 null 則不回報進度。</param>
+        UniTask PreloadAsync(IEnumerable<string> keys, Action<float> onProgress = null);
 
         /// <summary>
         /// 釋放指定 key 的已載入資源。

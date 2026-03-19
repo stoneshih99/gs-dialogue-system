@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -53,10 +54,35 @@ namespace SG.Dialogue.Resource
         /// 批次預載入多個資源 key。在對話開始前呼叫，避免對話中逐一載入造成掉幀。
         /// </summary>
         /// <param name="keys">要預載入的資源 key 列表。</param>
-        public static async UniTask PreloadAsync(IEnumerable<string> keys)
+        /// <param name="onProgress">載入進度回調 (0.0 ~ 1.0)，可用於顯示 Loading 畫面。</param>
+        public static async UniTask PreloadAsync(IEnumerable<string> keys, Action<float> onProgress = null)
         {
             if (_provider == null || keys == null) return;
-            await _provider.PreloadAsync(keys);
+            await _provider.PreloadAsync(keys, onProgress);
+        }
+
+        /// <summary>
+        /// 解析資源：優先透過 Bridge 以 key 載入，否則 fallback 到直接引用。
+        /// 統一供各 Manager 使用，避免重複程式碼。
+        /// </summary>
+        /// <typeparam name="T">資源類型。</typeparam>
+        /// <param name="resourceKey">資源 key（可為 null 或空）。</param>
+        /// <param name="directReference">節點上的直接引用（fallback 用）。</param>
+        /// <param name="loadedKeys">已載入 key 的追蹤列表，成功載入時會加入。</param>
+        /// <returns>解析後的資源。</returns>
+        public static async UniTask<T> ResolveAsset<T>(string resourceKey, T directReference, List<string> loadedKeys = null) where T : UnityEngine.Object
+        {
+            if (!string.IsNullOrEmpty(resourceKey) && HasProvider)
+            {
+                var asset = await LoadAsync<T>(resourceKey);
+                if (asset != null)
+                {
+                    loadedKeys?.Add(resourceKey);
+                    return asset;
+                }
+                Debug.LogWarning($"[DialogueResourceBridge] 無法載入資源 '{resourceKey}'，使用直接引用。");
+            }
+            return directReference;
         }
 
         /// <summary>

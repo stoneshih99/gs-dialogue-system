@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -21,16 +23,35 @@ namespace SG.Dialogue.Resource
         public abstract void ReleaseAll();
 
         /// <summary>
-        /// 批次預載入。預設以 Object 類型逐一載入，子類別可覆寫以使用更高效的批次 API。
+        /// 批次預載入。預設並行載入所有資源並回報進度。子類別可覆寫以使用更高效的批次 API。
         /// </summary>
-        public virtual async UniTask PreloadAsync(IEnumerable<string> keys)
+        public virtual async UniTask PreloadAsync(IEnumerable<string> keys, Action<float> onProgress = null)
         {
-            var tasks = new List<UniTask>();
-            foreach (var key in keys)
+            var keyList = keys.ToList();
+            if (keyList.Count == 0)
             {
-                tasks.Add(LoadAsync<Object>(key));
+                onProgress?.Invoke(1f);
+                return;
+            }
+
+            int completed = 0;
+            int total = keyList.Count;
+
+            var tasks = new List<UniTask>();
+            foreach (var key in keyList)
+            {
+                tasks.Add(LoadAndReport(key));
             }
             await UniTask.WhenAll(tasks);
+            onProgress?.Invoke(1f);
+            return;
+
+            async UniTask LoadAndReport(string k)
+            {
+                await LoadAsync<UnityEngine.Object>(k);
+                completed++;
+                onProgress?.Invoke((float)completed / total);
+            }
         }
     }
 }

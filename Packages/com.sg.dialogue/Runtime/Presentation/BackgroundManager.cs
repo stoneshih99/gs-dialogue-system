@@ -36,6 +36,7 @@ namespace SG.Dialogue.Presentation
                 cts?.Dispose();
             }
             _backgroundFadeCts.Clear();
+            ReleaseAllResources();
         }
 
         public async UniTask ProcessSetBackground(SetBackgroundNode node)
@@ -109,22 +110,9 @@ namespace SG.Dialogue.Presentation
             }
         }
 
-        /// <summary>
-        /// 解析資源：優先透過 Bridge 以 key 載入，否則 fallback 到直接引用。
-        /// </summary>
         private async UniTask<T> ResolveAsset<T>(string resourceKey, T directReference) where T : UnityEngine.Object
         {
-            if (!string.IsNullOrEmpty(resourceKey) && DialogueResourceBridge.HasProvider)
-            {
-                var asset = await DialogueResourceBridge.LoadAsync<T>(resourceKey);
-                if (asset != null)
-                {
-                    _loadedResourceKeys.Add(resourceKey);
-                    return asset;
-                }
-                Debug.LogWarning($"[BackgroundManager] 無法透過 Bridge 載入資源 '{resourceKey}'，嘗試使用直接引用。");
-            }
-            return directReference;
+            return await DialogueResourceBridge.ResolveAsset(resourceKey, directReference, _loadedResourceKeys);
         }
 
         /// <summary>
